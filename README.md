@@ -216,11 +216,17 @@ v0.0.1
 
 
 *General Section: https://www.youtube.com/watch?v=N8POaZ2nXbA&t=25s
+
 *Handy Injection Section: https://www.youtube.com/watch?v=-BETnaBBLME&t=25s
+
 *Miscellaneous Section: https://www.youtube.com/watch?v=y9HYHBtBYXs&t=834s
+
 *External Files: https://www.youtube.com/watch?v=eG2XRCj7Sy0&t=365s
+
 *Create your Own Database: https://www.youtube.com/watch?v=kC1-2UtXp_U
+
 *Edit a Database: https://www.youtube.com/watch?v=wF2DnfrgWkg
+
 *ERROR! Items_game.txt is missing!: https://www.youtube.com/watch?v=l4w2fT_lY10&t=3s
 
 
