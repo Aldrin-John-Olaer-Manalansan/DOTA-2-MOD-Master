@@ -1,3 +1,5 @@
+DEVELOPER: Aldrin John Olaer Manalansan(AJOM)
+
 ~~~~~~~~~~~ABOUT~~~~~~~~~~~
 
 
