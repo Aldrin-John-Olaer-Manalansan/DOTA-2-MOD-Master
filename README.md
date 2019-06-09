@@ -39,7 +39,15 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 
 
 
-v2.2.0 BETA*Changed all Subroutines into Separate Functions inside this Application's Code. Still in BETA Stage because uncommon bugs are still not known and is still waiting to be tracked.
+v2.3.0 ALPHA
+*Alpha Stage since no Bugs occured related to the subroutine-to-function migration of the application, but still analyzing for tweaks for future versions.
+*Added "Radiant Towers" and "Dire Towers" Feature at Miscellaneous>"Multiple-Styles" Sub-Section.
+*Added "Versus Screen" and "Emoticons" Feature at Miscellaneous>"SingleSource" Sub-Section.
+*"Terrain" is now Moved at Miscellaneous>"Multi-Styles" Sub-Section.
+*Recreated the "Single-Source" and "Multiple-Styles" Sub-Section of the "Miscellaneous" Section. Now, only one feature on this subsections can be selected at a time. I have been thinking that beginners who used this tools might get heache Seing so many controls.
+
+v2.2.0 BETA
+*Changed all Subroutines into Separate Functions inside this Application's Code. Still in BETA Stage because uncommon bugs are still not known and is still waiting to be tracked.
 *Added Database VERSION 2. An experimental database that has no integrity verification, resulting blazing writing and reading speed on version 2 database files. 
 -DISADVANTAGE: When the Database has will not inspect for corrupted item specification lines.
 -Fix: "Verify Integrity Cache" Button is Added
