@@ -55,7 +55,7 @@ if not (A_IsAdmin or RegExMatch(full_command_line, " /restart(?!\S)"))
 Menu, Tray, Add, &Exit, k_MenuExit
 Menu, Tray, NoStandard
 
-version=2.2.0 BETA
+version=2.3.0 ALPHA
 
 databasemessage=~ ~ ~ ~ MAIN DATABASE Version 2 : Don't Edit anything here to avoid DATABASE CORRUPTION!!! ~ ~ ~ ~`n`n
 ListViewSave(databasemessage) ; sets the default message in the beggining of the database and store to "static ExtraMessage"
@@ -154,12 +154,14 @@ else IfNotExist,%A_ScriptDir%\Library\activelist.txt
 	msgbox,16,ERROR!!! "activelist.txt" is MISSING!,It looks like:`n`n"%A_ScriptDir%\Library\activelist.txt"`n`nIs missing. But since this tool already supports auto-extraction of "activelist.txt"`, please restart this application. Before using the "inject" feature of this tool`, make sure to add the original "activelist.txt" inside "%A_ScriptDir%\Library" Folder OR ELSE THE HERO Recognition for Handy Injection Section WILL NOT WORK!`n`nIf you dont have an Idea where to find the "activelist.txt"`,here is a few steps:`n1)Download "GCFScape" application. Alternatively if GCFScape produces "ERROR" when opening "Pak01_dir.vpk"`, Download "Valve's Resource Viewer" application instead.`n2)Use "GCFScape" or "Valve's Resource Viewer" to open "Pak01_dir.vpk"(commonly it is located at "Steam\steamapps\common\dota 2 beta\game\dota\").`n3)Hit "CTRL+F"(or press "find" elsewhere) and search for "activelist.txt" without punctuation marks.`n4)If successfully found`,Right-Click the file(activelist.txt) and extract it to "%A_ScriptDir%\Library" folder.
 }
 
-param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips
+param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice
 Loop,parse,param,`,
 {
 	IniRead,%A_LoopField%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,%A_LoopField%
 }
 
+if version>%usedversion%
+	FileDelete,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 ; if a file is opened/dragged using this dota2 mod master, this code will able to detect them all
 draggedfilesg=
 draggedfilesh=
@@ -493,19 +495,27 @@ IniRead,inchoosetab,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,inchoosetab
 intablist=Single Source|Multiple Styles|Multiple Source|Optional Features
 Gui, MainGUI:Add, Tab2,x0 y20 h480 w550 -Wrap vInnerTab hwndInnerTab choose%inchoosetab%,%intablist%
 Gui, MainGUI:Tab,1
-Gui, MainGUI:Add, ListView,x1 y45 w137 h201 gbasicmisc vterrainchoice AltSubmit checked,Terrain Name|Rarity|ID
-Gui, MainGUI:Add, ListView,x137 y45 w137 h201 gbasicmisc vweatherchoice AltSubmit checked,Weather-Effect Name|Rarity|ID
-Gui, MainGUI:Add, ListView,x274 y45 w137 h201 gbasicmisc vmultikillchoice AltSubmit checked,Multikill-Banner Name|Rarity|ID
-Gui, MainGUI:Add, ListView,x411 y45 w137 h201 gbasicmisc vemblemchoice AltSubmit checked,Emblem Name|Rarity|ID
-Gui, MainGUI:Add, ListView,x1 y248 w182 h201 gbasicmisc vmusicchoice AltSubmit checked,Music-Pack Name|Rarity|ID
-Gui, MainGUI:Add, ListView,x184 y248 w182 h201 gbasicmisc vcursorchoice AltSubmit checked,Cursor-Pack Name|Rarity|ID
-Gui, MainGUI:Add, ListView,x367 y248 w182 h201 vloadingscreenchoice gbasicmisc AltSubmit checked,Loading-Screen Name|Rarity|ID
+singlesourcefamily=Weather-Effect|Multikill-Banner|Emblem|Music Pack|Cursor Pack|Loading Screen|Versus Screen|Emoticons
+Gui, MainGUI:Add, ComboBox,x1 y45 w155 h405 gmiscchoose vsinglesourcechoicegui Choose%singlesourcechoice% Simple AltSubmit,%singlesourcefamily%
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vweatherchoice AltSubmit checked,Weather-Effect Name|Rarity|ID
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vmultikillchoice AltSubmit checked,Multikill-Banner Name|Rarity|ID
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vemblemchoice AltSubmit checked,Emblem Name|Rarity|ID
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vmusicchoice AltSubmit checked,Music Pack Name|Rarity|ID
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vcursorchoice AltSubmit checked,Cursor Pack Name|Rarity|ID
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vloadingscreenchoice AltSubmit checked,Loading Screen Name|Rarity|ID
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vversuscreenchoice AltSubmit checked,Versus Screen Name|Rarity|ID
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vemoticonchoice AltSubmit checked,Emoticons Name|Rarity|ID
 Gui, MainGUI:Tab,2
-Gui, MainGUI:Add, ListView,x365 y45 w180 h201 gmiscstyle vhudchoice AltSubmit checked,HUD-Skin Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,x365 y248 w180 h201 gmiscstyle vradcreepchoice AltSubmit checked,Radiant Creeps Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,x183 y248 w180 h201 gmiscstyle vdirecreepchoice AltSubmit checked,Dire Creeps Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,x1 y45 w180 h404 vcourierchoice gmiscstyle AltSubmit checked,Courier Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,x183 y45 w180 h201 vwardchoice gmiscstyle AltSubmit checked,Ward Name|Rarity|ID|Styles Count|Active Style
+multiplestylesfamily=Courier|Ward|HUD-Skin|Radiant Creeps|Dire Creeps|Radiant Towers|Dire Towers|Terrain
+Gui, MainGUI:Add, ComboBox,x1 y45 w155 h405 gmiscchoose vmultiplestyleschoicegui Choose%multiplestyleschoice% Simple AltSubmit,%multiplestylesfamily%
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gbasicmisc Hidden vterrainchoice AltSubmit checked,Terrain Name|Rarity|ID|Styles Count|Active Style
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gmiscstyle Hidden vhudchoice AltSubmit checked,HUD-Skin Name|Rarity|ID|Styles Count|Active Style
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gmiscstyle Hidden vradcreepchoice AltSubmit checked,Radiant Creeps Name|Rarity|ID|Styles Count|Active Style
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gmiscstyle Hidden vdirecreepchoice AltSubmit checked,Dire Creeps Name|Rarity|ID|Styles Count|Active Style
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gmiscstyle Hidden vradtowerchoice AltSubmit checked,Radiant Towers Name|Rarity|ID|Styles Count|Active Style
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gmiscstyle Hidden vdiretowerchoice AltSubmit checked,Dire Towers Name|Rarity|ID|Styles Count|Active Style
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gmiscstyle Hidden vcourierchoice AltSubmit checked,Courier Name|Rarity|ID|Styles Count|Active Style
+Gui, MainGUI:Add, ListView,x173 y45 w375 h405 gmiscstyle Hidden vwardchoice AltSubmit checked,Ward Name|Rarity|ID|Styles Count|Active Style
 Gui, MainGUI:Tab,3
 Gui, MainGUI:Add, ListView,gannouncerview vannouncerview x275 y45 w272 h404 AltSubmit NoSort checked,Announcer Name|Item Slot|Rarity|ID
 Gui, MainGUI:Add, ListView,gtauntview vtauntview x1 y45 w272 h404 AltSubmit NoSort checked,Taunt Name|Rarity|ID|Used by
@@ -521,6 +531,7 @@ else if mappetstyle=0
 }
 Gui, MainGUI:Add, DropDownList,R3 x240 y60 w40 h20 vpetstyle choose%mappetstyle%,0|1|2
 petstyle_TT=Select the current style of Almond the Frondillo:`n`n`nStyle 0 - Natural Color`n`nStyle 1 - Red Shelled Almond the Frondillo`n`nStyle 2 - Golden Shelled Almond the Frondillo
+
 innertabparam=InnerTab,InnerTab1,InnerTab2 ;;;used always at anchor
 loop,parse,innertabparam,`,
 {
@@ -532,6 +543,9 @@ Gui, MainGUI:Submit, NoHide
 gosub, SelectOuterTab
 Gui, MainGUI:Show, h500 w550 ,AJOM's Dota 2 MOD Master
 Gui, MainGUI:Default
+
+gosub,activatemiscgui
+
 gosub,MainGUIGuiSize ; Anchor Function requires this command so that it will get all the offsets of each controls
 if usemiscon=1
 {
@@ -616,6 +630,48 @@ if version<>%usedversion%
 gosub,leakdestroyer
 gosub,showtooltips
 Gui, MainGUI:Default
+return
+
+miscchoose:
+Gui, MainGUI:Submit, NoHide
+if ((A_GuiControl="singlesourcechoicegui") and (singlesourcechoicegui=singlesourcechoice)) or ((A_GuiControl="multiplestyleschoicegui") and (multiplestyleschoicegui=multiplestyleschoice))
+{
+	return
+}
+else if A_GuiEvent=DoubleClick
+{
+	gosub,activatemiscgui
+	if (A_GuiControl="singlesourcechoicegui")
+		singlesourcechoice:=singlesourcechoicegui
+	else if (A_GuiControl="multiplestyleschoicegui")
+		multiplestyleschoice:=multiplestyleschoicegui
+}
+return
+
+activatemiscgui:
+Gui, MainGUI:Submit, NoHide
+param=weatherchoice,multikillchoice,emblemchoice,musicchoice,cursorchoice,loadingscreenchoice,versuscreenchoice,emoticonchoice
+loop,parse,param,`,
+{
+	if (A_Index=singlesourcechoicegui)
+		GuiControl, Show, %A_LoopField%
+	else if (A_Index=singlesourcechoice)
+		GuiControl, Hide, %A_LoopField%
+	else if (A_Index>singlesourcechoice) and (A_Index>singlesourcechoicegui)
+		break
+	
+}
+
+param=courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,terrainchoice
+loop,parse,param,`,
+{
+	if (A_Index=multiplestyleschoicegui)
+		GuiControl, Show, %A_LoopField%
+	else if (A_Index=multiplestyleschoice)
+		GuiControl, Hide, %A_LoopField%
+	else if (A_Index>multiplestyleschoice) and (A_Index>multiplestyleschoicegui)
+		break
+}
 return
 
 ChangeButtonNames:
@@ -1150,8 +1206,8 @@ replaceto=`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%
 replaceto4=`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%%A_Tab%"item_slot"%A_Tab%%A_Tab%"courier"`r`n%A_Tab%%A_Tab%%A_Tab%"name"
 replaceto5=`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%%A_Tab%"item_slot"%A_Tab%%A_Tab%"ward"`r`n%A_Tab%%A_Tab%%A_Tab%"name"
 sfinder=`r`n%A_Tab%%A_Tab%}`r`n%A_Tab%%A_Tab%" ;"
-param=terrain,hud_skin,loading_screen,courier,ward,music,cursor_pack,radiantcreeps,direcreeps
-param2=terrainchoice,hudchoice,loadingscreenchoice,courierchoice,wardchoice,musicchoice,cursorchoice,radcreepchoice,direcreepchoice
+param=terrain,hud_skin,loading_screen,courier,ward,music,cursor_pack,radiantcreeps,direcreeps,radianttowers,diretowers,versus_screen,emoticon_tool
+param2=terrainchoice,hudchoice,loadingscreenchoice,courierchoice,wardchoice,musicchoice,cursorchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
 IPS:=A_TickCount
 loop,parse,param2,`,
 {
@@ -2179,7 +2235,7 @@ StringLen,filelength,filestring
 sfinder=`r`n%A_Tab%%A_Tab%}`r`n%A_Tab%%A_Tab%" ;"
 GuiControl,+cBlue,searchnofound
 htarget=`r`n%A_Tab%%A_Tab%%A_Tab%"prefab"%A_Tab%%A_Tab%"announcer"`r`n
-lvparam=terrainchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,announcerview,tauntview,weatherchoice,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice
+lvparam=terrainchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,announcerview,tauntview,weatherchoice,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
 loop,parse,lvparam,`,
 {
 	GuiControl, MainGUI:-Redraw, %A_LoopField%
@@ -2245,8 +2301,8 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 			GoSub,lvautosize
 			LV_ModifyCol(4,"Sort")
 			
-			param=terrain,loading_screen,music,cursor_pack,emblem,weather,multikill_banner
-			param2=terrainchoice,loadingscreenchoice,musicchoice,cursorchoice,emblemchoice,weatherchoice,multikillchoice
+			param=loading_screen,music,cursor_pack,emblem,weather,multikill_banner,versus_screen,emoticon_tool
+			param2=loadingscreenchoice,musicchoice,cursorchoice,emblemchoice,weatherchoice,multikillchoice,versuscreenchoice,emoticonchoice
 			loop,parse,param2,`,
 			{
 				tmplistview=%A_LoopField%
@@ -2278,8 +2334,8 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 				}
 			}
 			
-			param=courier,ward,hud_skin,radiantcreeps,direcreeps
-			param2=courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice
+			param=courier,ward,hud_skin,radiantcreeps,direcreeps,radianttowers,diretowers,terrain
+			param2=courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,terrainchoice
 			loop,parse,param2,`,
 			{
 				tmplistview=%A_LoopField%
@@ -2510,8 +2566,8 @@ loop,parse,param2,`,
 		}
 	}
 }
-param=terrain,loading_screen,music,cursor_pack,emblem
-param2=terrainchoice,loadingscreenchoice,musicchoice,cursorchoice,emblemchoice
+param=loading_screen,music,cursor_pack,emblem,versus_screen,emoticon_tool
+param2=loadingscreenchoice,musicchoice,cursorchoice,emblemchoice,versuscreenchoice,emoticonchoice
 loop,parse,param2,`,
 {
 	tmplistview=%A_LoopField%
@@ -2578,8 +2634,8 @@ loop,parse,param2,`,
 		}
 	}
 }
-param=courier,ward,hud_skin,radiantcreeps,direcreeps
-param2=courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice
+param=courier,ward,hud_skin,radiantcreeps,direcreeps,radianttowers,diretowers,terrain
+param2=courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,terrainchoice
 loop,parse,param2,`,
 {
 	tmplistview=%A_LoopField%
@@ -2944,8 +3000,8 @@ IfNotExist,%A_ScriptDir%\Settings.aldrin_dota2mod
 {
 	FileAppend,,%A_ScriptDir%\Settings.aldrin_dota2mod
 	IniWrite,0,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,ucr
-	param=0,1,3,1,0,0,0,0,1
-	param1=pet,usemisc,mappetstyle,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips
+	param=0,1,3,1,0,0,0,0,1,1,1
+	param1=pet,usemisc,mappetstyle,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice
 	loop,parse,param,`,
 	{
 		paramtmp=%A_LoopField%
@@ -3258,7 +3314,7 @@ reloadmisc(invfile) {
 	
 	if VarRead("@DataBaseVersion!")=2
 	{
-		param=terrainchoice,weatherchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,tauntview,announcerview,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice
+		param=terrainchoice,weatherchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,tauntview,announcerview,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
 		Loop,parse,param,`,
 		{
 			if A_DefaultListView<>%A_LoopField%
@@ -3281,7 +3337,7 @@ reloadmisc(invfile) {
 				Gui, MainGUI:ListView,% misclv
 			}
 			GuiControl,-g,% misclv
-			if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice")
+			if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
 			{
 				;IniRead,miscstyle%A_Index%,%invfile%,Miscellaneous,miscstyle%A_Index%
 				miscstyle:=VarRead("miscstyle" A_Index)
@@ -3312,7 +3368,7 @@ reloadmisc(invfile) {
 							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 						}
 					}
-					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice")
+					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
 					{
 						LV_GetText(checker,A_Index,4)
 						if miscstyle<=%checker%
@@ -3328,7 +3384,7 @@ reloadmisc(invfile) {
 			{
 				GuiControl,% "+g" misclv,% misclv
 			}
-			else if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice")
+			else if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
 			{
 				GuiControl,+gmiscstyle,% misclv
 			}
@@ -3371,7 +3427,7 @@ reloadmisc(invfile) {
 				Break
 			}
 		}
-		param=terrainchoice,weatherchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,tauntview,announcerview,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice
+		param=terrainchoice,weatherchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,tauntview,announcerview,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
 		Loop,parse,param,`,
 		{
 			if A_DefaultListView<>%A_LoopField%
@@ -3391,7 +3447,7 @@ reloadmisc(invfile) {
 				Gui, MainGUI:ListView,% misclv%A_Index%
 			}
 			GuiControl,-g,% misclv%A_Index%
-			if (misclv%A_Index%="courierchoice") or (misclv%A_Index%="wardchoice") or (misclv%A_Index%="hudchoice") or (misclv%A_Index%="radcreepchoice") or (misclv%A_Index%="direcreepchoice")
+			if (misclv%A_Index%="courierchoice") or (misclv%A_Index%="wardchoice") or (misclv%A_Index%="hudchoice") or (misclv%A_Index%="radcreepchoice") or (misclv%A_Index%="direcreepchoice") or (misclv%A_Index%="radtowerchoice") or (misclv%A_Index%="diretowerchoice") or (misclv%A_Index%="terrainchoice")
 			{
 				IniRead,miscstyle%A_Index%,%invfile%,Miscellaneous,miscstyle%A_Index%
 			}
@@ -3424,7 +3480,7 @@ reloadmisc(invfile) {
 							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid%intsaver% "Registered Name: " miscidname%intsaver% "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 						}
 					}
-					if (misclv%intsaver%="courierchoice") or (misclv%intsaver%="wardchoice") or (misclv%intsaver%="hudchoice") or (misclv%intsaver%="radcreepchoice") or (misclv%intsaver%="direcreepchoice")
+					if (misclv%intsaver%="courierchoice") or (misclv%intsaver%="wardchoice") or (misclv%intsaver%="hudchoice") or (misclv%intsaver%="radcreepchoice") or (misclv%intsaver%="direcreepchoice") or (misclv%intsaver%="radtowerchoice") or (misclv%intsaver%="diretowerchoice") or (misclv%intsaver%="terrainchoice")
 					{
 						LV_GetText(checker,A_Index,4)
 						if miscstyle%intsaver%<=%checker%
@@ -3440,7 +3496,7 @@ reloadmisc(invfile) {
 			{
 				GuiControl,% "+g" misclv%A_Index%,% misclv%A_Index%
 			}
-			else if (misclv%intsaver%="courierchoice") or (misclv%intsaver%="wardchoice") or (misclv%intsaver%="hudchoice") or (misclv%intsaver%="radcreepchoice") or (misclv%intsaver%="direcreepchoice")
+			else if (misclv%intsaver%="courierchoice") or (misclv%intsaver%="wardchoice") or (misclv%intsaver%="hudchoice") or (misclv%intsaver%="radcreepchoice") or (misclv%intsaver%="direcreepchoice") or (misclv%intsaver%="radtowerchoice") or (misclv%intsaver%="diretowerchoice") or (misclv%intsaver%="terrainchoice")
 			{
 				GuiControl,+gmiscstyle,% misclv%A_Index%
 			}
@@ -3471,7 +3527,7 @@ reloadmisc(invfile) {
 }
 
 savemisc:
-param=terrainchoice,weatherchoice,hudchoice,loadingscreenchoice,tauntview,announcerview,courierchoice,wardchoice,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice
+param=terrainchoice,weatherchoice,hudchoice,loadingscreenchoice,tauntview,announcerview,courierchoice,wardchoice,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
 gosub,hideprogress
 count:=0
 if MyObject.FileTypeIndex=1
@@ -4935,8 +4991,8 @@ selectsave:
 gosub,leakdestroyer
 Gui, MainGUI:Submit, NoHide
 GoSub,default_settings
-param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,pet,autovpk,usemisc,mappetstyle,mapgiloc,maplowprocessor,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips
-param1=%ucron%,%invdirview%,%datadirview%,%hdatadirview%,%mdirview%,%peton%,%autovpkon%,%usemiscon%,%petstyle%,%giloc%,%lowprocessor%,%dota2dir%,%soundon%,%useextportraitfile%,%useextfile%,%useextitemgamefile%,%fastmisc%,%showtooltips%
+param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,pet,autovpk,usemisc,mappetstyle,mapgiloc,maplowprocessor,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice
+param1=%ucron%,%invdirview%,%datadirview%,%hdatadirview%,%mdirview%,%peton%,%autovpkon%,%usemiscon%,%petstyle%,%giloc%,%lowprocessor%,%dota2dir%,%soundon%,%useextportraitfile%,%useextfile%,%useextitemgamefile%,%fastmisc%,%showtooltips%,%singlesourcechoicegui%,%multiplestyleschoicegui%
 Loop,parse,param,`,
 {
 	tmpstring=%A_LoopField%
@@ -5946,9 +6002,183 @@ Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext35,Version %version%`n`nAJO
 Gui, aboutgui:Tab,2
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING`, but there will always be Limitations that this Injector(Until now) Cannot Fix.Current Issues that exist(7.03 patch):`n`n*This Tool needs to ReRun and ReInject all Item Sets every New Update/Patch with newly arrived items. It is because "items_game.txt" which is the script inside the MOD needs to be Reupdated/Repatched`, the injector's work is to ReUpdate the Script to be compatible with the newly arrived items listed at the new "items_game.txt". IF THIS INSTRUCTION IS NOT FOLLOWED`, YOU WILL ENCOUNTER WHEN LAUNCHING DOTA2 "ERROR PARSING SCRIPT" WHICH WILL IMMEDIATELY CRASH YOUR DOTA2 AND WILL REMAIN UNPLAYABLE UNTIL YOU EITHER "REMOVE THE MOD FROM YOUR DOTA2" OR "RELAUNCH THE TOOL AND REINJECT ALL ITEM SETS". Take Responsibility on the Risks!!!`n`n*Bristleback's "Piston Impaler" item does not stack with "Mace of the Wrathrunner(morning-star like)" item. This is due to the unhandled process of bristleback's "piston impaler animation" vs bristleback's "morning-star animation".`n`n*When playing "Online" Mode`, some item skin parts for heroes do not show if "it has no default cosmetic item". In other words`, this following posibilities will occur:`n-Ancient Apparition's "Shattering Blast Crown" "Head" item does not show up because "there is no default head item attached to Ancient Apparition".`n-Tinker's "Boots of Travel" "Misc" item does not show up because "there is no default misc item attached to Tinker".`n`nThis problem is common on "Modding by Scripting Method" but the MOD perfectly works on "offline/LAN mode".`n`n*Cosmetic items that "the model's item animation was substituted into the default model animation" does not function properly as expected`, Example:`n-The animation of Legion Commander's "Blades of Voth Domosh" functions as single wield type animation (wields only one sword).`n-Techies "Swine of the Sunken Gallery Set's" third member(which is Spoon) does not walk properly.`n-Witch Doctor's "Bonkers the Mad's" Monkey was not moving properly but instead was touching witch doctor's Butt.
 Gui, aboutgui:Tab,3
-Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,v2.2.0 BETA*Changed all Subroutines into Separate Functions inside this Application's Code. Still in BETA Stage because uncommon bugs are still not known and is still waiting to be tracked.`n*Added Database VERSION 2. An experimental database that has no integrity verification`, resulting blazing writing and reading speed on version 2 database files. `n-DISADVANTAGE: When the Database has will not inspect for corrupted item specification lines.`n-Fix: "Verify Integrity Cache" Button is Added`n*Added "Statistics" Sub-Section at "Handy-Injection" Section. This will report the number of item slots occupied by all heroes at the "Used Items Database" Sub-Section. The Statistics is helpful incase you missed applying a Modification on an item slot for a specific hero.`n*You can now Open ".aldrin_dota2db" and ".aldrin_dota2hidb" directly using DOTA2 MOD Master. This will automatically Preload the opened Database file. To do this`, simply Execute the ".aldrin_dota2db" or ".aldrin_dota2hidb" using DOTA2 MOD Master.exe .`n*Improved ERROR Logging`n*Fixed some bugs`n`nv2.1.0`n*Added two new features at Multiple Styles Subsection of Miscellaneous Section:`n~ Radiant Creeps - Scans all ID's with prefab = radiantcreeps .`n-Dire Creeps - Scans all ID's with prefab = direcreeps .`n*Fast Preloading Reference File now will be recreated every standard preload.`n*Fixed Some Bugs`n`nv2.0.0`n*Added the External Files System. This feature can allow external files to be merged with the pak01_dir generated by this tool. This Feature is very helpful if you want to merge your custom model(.vmdl_c) and even particle(.vpfc_c) files to be merged with the operation. just include a folder where your custom files inside at "%A_ScriptDir%\External Files"`n*Added "Fast Miscellaneous Preload" Feature at "Advanced" Section. This feature can lessen your waiting time preloading miscellaneous files`, thanks to V for Vendetta's "VarWrite" and "VarRead" Function which made file writings and readings to perform blazingly fast. But this is just optional`,since we always like to make sure that preloading miscellaneous should be accurate`, it depends on you if you want to use this feature`n*Integrated Alpha Bravo's "WM_MOUSEMOVE" Function which allows each controls to have tooltips. Now each questionable controls will have a tooltip present as guide. This will be helpful for new users of this tool. Incase you want to disable this feature`, you can uncheck "Advanced > show tooltip guides"`n`nv1.7.2`n*Updated "Relic" into "Emblem".`n*Integrated "Klark92's Draws" Function. This new Feature allowed buttons to have custom colors.`n*Added "Patch gameinfo.gi" Button Option at "Advanced Section". Pressing this Button will Manually Patch gameinfo.gi Reactivating the MOD(pak01_dir.vpk) Found at "%dota2dir%\game\Aldrin_Mods\" Folder.`n`nv1.7.1`n*Improved "pak01_dir.vpk" detection`n*Fixed a Bug where the default settings does not detect gameinfo.gi location leaving autoshutnik-method unchecked as default.`n`nv1.7.0`n*Added Voice-Actived Narrator Option at "Advanced" Section. When Enabled`, a Narrator announces statistics about the Injector's Operations`n*"HandyInjection"`,"H.I. Used Items"`, and "Custom Heroes" now belongs on a SINGLE Section named "Handy Injection". Inside the "Handy Injection" Section there are three another Sections`, the "Hero Items Selection"(the Old Name of this Section is HandyInjection)`, the "Used Items Database"(the Old Name of this Section is H.I. Used Items)`, and "Custom Heroes"`n*Fixed a bug where adding check marks on specific items at "Hero Items Selection" fails to be updated at "Used Items Database"`n*Fixed a bug where Heroes with "Multiple Alternate Models" are not extracted`n*Fixed a bug where some extracted models and particles with the same name on a directory fails to extract`, this was fixed by extracting and renaming them one at a time(which multiple CMD will not be applied on files with the same name)`n*Changed the Name this tool from "items_game.txt injector" > MOD Master`n`nv1.6.0`n*Added two new SINGLE SOURCE features at "Miscellaneous" Section`n-Multikill-Banner : When you continously kill enemy heroes within 10 seconds`, A Glowing effect on the streak message will show up.`n-emblem : A Person with the highest battlepass level will gain this emblem EFFECT`, But playing OFFLINE will result the main user's hero to gain a emblem EFFECT.`n*The Injector now Patches the "Portraits.txt" which change the orientation of the Hero on the HEROBAR.`n*Cured the Bug where the HLLIB manipulation is wrongly approached resulting PARTICLE CORRUPTION among certain particle files`, which some particles pops MULTIPLE RED CROSS(not yet 100`% fixed)`n*The Progress-Bar now Flickers and has borders sketching the complete progress`n*Added a New Feature on "Advanced" Section which is the "REPORT LOG". This feature reports what files are extracted and where can you find it. This can be helpful in some cases if you want to analyze all the Files which the injector had managed accourding to the amount of Data you wished to inject from your "Previous Operation".`n-The Report Log is only Generated from "General" and "Handy Injection" Operation`n-ModelRealName : The Name of the extracted File`n-ModelLocationPath : The Location where the "ModelRealName" was extracted`n-ModelDefaultName : "ModelRealName" was renamed into this name found at "ModelLocationPath"`n-ParticleRealName : The Name of the extracted File`n-ParticleLocationPath : The Location where the "ParticleRealName" was extracted`n-ParticleDefaultName : "ParticleRealName" was renamed into this name found at "ParticleLocationPath"`n`nv1.5.0`n*The Injector now AUTOMATICALLY DETECTS New Heroes through "activelist.txt" feature. Unlike the last version has its defined hero list`, but now using "activelist.txt" the injector now will scan all characters defined by DOTA2.`n*Reworked "Migration" Method Section`, which becomes more accurate on migrating items_game.txt.`n*Improved LEAK Checking which now will slightly save process required space.`n*Fixed "Custom Hero" Section where the "ADD" button malfuctioned`n*Can now capture lastly used Section. In which when you exit this tool`, it will save the current tab and make it as the default tab that will be opened on the next use of this Tool.`n`nv1.4.0`n*Added "Cursor-Pack" Feature at "Miscellaneous" Section`n*Reorganized the "Miscellaneous" Section`,dividing it into FOUR Sections: Single Source`,Multi-Styles`,Multi-Source`,Optional Features.`n*Fixed the Bug where the "HUD-Skin" writes incorrectly at "items_game.txt" causing "battlepass is missing failed to load items_def" ERROR when launching DOTA2.`n`nv1.3.5`n*Recompiled into a more stable Analyzer script.`n`nv1.3.4`n*Fixed a bug : If players installed their steam on a specific path... But Suddenly Relocate it to another Location`, The Registry Location will not be valid anymore. : So for those Player who have done that`, Relocate your DOTA2 path Manually!`n`nv1.3.3`n*Reworked Taunts setting it as "baseitem=1"`n`nv1.3.2`n*Fixed A bug where autoextract and gameinfo.gi auto-editing malfunctions because of the newly reworked method of detecting the dota 2 directory.`n`nv1.3.1`n*Reworked the Detection of the DOTA2 Directory. Deflecting the Encryption of "appmanifest.acf"`, in other words this tool will not read appmanifest anymore.`n`nv1.3.0`n*Added "Low-Processor Mode" at Advanced Section for those users who uses Low Processor Machines(2gb RAM below)`n`nv1.2.0`n*Added "Remove MOD on DOTA2" feature at "Advanced" section`n`nv1.1.0`n*Added "Music-Pack" feature at "Miscellaneous" section`n*Fixed the bug where at general section`,pressing "inject all actived id's" pops up multiple command prompts instead of hiding it.`n*Added the Detection of DOTA2 Registry Folder(for users that installed DOTA2 before the birth of DOTA2 BETA)`n*when "Auto-shutnik method" is turned off. It will now generate a "pak01_dir" folder including all cosmetic items plus items_game.txt. This option is best for MODDERs who wants to MANUALLY MOD DOTA2.`n`nv1.0.2`n*Fixed the bug where instead a cosmetic item should be renamed as ".vmdl_c"`, it was renamed as ".vmdl"(without _c) resulting arcana sets to malfunction`n`nv1.0.1`n*Universally fixes all dislocations of cosmetic items.`n*Improved the detection of both default item and injected item when extracting .vmdl files at pak01_dir folder.`n*Added the Detection of Cosmetic Particles`, which fixes the bug which particle effects do not work online.`n`nv1.0.0`n*Added the "HLLIB" Plugin which allows this tool to have the ability to extract cosmetic items from the original "pak01_dir.vpk" at steam folder. This Fixes the items injected to not show up online.`n*Relocates some settings to the "NEW Section" which is the "Advance" Section`,this section is optional for ADVANCE USERS who knows what they are doing`n*Makes this Tool even more interactive to Users`n`nv0.1.1`n*Fixed the BUG which the MOD does not show up ingame. This bug was caused by the new "auto-detection of gameinfo.gi"`n`nv0.1.0`n*Added "Titan's Anchor Logic" that allows this Tool to change its size or be maximized.`n*Maintainably Fixed "auto_vpk.bat ERROR cannot be executed because it does not exist".`n`nv0.0.1`n*Added "Miscellaneous" Section. This section is revolutional which supports multiple features:`n-Terrain Select`n-Weather Effect Select`n-HUD-Skin Select`n-Courier Select(supports changable styles)`n-Ward Select(supports changable styles)`n-Loading-Screen Select`n-Taunt for Heroes Select`n-Announcer and Mega-Kills Select`n-Activate Pet "Almond the Frondillo"`n*Added "Auto-Shutnik Method" Feature at "Miscellaneous" Section which allows this script to do all the work activating the "MOD" without requiring you to study "Shutnik Method". But this feature crucially requires "VPKCreator"(you can download it at the internet if its not present just search "dota2 vpkcreator") or else this feature will be disabled. ACTIVATING THIS FEATURE DOES NOT REQUIRE THE "Use Miscellaneous on Future Injection" TO BE ENABLED`, but ofcourse you need to locate the location of "gameinfo.gi". It is commonly located at "C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta\game\dota\" Folder.`n*Improved the Speed of Item Scanning by 50`%`, in other words`, if its slower for you. Then that constant speed is the fastest scan this application can do. SO HAVE PATIENCE!
+Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
+(
+v2.3.0 ALPHA
+*Alpha Stage since no Bugs occured related to the subroutine-to-function migration of the application, but still analyzing for tweaks for future versions.
+*Added "Radiant Towers" and "Dire Towers" Feature at Miscellaneous>"Multiple-Styles" Sub-Section.
+*Added "Versus Screen" and "Emoticons" Feature at Miscellaneous>"SingleSource" Sub-Section.
+*"Terrain" is now Moved at Miscellaneous>"Multi-Styles" Sub-Section.
+*Recreated the "Single-Source" and "Multiple-Styles" Sub-Section of the "Miscellaneous" Section. Now, only one feature on this subsections can be selected at a time. I have been thinking that beginners who used this tools might get heache Seing so many controls.
+
+v2.2.0 BETA
+*Changed all Subroutines into Separate Functions inside this Application's Code. Still in BETA Stage because uncommon bugs are still not known and is still waiting to be tracked.
+*Added Database VERSION 2. An experimental database that has no integrity verification, resulting blazing writing and reading speed on version 2 database files. 
+-DISADVANTAGE: When the Database has will not inspect for corrupted item specification lines.
+-Fix: "Verify Integrity Cache" Button is Added
+*Added "Statistics" Sub-Section at "Handy-Injection" Section. This will report the number of item slots occupied by all heroes at the "Used Items Database" Sub-Section. The Statistics is helpful incase you missed applying a Modification on an item slot for a specific hero.
+*You can now Open ".aldrin_dota2db" and ".aldrin_dota2hidb" directly using DOTA2 MOD Master. This will automatically Preload the opened Database file. To do this, simply Execute the ".aldrin_dota2db" or ".aldrin_dota2hidb" using DOTA2 MOD Master.exe .
+*Added "Statistics" System Sub-Section at "Handy Injection" Section. This reports the number of unnocupied item slots every hero has for availability. This is helpful for those people who are trying to track down unoccupied item slots and occupy them with cosmetic items.
+*Improved ERROR Logging
+*Fixed some bugs
+
+v2.1.0
+*Added two new features at Multiple Styles Subsection of Miscellaneous Section:
+~ Radiant Creeps - Scans all ID's with prefab = radiantcreeps .
+-Dire Creeps - Scans all ID's with prefab = direcreeps .
+*Fast Preloading Reference File now will be recreated every standard preload.
+*Fixed Some Bugs
+
+v2.0.0
+*Added the External Files System. This feature can allow external files to be merged with the pak01_dir generated by this tool. This Feature is very helpful if you want to merge your custom model(.vmdl_c) and even particle(.vpfc_c) files to be merged with the operation. just include a folder where your custom files inside at "%A_ScriptDir%\External Files"
+*Added "Fast Miscellaneous Preload" Feature at "Advanced" Section. This feature can lessen your waiting time preloading miscellaneous files, thanks to V for Vendetta's "VarWrite" and "VarRead" Function which made file writings and readings to perform blazingly fast. But this is just optional,since we always like to make sure that preloading miscellaneous should be accurate, it depends on you if you want to use this feature
+*Integrated Alpha Bravo's "WM_MOUSEMOVE" Function which allows each controls to have tooltips. Now each questionable controls will have a tooltip present as guide. This will be helpful for new users of this tool. Incase you want to disable this feature, you can uncheck "Advanced > show tooltip guides"
+
+v1.7.2
+*Updated "Relic" into "Emblem".
+*Integrated "Klark92's Draws" Function. This new Feature allowed buttons to have custom colors.
+*Added "Patch gameinfo.gi" Button Option at "Advanced Section". Pressing this Button will Manually Patch gameinfo.gi Reactivating the MOD(pak01_dir.vpk) Found at "%dota2dir%\game\Aldrin_Mods\" Folder.
+
+v1.7.1
+*Improved "pak01_dir.vpk" detection
+*Fixed a Bug where the default settings does not detect gameinfo.gi location leaving autoshutnik-method unchecked as default.
+
+v1.7.0
+*Added Voice-Actived Narrator Option at "Advanced" Section. When Enabled, a Narrator announces statistics about the Injector's Operations
+*"HandyInjection","H.I. Used Items", and "Custom Heroes" now belongs on a SINGLE Section named "Handy Injection". Inside the "Handy Injection" Section there are three another Sections, the "Hero Items Selection"(the Old Name of this Section is HandyInjection), the "Used Items Database"(the Old Name of this Section is H.I. Used Items), and "Custom Heroes"
+*Fixed a bug where adding check marks on specific items at "Hero Items Selection" fails to be updated at "Used Items Database"
+*Fixed a bug where Heroes with "Multiple Alternate Models" are not extracted
+*Fixed a bug where some extracted models and particles with the same name on a directory fails to extract, this was fixed by extracting and renaming them one at a time(which multiple CMD will not be applied on files with the same name)
+*Changed the Name this tool from "items_game.txt injector" > MOD Master
+
+v1.6.0
+*Added two new SINGLE SOURCE features at "Miscellaneous" Section
+-Multikill-Banner : When you continously kill enemy heroes within 10 seconds, A Glowing effect on the streak message will show up.
+-emblem : A Person with the highest battlepass level will gain this emblem EFFECT, But playing OFFLINE will result the main user's hero to gain a emblem EFFECT.
+*The Injector now Patches the "Portraits.txt" which change the orientation of the Hero on the HEROBAR.
+*Cured the Bug where the HLLIB manipulation is wrongly approached resulting PARTICLE CORRUPTION among certain particle files, which some particles pops MULTIPLE RED CROSS(not yet 100`% fixed)
+*The Progress-Bar now Flickers and has borders sketching the complete progress
+*Added a New Feature on "Advanced" Section which is the "REPORT LOG". This feature reports what files are extracted and where can you find it. This can be helpful in some cases if you want to analyze all the Files which the injector had managed accourding to the amount of Data you wished to inject from your "Previous Operation".
+-The Report Log is only Generated from "General" and "Handy Injection" Operation
+-ModelRealName : The Name of the extracted File
+-ModelLocationPath : The Location where the "ModelRealName" was extracted
+-ModelDefaultName : "ModelRealName" was renamed into this name found at "ModelLocationPath"
+-ParticleRealName : The Name of the extracted File
+-ParticleLocationPath : The Location where the "ParticleRealName" was extracted
+-ParticleDefaultName : "ParticleRealName" was renamed into this name found at "ParticleLocationPath"
+
+v1.5.0
+*The Injector now AUTOMATICALLY DETECTS New Heroes through "activelist.txt" feature. Unlike the last version has its defined hero list, but now using "activelist.txt" the injector now will scan all characters defined by DOTA2.
+*Reworked "Migration" Method Section, which becomes more accurate on migrating items_game.txt.
+*Improved LEAK Checking which now will slightly save process required space.
+*Fixed "Custom Hero" Section where the "ADD" button malfuctioned
+*Can now capture lastly used Section. In which when you exit this tool, it will save the current tab and make it as the default tab that will be opened on the next use of this Tool.
+
+v1.4.0
+*Added "Cursor-Pack" Feature at "Miscellaneous" Section
+*Reorganized the "Miscellaneous" Section,dividing it into FOUR Sections: Single Source,Multi-Styles,Multi-Source,Optional Features.
+*Fixed the Bug where the "HUD-Skin" writes incorrectly at "items_game.txt" causing "battlepass is missing failed to load items_def" ERROR when launching DOTA2.
+
+v1.3.5
+*Recompiled into a more stable Analyzer script.
+
+v1.3.4
+*Fixed a bug : If players installed their steam on a specific path... But Suddenly Relocate it to another Location, The Registry Location will not be valid anymore. : So for those Player who have done that, Relocate your DOTA2 path Manually!
+
+v1.3.3
+*Reworked Taunts setting it as "baseitem=1"
+
+v1.3.2
+*Fixed A bug where autoextract and gameinfo.gi auto-editing malfunctions because of the newly reworked method of detecting the dota 2 directory.
+
+v1.3.1
+*Reworked the Detection of the DOTA2 Directory. Deflecting the Encryption of "appmanifest.acf", in other words this tool will not read appmanifest anymore.
+
+v1.3.0
+*Added "Low-Processor Mode" at Advanced Section for those users who uses Low Processor Machines(2gb RAM below)
+
+v1.2.0
+*Added "Remove MOD on DOTA2" feature at "Advanced" section
+
+v1.1.0
+*Added "Music-Pack" feature at "Miscellaneous" section
+*Fixed the bug where at general section,pressing "inject all actived id's" pops up multiple command prompts instead of hiding it.
+*Added the Detection of DOTA2 Registry Folder(for users that installed DOTA2 before the birth of DOTA2 BETA)
+*when "Auto-shutnik method" is turned off. It will now generate a "pak01_dir" folder including all cosmetic items plus items_game.txt. This option is best for MODDERs who wants to MANUALLY MOD DOTA2.
+
+v1.0.2
+*Fixed the bug where instead a cosmetic item should be renamed as ".vmdl_c", it was renamed as ".vmdl"(without _c) resulting arcana sets to malfunction
+
+v1.0.1
+*Universally fixes all dislocations of cosmetic items.
+*Improved the detection of both default item and injected item when extracting .vmdl files at pak01_dir folder.
+*Added the Detection of Cosmetic Particles, which fixes the bug which particle effects do not work online.
+
+v1.0.0
+*Added the "HLLIB" Plugin which allows this tool to have the ability to extract cosmetic items from the original "pak01_dir.vpk" at steam folder. This Fixes the items injected to not show up online.
+*Relocates some settings to the "NEW Section" which is the "Advance" Section,this section is optional for ADVANCE USERS who knows what they are doing
+*Makes this Tool even more interactive to Users
+
+v0.1.1
+*Fixed the BUG which the MOD does not show up ingame. This bug was caused by the new "auto-detection of gameinfo.gi"
+
+v0.1.0
+*Added "Titan's Anchor Logic" that allows this Tool to change its size or be maximized.
+*Maintainably Fixed "auto_vpk.bat ERROR cannot be executed because it does not exist".
+
+v0.0.1
+*Added "Miscellaneous" Section. This section is revolutional which supports multiple features:
+-Terrain Select
+-Weather Effect Select
+-HUD-Skin Select
+-Courier Select(supports changable styles)
+-Ward Select(supports changable styles)
+-Loading-Screen Select
+-Taunt for Heroes Select
+-Announcer and Mega-Kills Select
+-Activate Pet "Almond the Frondillo"
+*Added "Auto-Shutnik Method" Feature at "Miscellaneous" Section which allows this script to do all the work activating the "MOD" without requiring you to study "Shutnik Method". But this feature crucially requires "VPKCreator"(you can download it at the internet if its not present just search "dota2 vpkcreator") or else this feature will be disabled. ACTIVATING THIS FEATURE DOES NOT REQUIRE THE "Use Miscellaneous on Future Injection" TO BE ENABLED, but ofcourse you need to locate the location of "gameinfo.gi". It is commonly located at "C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta\game\dota\" Folder.
+*Improved the Speed of Item Scanning by 50`%, in other words, if its slower for you. Then that constant speed is the fastest scan this application can do. SO HAVE PATIENCE!
+)
 Gui, aboutgui:Tab,4
-Gui,aboutgui:Add,Edit,x0 y20 h400 w500 vtext37 ReadOnly,*Right-Click an item to change "Styles"(if it has an available alternative style).`n`n*At "Handy Injection>Hero Items Selection" Section`,every Hero can ONLY have ONE ITEM PER ITEM SLOT. Adding a "Check" Mark on an item will REMOVE THE OTHER CHECK MARK ON AN ITEM WITH THE SAME ITEM SLOT(eg. juggernaut's bladeform legacy is an Head Item slot`, it will deselect any item that are Head Item Slot Like Mask of a Thousand Faces).`n`n*On every Dropdownlist(eg. The Custom Items Location Path Found at the General Section... The gameinfo.gi Location Path found at the Advanced Section)`, to clear the control just left click the dropdownlist and left click the location path. This will clear the location path and disable its future controls.`n`n*To Manually Patch gameinfo.gi using the injector`, go to "advanced>patch gameinfo.gi". Clicking this button will Activate the MOD(pak01_dir.vpk) found at "%dota2dir%\" Folder.`n`n*It is good that "use miscellaneous on future injection" Feature at "Miscellaneous" Section is "TURNED OFF" if you do not use any feature on that section. Because every start`, this Tool will need to preload all miscellaneous assets which will consume much time`n`n*"AUTO-SHUTNIK METHOD" is a very important feature of this Tool`,it was built for users who dont know how to "Manually MOD DOTA2".`n`n*Turning Off "AUTO-SHUTNIK METHOD" will Generate a "pak01_dir" folder at the "Generated MOD" Folder found on the same folder of this Tool. This is HELPFUL for users who wants to MANUALLY MOD DOTA2`n`n*Turning ON "Low-Processor Mode" at "Advanced" Section will command this Tool not to consume alot of RAM when "Injecting items"`, executing only ONE COMMAND PROMPT to execute the Extraction of Items through their specific locations. BUT AS PENALTY`, it will CONSUME ALOT OF TIME for the Injection to Finish!!! So if you are "Injecting 400 items"... I appoximate each items will be extracted after "5 seconds"`, so 400 x 5 is equal to 2000 seconds(33 minutes)`n`n*"Save Settings" button on the bottom left does NOT SAVE DATALISTS`,it only saves "directories" which you selected and checkboxes that are not inside a "DATALIST". If you want to save a Datalist. Use "Save DataBase List" instead.`n`n*"Save DataBase List" at "Hero Items Selection" and "Used Items Database" from Handy Injection Section do the same thing.`n`n*"Save DataBase List" at the "General" Section is different on "Save DataBase List" for "Handy Injection". In other words`, it only saves the datalist PRESENT ON THAT SECTION PLUS ALL Miscellaneous DATALIST(if enabled).`n`n*"Migration" Feature only prioritize items with "prefab=default_item". In other words`, it does not support "terrain`,weather`,hud`,loadingscreen`,ect"`n`n*At "Search" Section`,You can press "Enter/Return" Key and it will do the same job pressing "Search for(keyword)" button.`n`n*Pressing "Search for(keyword)" Button(Or Enter/Return) with the same "Keyword" you have searched last time will move to the next occurence... Until there is no match found``, it will go back to the very first occurence.`n`n*The "ERROR LOG" at "Advanced" Section reports certain coincidence that is rarely different from what the injector has scanned before the last launch. This happens when a new update comes out with newly added cosmetic items`, those items are registered at the "items_game.txt" that have unique ID's that not present on the earlier patches. But sometimes`, they are REGISTERED AT AN EXISTED ID... While the OLD REGISTERED item on that ID that was REPLACED by this newly arrived item``,was MOVED INTO ANOTHER UNIQUE ID!!! So this Tool will able to detect those coincidence WHEN YOU HAVE A DATABASE.`n`n*Expect that when an "ITEM was Announced" at the "ERROR LOG"`,it will be UNCHECKED at either "Handy Injection" section or "General" Section`, in other words it will be unused. You need to "recheck" it again on that section to "Activate" it again.`n`n*This Tool detects the DOTA2 Directory by pairing a combination pattern... It scans all Folder inside the "steamapps\common" then scans if the picked folder has "game\dota" subfolder inside.`n`n*The Injector needs 150MB of RAM when making its Operation. If your computer is very weak to handle this amount of memory`, then please do not use this injector and Throw this Tool at your Recycle Bin!
+Gui,aboutgui:Add,Edit,x0 y20 h400 w500 vtext37 ReadOnly,
+(
+*Right-Click an item to change "Styles"(if it has an available alternative style).
+
+*At "Handy Injection>Hero Items Selection" Section,every Hero can ONLY have ONE ITEM PER ITEM SLOT. Adding a "Check" Mark on an item will REMOVE THE OTHER CHECK MARK ON AN ITEM WITH THE SAME ITEM SLOT(eg. juggernaut's bladeform legacy is an Head Item slot, it will deselect any item that are Head Item Slot Like Mask of a Thousand Faces).
+
+*On every Dropdownlist(eg. The Custom Items Location Path Found at the General Section... The gameinfo.gi Location Path found at the Advanced Section), to clear the control just left click the dropdownlist and left click the location path. This will clear the location path and disable its future controls.
+
+*To Manually Patch gameinfo.gi using the injector, go to "advanced>patch gameinfo.gi". Clicking this button will Activate the MOD(pak01_dir.vpk) found at "%dota2dir%\" Folder.
+
+*It is good that "use miscellaneous on future injection" Feature at "Miscellaneous" Section is "TURNED OFF" if you do not use any feature on that section. Because every start, this Tool will need to preload all miscellaneous assets which will consume much time
+
+*"AUTO-SHUTNIK METHOD" is a very important feature of this Tool,it was built for users who dont know how to "Manually MOD DOTA2".
+
+*Turning Off "AUTO-SHUTNIK METHOD" will Generate a "pak01_dir" folder at the "Generated MOD" Folder found on the same folder of this Tool. This is HELPFUL for users who wants to MANUALLY MOD DOTA2
+
+*Turning ON "Low-Processor Mode" at "Advanced" Section will command this Tool not to consume alot of RAM when "Injecting items", executing only ONE COMMAND PROMPT to execute the Extraction of Items through their specific locations. BUT AS PENALTY, it will CONSUME ALOT OF TIME for the Injection to Finish!!! So if you are "Injecting 400 items"... I appoximate each items will be extracted after "5 seconds", so 400 x 5 is equal to 2000 seconds(33 minutes)
+
+*"Save Settings" button on the bottom left does NOT SAVE DATALISTS,it only saves "directories" which you selected and checkboxes that are not inside a "DATALIST". If you want to save a Datalist. Use "Save DataBase List" instead.
+
+*"Save DataBase List" at "Hero Items Selection" and "Used Items Database" from Handy Injection Section do the same thing.
+
+*"Save DataBase List" at the "General" Section is different on "Save DataBase List" for "Handy Injection". In other words, it only saves the datalist PRESENT ON THAT SECTION PLUS ALL Miscellaneous DATALIST(if enabled).
+
+*"Migration" Feature only prioritize items with "prefab=default_item". In other words, it does not support "terrain,weather,hud,loadingscreen,ect"
+
+*At "Search" Section,You can press "Enter/Return" Key and it will do the same job pressing "Search for(keyword)" button.
+
+*Pressing "Search for(keyword)" Button(Or Enter/Return) with the same "Keyword" you have searched last time will move to the next occurence... Until there is no match found`, it will go back to the very first occurence.
+
+*The "ERROR LOG" at "Advanced" Section reports certain coincidence that is rarely different from what the injector has scanned before the last launch. This happens when a new update comes out with newly added cosmetic items, those items are registered at the "items_game.txt" that have unique ID's that not present on the earlier patches. But sometimes, they are REGISTERED AT AN EXISTED ID... While the OLD REGISTERED item on that ID that was REPLACED by this newly arrived item`,was MOVED INTO ANOTHER UNIQUE ID!!! So this Tool will able to detect those coincidence WHEN YOU HAVE A DATABASE.
+
+*Expect that when an "ITEM was Announced" at the "ERROR LOG",it will be UNCHECKED at either "Handy Injection" section or "General" Section, in other words it will be unused. You need to "recheck" it again on that section to "Activate" it again.
+
+*This Tool detects the DOTA2 Directory by pairing a combination pattern... It scans all Folder inside the "steamapps\common" then scans if the picked folder has "game\dota" subfolder inside.
+
+*The Injector needs 150MB of RAM when making its Operation. If your computer is very weak to handle this amount of memory, then please do not use this injector and Throw this Tool at your Recycle Bin!
+)
 Gui, aboutgui:Tab,5
 Gui,aboutgui:Add, Link,vtext39,*General Section: <a href="https://www.youtube.com/watch?v=N8POaZ2nXbA&t=25s">https://www.youtube.com/watch?v=N8POaZ2nXbA&t=25s</a>
 Gui,aboutgui:Add, Link,vtext40,*Handy Injection Section: <a href="https://www.youtube.com/watch?v=-BETnaBBLME&t=25s">https://www.youtube.com/watch?v=-BETnaBBLME&t=25s</a>
@@ -5958,7 +6188,38 @@ Gui,aboutgui:Add, Link,vtext33,*Create your Own Database: <a href="https://www.y
 Gui,aboutgui:Add, Link,vtext34,*Edit a Database: <a href="https://www.youtube.com/watch?v=wF2DnfrgWkg">https://www.youtube.com/watch?v=wF2DnfrgWkg</a>
 Gui,aboutgui:Add, Link,vtext42,*ERROR! Items_game.txt is missing!: <a href="https://www.youtube.com/watch?v=l4w2fT_lY10&t=3s">https://www.youtube.com/watch?v=l4w2fT_lY10&t=3s</a>
 Gui, aboutgui:Tab,6
-Gui,aboutgui:Add,Edit,x0 y20 h400 w500 vtext38 ReadOnly,This are lifetime credits to those people who suffered bugs and are concerned to report to us. Making this tool More better every time!`n`nv2.1.0`n*7u7u74n9- inspected a bug where the injector only extracts npc_dota assets. Eg. Spirits of the Mothbinder's vmdl counterpart is "dota_death_prophet_exorcism_spirit" that has no "npc" at the beggining`, making the injector to ignore this asset.`n`nv2.0.0`n*Alpha Bravo- as I currently use his "WM_MOUSEMOVE" Function.`n*Obi-Wahn- for his "LV_MoveRow" Function that is integrated on this tool.`n*Pulover [Rodolfo U. Batista]- for his "Eval" Function that I currently used evaluating strings into numbers.`n*V for Vendetta- for his "VarWrite" and "VarRead" Function.`n`n`nv1.7.2`n*Klark92-as I currently use his "Draw" Function`n`nv1.6.1`n*7u7u74n9-inspected how the injector generates all files and confirmed its inaccuracy. Reported main cost problems including missing .vmdl files extracted at pak01_dir`, Alternate Models(for three level grow of tiny`,night stalker at night`,terrorblade's demon form`,lycan's shapeshift`,lone druid' druid form`,ect) failed to extract. Suggested Keyholes and some details.`n`nv1.3.4`n*Kush Manek-reported the bug where when he relocated his steam folder to another path`,the tool cant identify the location anymore. Concluding "Cats are not good on hide and seek".`n`nv1.0.1`n*John Kris Uytiepo-reported specific heroes which has bugs which the items does not show when playing online. This Bug was fixed by optimizing detection to prevent dislocations on its specific location.`n`nv0.1.1`n*Edwin Santos-reported the bug of not showing items even if a good procedure was met.`n`nv0.1.1`n*Titan-as I currently use his "Anchor" Logic Function
+Gui,aboutgui:Add,Edit,x0 y20 h400 w500 vtext38 ReadOnly,
+(
+This are lifetime credits to those people who suffered bugs and are concerned to report to us. Making this tool More better every time!
+
+v2.1.0
+*7u7u74n9- inspected a bug where the injector only extracts npc_dota assets. Eg. Spirits of the Mothbinder's vmdl counterpart is "dota_death_prophet_exorcism_spirit" that has no "npc" at the beggining, making the injector to ignore this asset.
+
+v2.0.0
+*Alpha Bravo- as I currently use his "WM_MOUSEMOVE" Function.
+*Obi-Wahn- for his "LV_MoveRow" Function that is integrated on this tool.
+*Pulover [Rodolfo U. Batista]- for his "Eval" Function that I currently used evaluating strings into numbers.
+*V for Vendetta- for his "VarWrite" and "VarRead" Function.
+
+
+v1.7.2
+*Klark92-as I currently use his "Draw" Function
+
+v1.6.1
+*7u7u74n9-inspected how the injector generates all files and confirmed its inaccuracy. Reported main cost problems including missing .vmdl files extracted at pak01_dir, Alternate Models(for three level grow of tiny,night stalker at night,terrorblade's demon form,lycan's shapeshift,lone druid' druid form,ect) failed to extract. Suggested Keyholes and some details.
+
+v1.3.4
+*Kush Manek-reported the bug where when he relocated his steam folder to another path,the tool cant identify the location anymore. Concluding "Cats are not good on hide and seek".
+
+v1.0.1
+*John Kris Uytiepo-reported specific heroes which has bugs which the items does not show when playing online. This Bug was fixed by optimizing detection to prevent dislocations on its specific location.
+
+v0.1.1
+*Edwin Santos-reported the bug of not showing items even if a good procedure was met.
+
+v0.1.1
+*Titan-as I currently use his "Anchor" Logic Function
+)
 Gui, aboutgui:Tab
 Gui, aboutgui:Add, Button, vtext43 x230 y420, OK
 Gui,aboutgui:Show,h450 w500,About AJOM's Dota 2 MOD Master
@@ -7739,25 +8000,12 @@ Gui, MainGUI:Default
 DllCall("QueryPerformanceCounter", "Int64P", t0)
 
 
-wv1d4_hv1d2_param=terrainchoice
 
 xv1d2_wv1d2_param=injectto
 
-xv1d2_wv1d2_h_param=showitems,announcerview,reportshow
-xv2d3_wv1d3_hv1d2_param=hudchoice
-xv1d3_wv1d3_hv1d2_param=wardchoice
+xv1d2_wv1d2_h_param=showitems,announcerview,reportshow,terrainchoice,weatherchoice,multikillchoice,emblemchoice,musicchoice,cursorchoice,loadingscreenchoice,courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
 
-xv1d4_wv1d4_hv1d2_param=weatherchoice
-xv2d4_wv1d4_hv1d2_param=multikillchoice
-xv3d4_wv1d4_hv1d2_param=emblemchoice
-
-yv1d2_wv1d3_hv1d2_param=musicchoice
-
-xv1d3_yv1d2_wv1d3_hv1d2_param=cursorchoice,direcreepchoice
-xv2d3_yv1d2_wv1d3_hv1d2_param=loadingscreenchoice,radcreepchoice
-
-wv1d2_h_param=herochoice,tauntview,errorshow
-wv1d3_h_param=courierchoice
+wv1d2_h_param=herochoice,tauntview,errorshow,singlesourcechoicegui,multiplestyleschoicegui
 
 x_y_param=text31,text51
 y_w_param=datadirview,hdatadirview,MyProgress,searchnofound
@@ -7779,7 +8027,7 @@ y_param=text6,text18,text30
 w_param=searchbar,idbar,namebar,prefabbar,itemslotbar,modelpathbar,heroesbar,invdirview,mdirview,text24,giloc,dota2dir,useextitemgamefile,useextportraitfile
 h_param=statscalibrator
 
-commandparam=w_h_param,x_y_param,y_w_param,x_param,y_param,xv1d2_wv1d2_h_param,w_param,wv1d3_h_param,wv1d2_param,xv1d2_wv1d2_param,xv1d2_param,xv1d2_y_param,wv1d2_h_param,xv2d3_wv1d3_hv1d2_param,xv1d3_wv1d3_hv1d2_param,xv1d3_y_param,xv2d3_y_param,wv1d4_hv1d2_param,xv1d4_wv1d4_hv1d2_param,xv2d4_wv1d4_hv1d2_param,xv3d4_wv1d4_hv1d2_param,yv1d2_wv1d3_hv1d2_param,xv2d3_yv1d2_wv1d3_hv1d2_param,xv1d3_yv1d2_wv1d3_hv1d2_param,x_h_param,xv5d16_param,xv11d16_param,h_param
+commandparam=w_h_param,x_y_param,y_w_param,x_param,y_param,xv1d2_wv1d2_h_param,w_param,wv1d2_param,xv1d2_wv1d2_param,xv1d2_param,xv1d2_y_param,wv1d2_h_param,xv1d3_y_param,xv2d3_y_param,x_h_param,xv5d16_param,xv11d16_param,h_param
 loop,parse,commandparam,`,
 {
 	StringTrimRight,command,A_LoopField,5
