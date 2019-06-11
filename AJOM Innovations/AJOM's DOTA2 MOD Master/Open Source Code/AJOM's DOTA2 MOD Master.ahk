@@ -55,7 +55,7 @@ if not (A_IsAdmin or RegExMatch(full_command_line, " /restart(?!\S)"))
 Menu, Tray, Add, &Exit, k_MenuExit
 Menu, Tray, NoStandard
 
-version=2.3.0 ALPHA
+version=2.3.1
 
 databasemessage=~ ~ ~ ~ MAIN DATABASE Version 2 : Don't Edit anything here to avoid DATABASE CORRUPTION!!! ~ ~ ~ ~`n`n
 ListViewSave(databasemessage) ; sets the default message in the beggining of the database and store to "static ExtraMessage"
@@ -154,11 +154,14 @@ else IfNotExist,%A_ScriptDir%\Library\activelist.txt
 	msgbox,16,ERROR!!! "activelist.txt" is MISSING!,It looks like:`n`n"%A_ScriptDir%\Library\activelist.txt"`n`nIs missing. But since this tool already supports auto-extraction of "activelist.txt"`, please restart this application. Before using the "inject" feature of this tool`, make sure to add the original "activelist.txt" inside "%A_ScriptDir%\Library" Folder OR ELSE THE HERO Recognition for Handy Injection Section WILL NOT WORK!`n`nIf you dont have an Idea where to find the "activelist.txt"`,here is a few steps:`n1)Download "GCFScape" application. Alternatively if GCFScape produces "ERROR" when opening "Pak01_dir.vpk"`, Download "Valve's Resource Viewer" application instead.`n2)Use "GCFScape" or "Valve's Resource Viewer" to open "Pak01_dir.vpk"(commonly it is located at "Steam\steamapps\common\dota 2 beta\game\dota\").`n3)Hit "CTRL+F"(or press "find" elsewhere) and search for "activelist.txt" without punctuation marks.`n4)If successfully found`,Right-Click the file(activelist.txt) and extract it to "%A_ScriptDir%\Library" folder.
 }
 
-param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice
+param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate
 Loop,parse,param,`,
 {
 	IniRead,%A_LoopField%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,%A_LoopField%
 }
+
+if disableautoupdate<>1
+	versionchecker(version)
 
 if version>%usedversion%
 	FileDelete,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
@@ -355,10 +358,11 @@ soundon_TT=Checking this Option will use Artificial Narration that announces cur
 Gui, MainGUI:Add, CheckBox, checked%fastmisc% x9 y170 vfastmisc,Remember Miscellaneous Resources for fast Preload(Not advisable to be checked. if you want to accurately preload all Miscellaneous resources`, leave this option unchecked)
 fastmisc_TT=If this Option is ~ `n`nCHECKED : Everytime DOTA2 MOD Master preloads Miscellaneous resources`, it automatically remembers all Miscellaneous resources upon the next start by creating a reference file. So that if the real items_game.txt is not changed by updates/patches`, Fast Preloading will be done.`n`n*Prosequences`n-Ultra Fast Preloading every start of DOTA2 MOD Master.`n-Does not need to Redefine all Miscellaneous Resources every start.`n`n*Consequences`n-Since I still have not proved if this option will produce innacurate results`, the most expected consequence that I predicted is "Innacurate" Resources. It might have some "MISSING Miscellaneous Resources" that should be present or might produce an "Extra BLANK Row" that is irritating.`n`n`nUNCHECKED : It always scan Miscellaneous Resources at items_game.txt file every start.`n`n*Prosequences`n-Preloading Miscellaneous resources is FULLY Accurate since it always scans items_game.txt every start. Making sure that every single Miscellaneous resource will be present on every lists.`n`n*Consequences`n-Slower Startup since DOTA2 MOD Master needs to Preload "Miscellaneous" Resources first before it is allowed to be used. 
 Gui, MainGUI:Add, CheckBox, checked%showtooltips% x9 y190 vshowtooltips gshowtooltips,Show Tooltip Guides on every Controls.
-Gui, MainGUI:Add, text,x4 y210,ERROR Log
-Gui, MainGUI:Add, Edit, verrorshow x4 y225 w266 h226 +ReadOnly,
-Gui, MainGUI:Add, text,x276 y210 vtext32,Report Log
-Gui, MainGUI:Add, Edit, vreportshow x276 y225 w266 h226 +ReadOnly,
+Gui, MainGUI:Add, CheckBox, checked%disableautoupdate% x9 y210 vdisableautoupdate,Disable Automatic Updates.
+Gui, MainGUI:Add, text,x4 y230,ERROR Log
+Gui, MainGUI:Add, Edit, verrorshow x4 y245 w266 h206 +ReadOnly,
+Gui, MainGUI:Add, text,x276 y230 vtext32,Report Log
+Gui, MainGUI:Add, Edit, vreportshow x276 y245 w266 h206 +ReadOnly,
 Gui, MainGUI:Tab
 Gui, MainGUI:Add, Progress, x4 y452 w540 -smooth vMyProgress Range0-1000,
 GuiControl,MainGUI:Hide,MyProgress
@@ -3000,8 +3004,8 @@ IfNotExist,%A_ScriptDir%\Settings.aldrin_dota2mod
 {
 	FileAppend,,%A_ScriptDir%\Settings.aldrin_dota2mod
 	IniWrite,0,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,ucr
-	param=0,1,3,1,0,0,0,0,1,1,1
-	param1=pet,usemisc,mappetstyle,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice
+	param=0,1,3,1,0,0,0,0,1,1,1,0
+	param1=pet,usemisc,mappetstyle,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate
 	loop,parse,param,`,
 	{
 		paramtmp=%A_LoopField%
@@ -4991,8 +4995,8 @@ selectsave:
 gosub,leakdestroyer
 Gui, MainGUI:Submit, NoHide
 GoSub,default_settings
-param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,pet,autovpk,usemisc,mappetstyle,mapgiloc,maplowprocessor,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice
-param1=%ucron%,%invdirview%,%datadirview%,%hdatadirview%,%mdirview%,%peton%,%autovpkon%,%usemiscon%,%petstyle%,%giloc%,%lowprocessor%,%dota2dir%,%soundon%,%useextportraitfile%,%useextfile%,%useextitemgamefile%,%fastmisc%,%showtooltips%,%singlesourcechoicegui%,%multiplestyleschoicegui%
+param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,pet,autovpk,usemisc,mappetstyle,mapgiloc,maplowprocessor,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate
+param1=%ucron%,%invdirview%,%datadirview%,%hdatadirview%,%mdirview%,%peton%,%autovpkon%,%usemiscon%,%petstyle%,%giloc%,%lowprocessor%,%dota2dir%,%soundon%,%useextportraitfile%,%useextfile%,%useextitemgamefile%,%fastmisc%,%showtooltips%,%singlesourcechoicegui%,%multiplestyleschoicegui%,%disableautoupdate%
 Loop,parse,param,`,
 {
 	tmpstring=%A_LoopField%
@@ -6004,6 +6008,9 @@ Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,This Tool gives a bright
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.3.1
+*DOTA2 MOD Master now supports Auto-Update Feature! You can disable this feature at "Advanced" Section.
+
 v2.3.0 ALPHA
 *Alpha Stage since no Bugs occured related to the subroutine-to-function migration of the application, but still analyzing for tweaks for future versions.
 *Added "Radiant Towers" and "Dire Towers" Feature at Miscellaneous>"Multiple-Styles" Sub-Section.
@@ -6235,6 +6242,9 @@ return
 k_MenuExit:
 MainGUIGuiClose:
 gosub,savetab
+if updatewassuccessful=1
+	ifexist,%A_ScriptDir%\Plugins\Unzip\master.zip
+		gosub,updatemigrator
 ExitApp
 return
 
@@ -7971,6 +7981,65 @@ SaveFile(Owner, FileName := "", Filter := "", FileTypeIndex := 1, CustomPlaces :
 
     return Result ? {File: Result, FileTypeIndex: FileTypeIndex} : FALSE
 } ; https://github.com/flipeador/AutoHotkey/blob/master/Lib/dlg/SaveFile.ahk
+
+;~~~~~AutoUpdate by Aldrin John O. Manalansan~~~~~
+versionchecker(version)
+{
+	if A_IsCompiled
+	{
+		UrlDownloadToFile,https://raw.githubusercontent.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/master/Version.ini,%A_ScriptDir%\Plugins\Unzip\Version.ini
+		if ErrorLevel
+			return
+		IniRead,webversion,%A_ScriptDir%\Plugins\Unzip\Version.ini,Version,appversion,%A_Space%
+		if (webversion<>"") and (webversion<>A_Space) and (webversion>version)
+		{
+			msgbox,262180,New Version Available!,
+(
+DOTA2 MOD Master v%webversion% is now available to be downloaded, Would you like to migrate to the latest version?
+
+Tip: You can Disable Automatic-Updates at "Advanced" Section.
+)
+			IfMsgBox Yes
+				SetTimer,updateversion,1000
+		}
+		FileDelete,%A_ScriptDir%\Plugins\Unzip\Version.ini
+	}
+}
+	
+updateversion:
+UrlDownloadToFile,https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/archive/master.zip,%A_ScriptDir%\Plugins\Unzip\master.zip
+if ErrorLevel
+	return
+updatewassuccessful=1
+updatefiles:
+ifexist,%A_ScriptDir%\Plugins\Unzip\master.zip
+{
+	msgbox,262148,Update/Migration COMPLETE!,Latest Version of DOTA2 MOD Master has been successfully Installed, would you like to reload this program for this version to take effect?
+	IfMsgBox Yes
+	{
+		gosub,updatemigrator
+		if ErrorLevel=ERROR
+			goto,updatefiles
+		ExitApp
+	}
+	SetTimer,updateversion,Off
+}
+return
+
+updatemigrator:
+temp=
+(join&
+unzip.exe -o -qq master.zip "DOTA-2-MOD-Master-master/AJOM Innovations/AJOM's DOTA2 MOD Master/*"
+xcopy "%A_ScriptDir%\Plugins\Unzip\DOTA-2-MOD-Master-master\AJOM Innovations\AJOM's DOTA2 MOD Master" "%A_ScriptDir%" /r /y /c /i /q /s
+RD /S /Q "%A_ScriptDir%\Plugins\Unzip\DOTA-2-MOD-Master-master"
+del /f /q "%A_ScriptDir%\Plugins\Unzip\master.zip"
+"%A_ScriptFullPath%"
+)
+temp:=StrReplace(temp,"\","/")
+run, %comspec% /c %temp%,%A_ScriptDir%\Plugins\Unzip,Hide UseErrorLevel
+return
+;~~~~~end of AutoUpdate~~~~~
+
 ;;~~~~~~~~~~~~~~~~~~~~~~~End of Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 aboutguiguisize:
