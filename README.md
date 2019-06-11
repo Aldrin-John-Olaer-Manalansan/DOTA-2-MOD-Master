@@ -37,7 +37,8 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 
 ~~~~~~~~~~~CHANGELOG~~~~~~~~~~~
 
-
+v2.3.1
+*DOTA2 MOD Master now supports Auto-Update Feature! You can disable this feature at "Advanced" Section.
 
 v2.3.0 ALPHA
 *Alpha Stage since no Bugs occured related to the subroutine-to-function migration of the application, but still analyzing for tweaks for future versions.
