@@ -37,6 +37,9 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 
 ~~~~~~~~~~~CHANGELOG~~~~~~~~~~~
 
+v2.3.2
+*Fixed a Bug where Folder names containing a comma(,) character to corrupt the settings, thus failing the program to launch.
+
 v2.3.1
 *DOTA2 MOD Master now supports Auto-Update Feature! You can disable this feature at "Advanced" Section.
 
