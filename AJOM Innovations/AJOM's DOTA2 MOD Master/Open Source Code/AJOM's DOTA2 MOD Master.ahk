@@ -55,7 +55,7 @@ if not (A_IsAdmin or RegExMatch(full_command_line, " /restart(?!\S)"))
 Menu, Tray, Add, &Exit, k_MenuExit
 Menu, Tray, NoStandard
 
-version=2.3.1
+version=2.3.2
 
 databasemessage=~ ~ ~ ~ MAIN DATABASE Version 2 : Don't Edit anything here to avoid DATABASE CORRUPTION!!! ~ ~ ~ ~`n`n
 ListViewSave(databasemessage) ; sets the default message in the beggining of the database and store to "static ExtraMessage"
@@ -276,7 +276,7 @@ loop,parse,checkparam,`,
 }
 DllCall("QueryPerformanceFrequency", "Int64P", freq)
 Gui, MainGUI:+Resize +MinSize
-IniRead,choosetab,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,choosetab
+IniRead,choosetab,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,choosetab,3
 tablist=General|Search|Handy Injection|Migration|Miscellaneous|Advanced
 Gui, MainGUI:Add, Tab2,x0 y0 h500 w550 -Wrap vOuterTab gSelectOuterTab choose%choosetab%, %tablist%
 Gui, MainGUI:Tab,2
@@ -410,7 +410,7 @@ exthiddencontrolscontroller=Handy Injection,General
 exthiddencontrolstab=InnerTab1,InnerTab2
 ;;;;
 
-IniRead,inchoosetab2,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,inchoosetab2
+IniRead,inchoosetab2,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,inchoosetab2,1
 intablist2=Main|External Files
 Gui, MainGUI:Add, Tab2,x0 y20 h480 w550 -Wrap gSelectOuterTab vInnerTab2 hwndInnerTab2 choose%inchoosetab2%,%intablist2%
 Gui, MainGUI:Tab,1
@@ -445,7 +445,7 @@ Gui, MainGUI:Add, DropDownList,choose1 x112 y420 w435 h21 gdirremover vdatadirvi
 datadirview_TT=To remove a list on this dropdownlist`, simply left-click this dropdownlist and then left-click the list you want to remove.
 
 
-IniRead,inchoosetab1,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,inchoosetab1
+IniRead,inchoosetab1,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,inchoosetab1,1
 intablist1=Hero Items Selection|Used Items Database|Statistics|Custom Heroes|External Files
 Gui, MainGUI:Add, Tab2,x0 y20 h480 w550 -Wrap gSelectOuterTab vInnerTab1 hwndInnerTab1 choose%inchoosetab1%,%intablist1%
 Gui, MainGUI:Tab,1
@@ -478,6 +478,8 @@ SetBtnTxtColor(HBTN, "Blue")
 Gui, MainGUI:Font
 Menu, MyContextMenu, Add, Delete, hbuttondelete
 Menu, MyContextMenu, Add, Change Style, hbuttonstyle
+Menu, MyContextMenu, Add, Increase Priority, hincprio
+Menu, MyContextMenu, Add, Decrease Priority, hdecprio
 Gui, MainGUI:Tab,3
 Gui, MainGUI:Add, Text, x1 y45,Calibrator Settings
 Gui, MainGUI:Add, ListView,NoSort vstatscalibrator gstatscalibrator x1 y60 w150 h390 checked AltSubmit,Item Slot
@@ -3211,6 +3213,7 @@ if A_DefaultListView<>itemview
 {
 	Gui, MainGUI:ListView, itemview
 }
+msgbox %position%
 LV_GetText(stylescount,position,6)
 LV_GetText(countcheck,position,7)
 if stylescount>%countcheck%
@@ -3852,7 +3855,7 @@ if soundon=1
 progress:=0,IPS:=StartTimer:=A_TickCount
 gosub,showprogress
 ;LV_ModifyCol(4,"Sort Integer") ; this increases the speed when finding the items... Type of strategy, lowest id number >>> highest id number
-LV_ModifyCol(4,"SortDesc Integer") ; this increases the speed when finding the items... Type of strategy, highest id number >>> lowest id number
+;LV_ModifyCol(4,"SortDesc Integer") ; this increases the speed when finding the items... Type of strategy, highest id number >>> lowest id number
 Loop % LV_GetCount()
 {
 	progress+=adder
@@ -4996,16 +4999,18 @@ gosub,leakdestroyer
 Gui, MainGUI:Submit, NoHide
 GoSub,default_settings
 param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,pet,autovpk,usemisc,mappetstyle,mapgiloc,maplowprocessor,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate
-param1=%ucron%,%invdirview%,%datadirview%,%hdatadirview%,%mdirview%,%peton%,%autovpkon%,%usemiscon%,%petstyle%,%giloc%,%lowprocessor%,%dota2dir%,%soundon%,%useextportraitfile%,%useextfile%,%useextitemgamefile%,%fastmisc%,%showtooltips%,%singlesourcechoicegui%,%multiplestyleschoicegui%,%disableautoupdate%
-Loop,parse,param,`,
+param1=%ucron%|%invdirview%|%datadirview%|%hdatadirview%|%mdirview%|%peton%|%autovpkon%|%usemiscon%|%petstyle%|%giloc%|%lowprocessor%|%dota2dir%|%soundon%|%useextportraitfile%|%useextfile%|%useextitemgamefile%|%fastmisc%|%showtooltips%|%singlesourcechoicegui%|%multiplestyleschoicegui%|%disableautoupdate%
+Loop,parse,param1,|
 {
 	tmpstring=%A_LoopField%
 	tmpint=%A_Index%
-	Loop,parse,param1,`,
+	Loop,parse,param,`,
 	{
 		if tmpint=%A_Index%
 		{
-			IniWrite,%A_LoopField%, %A_ScriptDir%\Settings.aldrin_dota2mod, Edits,%tmpstring%
+			;tmpstring:=StrReplace(tmpstring,",","``,")
+			;msgbox %tmpstring%
+			IniWrite,%tmpstring%, %A_ScriptDir%\Settings.aldrin_dota2mod, Edits,%A_LoopField%
 			Break
 		}
 	}
@@ -6008,6 +6013,9 @@ Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,This Tool gives a bright
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.3.2
+*Fixed a Bug where Folder names containing a comma(,) character to corrupt the settings, thus failing the program to launch.
+
 v2.3.1
 *DOTA2 MOD Master now supports Auto-Update Feature! You can disable this feature at "Advanced" Section.
 
@@ -8435,6 +8443,57 @@ if (InStr(ErrorLevel, "C", true)) or (InStr(ErrorLevel, "c", true))
 	
 }
 return
+
+hincprio:
+Gui, MainGUI:Default
+Gui, MainGUI:Submit,NoHide
+Gui, MainGUI:ListView,itemview
+lvrowswapper(A_DefaultListView,"7",1)
+return
+
+hdecprio:
+Gui, MainGUI:Default
+Gui, MainGUI:Submit,NoHide
+Gui, MainGUI:ListView,itemview
+lvrowswapper(A_DefaultListView,"7")
+return
+
+lvrowswapper(listview,columncount,isincrement:=0)
+{
+	Gui, MainGUI:ListView,%listview%
+	if (isincrement=0)
+	{
+		Loop % LV_GetCount()
+		{
+			if (LV_GetNext(A_Index-1)=A_Index) and (A_Index<>1)
+			{
+				offset2:=A_Index-1,offset1:=A_Index
+				loop %columncount%
+				{
+					LV_GetText(temp1,offset1,A_Index),LV_GetText(temp2,offset2,A_Index)
+					LV_Modify(offset1,"-Select Col" A_Index,temp2),LV_Modify(offset2,"Select Col" A_Index,temp1)
+				}
+			}
+		}
+	}
+	else
+	{
+		Loop % LV_GetCount()
+		{
+			if (LV_GetNext(LV_GetCount()-A_Index)=LV_GetCount()-A_Index+1) and (LV_GetCount()-A_Index+1<>LV_GetCount())
+			{
+				offset1:=LV_GetCount()-A_Index+2,offset2:=LV_GetCount()-A_Index+1
+				;msgbox % "at`n`n" LV_GetCount() " and " A_Index
+				loop %columncount%
+				{
+					LV_GetText(temp1,offset1,A_Index),LV_GetText(temp2,offset2,A_Index)
+					;msgbox %offset1% and %offset2%`n`n%temp1% and %temp2%
+					LV_Modify(offset1,"Select Col" A_Index,temp2),LV_Modify(offset2,"-Select Col" A_Index,temp1)
+				}
+			}
+		}
+	}
+}
 
 /*
 
