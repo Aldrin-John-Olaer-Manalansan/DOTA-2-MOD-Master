@@ -37,6 +37,11 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 
 ~~~~~~~~~~~CHANGELOG~~~~~~~~~~~
 
+v2.3.3
+*Added Rarity Color Coding.
+*Added "Rescan Resources" Button at "Advanced" Section. This will rescan all resources avoiding inaccurate list of items at miscellaneous section.
+*Fixed a Bug where "terrain" style cannot be changed.
+
 v2.3.2
 *Fixed a Bug where Folder names containing a comma(,) character to corrupt the settings, thus failing the program to launch.
 
