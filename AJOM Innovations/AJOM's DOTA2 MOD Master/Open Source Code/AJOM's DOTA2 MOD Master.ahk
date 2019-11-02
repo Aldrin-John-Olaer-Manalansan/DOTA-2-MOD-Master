@@ -32,52 +32,62 @@ if not (A_IsAdmin or RegExMatch(DllCall("GetCommandLine", "str"), " /restart(?!\
 ;
 
 dotnetdetection:
-Run,%A_ComSpec%,,Hide UseErrorLevel,vPID
-DetectHiddenWindows, On
-WinWait,ahk_pid %vPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
-WinHide,ahk_pid %vPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
-DllCall("kernel32\AttachConsole", "UInt",vPID)
-exec := (comobjcreate("wscript.shell").exec(a_comspec " /c dotnet&&echo 1"))
-WinHide,ahk_pid %vPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
-stdout := exec.stdout.readall()
-DllCall("kernel32\FreeConsole")
-Process, Close, % vPID
-DetectHiddenWindows, Off
-VarSetCapacity(exec,0)
-if !stdout
+if !FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") and !FileExist(A_ProgramFiles "\dotnet\dotnet.exe")
 {
-	msgbox,16,DotNet Core Required!,Material File Extraction and Detection feature of this tool requires Dotnet Core installed on your computer. Please install the corresponding installers after pressing "OK" to maximize the full potential of DOTA2 MOD Master.
-	IfNotExist,%A_ScriptDir%\Plugins\Installers\
+	Run,%A_ComSpec%,,Hide UseErrorLevel,vPID
+	DetectHiddenWindows, On
+	WinWait,ahk_pid %vPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+	WinHide,ahk_pid %vPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+	DllCall("kernel32\AttachConsole", "UInt",vPID)
+	exec := (comobjcreate("wscript.shell").exec(a_comspec " /c dotnet --info&&echo 1"))
+	WinHide,ahk_pid %vPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+	stdout := exec.stdout.readall()
+	if debugmode
+	msgbox stdout
+	DllCall("kernel32\FreeConsole")
+	Process, Close, % vPID
+	DetectHiddenWindows, Off
+	VarSetCapacity(exec,0)
+	if !stdout
 	{
-		FileCreateDir,%A_ScriptDir%\Plugins\Installers
-	}
-	IfNotExist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\
-	{
-		FileCreateDir,%A_Temp%\AJOM Innovations\DOTA2 MOD Master
-	}
-	DLarray:=[]
-	if A_Is64bitOS
-	{
-		if !FileExist(A_ScriptDir "\Plugins\Installers\DotnetCoreRuntimex64.exe")
+		msgbox,16,DotNet Core Required!,Material File Extraction and Detection feature of this tool requires Dotnet Core installed on your computer. Please install the corresponding installers after pressing "OK" to maximize the full potential of DOTA2 MOD Master.
+		IfNotExist,%A_ScriptDir%\Plugins\Installers\
 		{
-			DownloadFileURL([["https://download.visualstudio.microsoft.com/download/pr/a803822b-178b-4d21-bb7c-aaa1d209c341/e77c5ca1d0ea9963346655e2ec2733f2/dotnet-runtime-2.2.7-win-x64.exe",A_Temp "\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe","DotNet Core Runtime"]],3)
-			ifexist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe
-				FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex64.exe,1
+			FileCreateDir,%A_ScriptDir%\Plugins\Installers
 		}
-		runwait,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex64.exe,,UseErrorLevel
-	}
-	else
-	{
-		if !FileExist(A_ScriptDir "\Plugins\Installers\DotnetCoreRuntimex86.exe")
+		IfNotExist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\
 		{
-			DownloadFileURL([["https://download.visualstudio.microsoft.com/download/pr/2b9e6f98-53ba-412d-8a4e-cb4092d8a293/602c597f378f5c5d527e91e1fa1ebb55/dotnet-runtime-2.2.7-win-x86.exe",A_Temp "\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe","DotNet Core Runtime"]],3)
-			ifexist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe
-				FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex86.exe,1
+			FileCreateDir,%A_Temp%\AJOM Innovations\DOTA2 MOD Master
 		}
-		runwait,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex86.exe,,UseErrorLevel
+		DLarray:=[]
+		if A_Is64bitOS
+		{
+			if !FileExist(A_ScriptDir "\Plugins\Installers\DotnetCoreRuntimex64.exe")
+			{
+				DownloadFileURL([["https://download.visualstudio.microsoft.com/download/pr/a803822b-178b-4d21-bb7c-aaa1d209c341/e77c5ca1d0ea9963346655e2ec2733f2/dotnet-runtime-2.2.7-win-x64.exe",A_Temp "\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe","DotNet Core Runtime"]],3)
+				ifexist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe
+					FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex64.exe,1
+			}
+			runwait,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex64.exe,,UseErrorLevel
+			if (ErrorLevel="ERROR") or FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") or FileExist(A_ProgramFiles "\dotnet\dotnet.exe")
+				goto,dotnetdetection
+		}
+		else
+		{
+			if !FileExist(A_ScriptDir "\Plugins\Installers\DotnetCoreRuntimex86.exe")
+			{
+				DownloadFileURL([["https://download.visualstudio.microsoft.com/download/pr/2b9e6f98-53ba-412d-8a4e-cb4092d8a293/602c597f378f5c5d527e91e1fa1ebb55/dotnet-runtime-2.2.7-win-x86.exe",A_Temp "\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe","DotNet Core Runtime"]],3)
+				ifexist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe
+					FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex86.exe,1
+			}
+			runwait,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex86.exe,,UseErrorLevel
+			if (ErrorLevel="ERROR") or FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") or FileExist(A_ProgramFiles "\dotnet\dotnet.exe")
+				goto,dotnetdetection
+		}
+		VarSetCapacity(DLarray,0)
+		MsgBox,Installation Complete,Please Re-Run DOTA2 MOD Master.,3
+		exitapp
 	}
-	VarSetCapacity(DLarray,0)
-	goto,dotnetdetection
 }
 
 ;;optimize speed of script
