@@ -36,6 +36,18 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 
 
 ~~~~~~~~~~~CHANGELOG~~~~~~~~~~~
+v2.5.0
+*SPEEDY VERSION. Advisable to migrate on this version.
+*Database Version 1.5 changed the previous v1 database version. This Database version is faster than the previous database version... But still Version 2(experimental) is still unbeatable when it comes to saving/preloading speed.
+*Added "Maximum Threads" at "Advanced Section". This will limit how many simultaneous threads that can be used by DOTA2 MOD Master to extract model,particle effect files.
+*Some bug fixes.
+
+v2.4.0
+*Integrated Decompiler Technology! This allows broad analization on model(vmdl_c) files, I am currently under reverse engineering how the decompiler interacts with the models.
+*DOTA2 MOD Master can now detect Material files(.vmat_c). Say goodbye to "bad item coloring when playing online".
+*Reworked the Resizing Logic... "Anchor" changed into "AutoXYWH".
+*Some Bug fixes...
+~~~~Author Comment: "Decompile > Modify parameters > Compile" Scheme for VMDL_C,VTEX_C,VANIM_C COMING SOON.... Long working progress....~~~~~
 
 v2.3.3
 *Added Rarity Color Coding.
