@@ -36,6 +36,10 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 
 
 ~~~~~~~~~~~CHANGELOG~~~~~~~~~~~
+v2.5.1
+*Fixed a bug where a Command Prompt(cmd) sometimes pops up.
+*Recallibrated "Maximum Threads", last time it wait for all "n" number of threads to close, now it makes sure that only "n" number of threads run always
+
 v2.5.0
 *SPEEDY VERSION. Advisable to migrate on this version.
 *Database Version 1.5 changed the previous v1 database version. This Database version is faster than the previous database version... But still Version 2(experimental) is still unbeatable when it comes to saving/preloading speed.
