@@ -288,15 +288,11 @@ Loop
 	{
 		Break
 	}
-	ipos1:=instr(GlobalArray["activelist.txt"],"""",,ipos)
+	ipos1:=instr(GlobalArray["activelist.txt"],"""",,ipos+1)
 	tmp2:=SubStr(GlobalArray["activelist.txt"],ipos,ipos1-ipos)
 	if tmp2<>
 	{
 		mapherochoice.="|" tmp2
-	}
-	if ErrorLevel=1
-	{
-		Break
 	}
 }
 mapherochoice:=StrReplace(mapherochoice,"npc_dota_hero_")
@@ -1734,7 +1730,7 @@ for intsaver, in param
 		{
 			VarSetCapacity(misccontent,0)
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -1797,7 +1793,7 @@ loop % LV_GetCount()
 			{
 				VarSetCapacity(misccontent,0)
 			}
-			if ErrorLevel=1
+			if ErrorLevel=1 ; hunt this errorlevel
 			{
 				Break
 			}
@@ -1838,7 +1834,7 @@ if LV_GetNext(,"Checked")>0
 		{
 			VarSetCapacity(misccontent,0)
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -1903,7 +1899,7 @@ if LV_GetNext(,"Checked")>0
 		{
 			VarSetCapacity(misccontent,0)
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -2019,7 +2015,7 @@ if peton=1
 					{
 						VarSetCapacity(filecontent,0)
 					}
-					if ErrorLevel=1
+					if ErrorLevel=1 ; hunt this errorlevel
 					{
 						Break
 					}
@@ -2035,7 +2031,7 @@ if peton=1
 		{
 			VarSetCapacity(misccontent,0)
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -2323,7 +2319,7 @@ if InStr(vpktmp,finder)
 				check%A_Index%=1
 			}
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -2393,7 +2389,7 @@ else
 			{
 				index:=index+1
 			}
-			if ErrorLevel=1
+			if ErrorLevel=1 ; hunt this errorlevel
 			{
 				Break
 			}
@@ -2660,7 +2656,7 @@ Loop
 		LV_Add(,hitemname,hitemslot,hitemrarity,hitemid)
 		GuiControl,Text,searchnofound,Preloading %hitemname%
 	}
-	if ErrorLevel=1
+	if ErrorLevel=1 ; hunt this errorlevel
 	{
 		;if fastmisc=1
 		;{
@@ -2728,7 +2724,7 @@ Loop
 		LV_Add(,hitemname,hitemrarity,hitemid,hherouser)
 		GuiControl,Text,searchnofound,Preloading %hitemname%
 	}
-	if ErrorLevel=1
+	if ErrorLevel=1 ; hunt this errorlevel
 	{
 		;if fastmisc=1
 		;{
@@ -2869,7 +2865,7 @@ for intsaver, in param
 			LV_Add(,hitemname,hitemrarity,hitemid)
 			GuiControl,Text,searchnofound,Preloading %subject%: %hitemname%
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			;if fastmisc=1
 			;{
@@ -2944,7 +2940,7 @@ for intsaver, in param
 			LV_Add(,hitemname,hitemrarity,hitemid,stylescount,"0")
 			GuiControl,Text,searchnofound,Preloading %subject%: %hitemname%
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			;if fastmisc=1
 			;{
@@ -3409,13 +3405,13 @@ Loop
 					StringReplace,masterfilecontent,masterfilecontent,%comparedto%,%comparedfrom%,1
 					Break
 				}
-				If ErrorLevel=1
+				If ErrorLevel=1 ; hunt this errorlevel
 				{
 					Break
 				}
 			}
 		}
-		If ErrorLevel=1
+		If ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -3677,7 +3673,7 @@ reloadmisc(invfile) {
 			{
 				Break
 			}
-			If ErrorLevel=1
+			If ErrorLevel=1 ; hunt this errorlevel
 			{
 				Break
 			}
@@ -3791,7 +3787,7 @@ reloadmisc(invfile) {
 			{
 				Break
 			}
-			If ErrorLevel=1
+			If ErrorLevel=1 ; hunt this errorlevel
 			{
 				Break
 			}
@@ -4402,7 +4398,7 @@ Loop % LV_GetCount()
 				Break
 			}
 		}
-		If ErrorLevel=1
+		If ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -6606,7 +6602,7 @@ newiddetector(tmpstring,newfilestring:="") {
 			tmpbar:=iddetector(filecontent) ;filecontent := extracted content from items_game.txt
 			Break
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -6692,7 +6688,7 @@ miscdetector(searchedfilter,tmpfind,tmpstring,newfilestring:="") {
 		{
 			Break
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			Break
 		}
@@ -6734,7 +6730,7 @@ itemdetector(tmpstring,newfilestring:="") {
 		;	pos2 := InStr(filestring,"`r`n		}",,pos)											-	scans for the last pattern(ending barrier)
 		;	filecontent := SubStr(filestring,pos,pos2-pos)											-	extracts the specified content between two barriers
 		pos := InStr(filestring,"		}`r`n		""" tmpstring """`r`n		{",,,A_Index),pos2 := InStr(filestring,"`r`n		}",,pos),filecontent := SubStr(filestring,pos,pos2-pos)
-		if ((InStr(filecontent,"prefab")>0) and (InStr(filecontent,"used_by_heroes")>0)) or (ErrorLevel=1)
+		if ((InStr(filecontent,"prefab")>0) and (InStr(filecontent,"used_by_heroes")>0)) or (ErrorLevel=1) ; hunt this errorlevel
 		{
 			Break
 		}
@@ -7355,7 +7351,7 @@ if searchbar<>
 		{
 			VarSetCapacity(filecontent,0)
 		}
-		if ErrorLevel=1
+		if ErrorLevel=1 ; hunt this errorlevel
 		{
 			GuiControl,+cRed, searchnofound
 			if searchbarsaver=%searchbar%
@@ -10357,7 +10353,7 @@ Loop
 	{
 		herolist.push(tmp2) ; stores the npc_dota_hero_*** to the last unused element(rightmost element)
 	}
-	if ErrorLevel=1
+	if ErrorLevel=1 ; hunt this errorlevel
 	{
 		Break
 	}
