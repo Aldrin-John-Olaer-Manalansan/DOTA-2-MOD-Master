@@ -31,63 +31,6 @@ if not (A_IsAdmin or RegExMatch(DllCall("GetCommandLine", "str"), " /restart(?!\
 }
 ;
 
-dotnetdetection:
-if !FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") and !FileExist(A_ProgramFiles "\dotnet\dotnet.exe")
-{
-	Run,%A_ComSpec%,,Hide UseErrorLevel,cPID
-	DetectHiddenWindows, On
-	WinWait,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
-	WinHide,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
-	DllCall("kernel32\AttachConsole", "UInt",cPID)
-	exec := (comobjcreate("wscript.shell").exec(a_comspec " /c dotnet --info&&echo 1"))
-	WinHide,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
-	stdout := exec.stdout.readall()
-	DllCall("kernel32\FreeConsole")
-	Process, Close, % cPID
-	DetectHiddenWindows, Off
-	VarSetCapacity(exec,0)
-	if !stdout
-	{
-		msgbox,16,DotNet Core Required!,Material File Extraction and Detection feature of this tool requires Dotnet Core installed on your computer. Please install the corresponding installers after pressing "OK" to maximize the full potential of DOTA2 MOD Master.
-		IfNotExist,%A_ScriptDir%\Plugins\Installers\
-		{
-			FileCreateDir,%A_ScriptDir%\Plugins\Installers
-		}
-		IfNotExist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\
-		{
-			FileCreateDir,%A_Temp%\AJOM Innovations\DOTA2 MOD Master
-		}
-		DLarray:=[]
-		if A_Is64bitOS
-		{
-			if !FileExist(A_ScriptDir "\Plugins\Installers\DotnetCoreRuntimex64.exe")
-			{
-				DownloadFileURL([["https://download.visualstudio.microsoft.com/download/pr/a803822b-178b-4d21-bb7c-aaa1d209c341/e77c5ca1d0ea9963346655e2ec2733f2/dotnet-runtime-2.2.7-win-x64.exe",A_Temp "\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe","DotNet Core Runtime"]],3)
-				ifexist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe
-					FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex64.exe,1
-			}
-			runwait,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex64.exe,,UseErrorLevel
-			if (ErrorLevel="ERROR") or FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") or FileExist(A_ProgramFiles "\dotnet\dotnet.exe")
-				goto,dotnetdetection
-		}
-		else
-		{
-			if !FileExist(A_ScriptDir "\Plugins\Installers\DotnetCoreRuntimex86.exe")
-			{
-				DownloadFileURL([["https://download.visualstudio.microsoft.com/download/pr/2b9e6f98-53ba-412d-8a4e-cb4092d8a293/602c597f378f5c5d527e91e1fa1ebb55/dotnet-runtime-2.2.7-win-x86.exe",A_Temp "\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe","DotNet Core Runtime"]],3)
-				ifexist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe
-					FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex86.exe,1
-			}
-			runwait,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex86.exe,,UseErrorLevel
-			if (ErrorLevel="ERROR") or FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") or FileExist(A_ProgramFiles "\dotnet\dotnet.exe")
-				goto,dotnetdetection
-		}
-		VarSetCapacity(DLarray,0)
-		MsgBox,Installation Complete,Please Re-Run DOTA2 MOD Master.,3
-		exitapp
-	}
-}
-
 ;;optimize speed of script
 #NoEnv
 ;#MaxHotkeysPerInterval 99000000
@@ -99,7 +42,7 @@ if !FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program File
 #MaxThreadsPerHotkey 1
 SetBatchLines -1
 SetControlDelay,-1
-SetWinDelay, -1
+;SetWinDelay, -1
 ;SetWinDelay,0
 ListLines Off
 Process, Priority, , A
@@ -109,14 +52,91 @@ SetDefaultMouseSpeed, 0
 SendMode Input
 AutoTrim,Off
 #MaxThreadsBuffer On
+CoordMode,ToolTip,Screen
+;if A_Is64bitOS
+;	SetRegView 64
 ;SetFormat,IntegerFast,%A_FormatInteger%
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
+version=2.5.2
+if disableautoupdate<>1
+	versionchecker(version)
+
+ToolTip,DOTA2 MOD Master:`nVerifying DotNet Functionality,0,0
+shellcmdrunning:=!FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") and !FileExist(A_ProgramFiles "\dotnet\dotnet.exe") ; initial detection that we are going to run a shell cmd
+if shellcmdrunning
+{
+	DetectHiddenWindows, On
+	Run,%A_ComSpec%,,Hide UseErrorLevel,cPID
+	WinWait,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+	;WinHide,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+	DllCall("kernel32\AttachConsole", "UInt",cPID)
+	cshell:=comobjcreate("wscript.shell")
+}
+dotnetdetection:
+global globaldotnetdir
+dotnetfullpath=%A_ProgramFiles%\dotnet\dotnet.exe
+if !FileExist(dotnetfullpath) ; stage 1 - if programfiles dotnet is missing
+{
+	dotnetfullpath:=substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe"
+	if !FileExist(dotnetfullpath) ; stage 2 - if programfile substring dotnet is missing
+	{
+		RegExMatch(cshell.exec("where dotnet").stdout.readall(),"m)^.*",dotnetfullpath)
+		if !FileExist(dotnetfullpath) ; stage 3 - if "where dotnet" cmd command cannot really detect dotnet
+		{
+			msgbox,16,DotNet Core Required!,Material File Extraction and Detection feature of this tool requires Dotnet Core installed on your computer. Please install the corresponding installers after pressing "OK" to maximize the full potential of DOTA2 MOD Master.
+			IfNotExist,%A_ScriptDir%\Plugins\Installers\
+			{
+				FileCreateDir,%A_ScriptDir%\Plugins\Installers
+			}
+			IfNotExist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\
+			{
+				FileCreateDir,%A_Temp%\AJOM Innovations\DOTA2 MOD Master
+			}
+			DLarray:=[]
+			if A_Is64bitOS
+			{
+				if !FileExist(A_ScriptDir "\Plugins\Installers\DotnetCoreRuntimex64.exe")
+				{
+					DownloadFileURL([["https://download.visualstudio.microsoft.com/download/pr/a803822b-178b-4d21-bb7c-aaa1d209c341/e77c5ca1d0ea9963346655e2ec2733f2/dotnet-runtime-2.2.7-win-x64.exe",A_Temp "\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe","DotNet Core Runtime"]],3)
+					ifexist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe
+						FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex64.exe,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex64.exe,1
+				}
+				runwait,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex64.exe,,UseErrorLevel
+				if (ErrorLevel="ERROR") or FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") or FileExist(A_ProgramFiles "\dotnet\dotnet.exe")
+					goto,dotnetdetection
+			}
+			else
+			{
+				if !FileExist(A_ScriptDir "\Plugins\Installers\DotnetCoreRuntimex86.exe")
+				{
+					DownloadFileURL([["https://download.visualstudio.microsoft.com/download/pr/2b9e6f98-53ba-412d-8a4e-cb4092d8a293/602c597f378f5c5d527e91e1fa1ebb55/dotnet-runtime-2.2.7-win-x86.exe",A_Temp "\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe","DotNet Core Runtime"]],3)
+					ifexist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe
+						FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\DotnetCoreRuntimex86.exe,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex86.exe,1
+				}
+				runwait,%A_ScriptDir%\Plugins\Installers\DotnetCoreRuntimex86.exe,,UseErrorLevel
+				if (ErrorLevel="ERROR") or FileExist(substr(A_ProgramFiles,1,InStr(A_ProgramFiles,"\",0)) "Program Files\dotnet\dotnet.exe") or FileExist(A_ProgramFiles "\dotnet\dotnet.exe")
+					goto,dotnetdetection
+			}
+			VarSetCapacity(DLarray,0)
+			MsgBox,Installation Complete,Please Re-Run DOTA2 MOD Master.,3
+			exitapp
+		}
+	}
+}
+if !FileExist(dotnetfullpath) ; if dotnet really cannot be found
+	dotnetfullpath=dotnet
+if shellcmdrunning ; if a shell cmd is running
+{
+	VarSetCapacity(cshell,0)
+	DllCall("kernel32\FreeConsole")
+	Process, Close, % cPID
+	DetectHiddenWindows, Off
+}
+
 Menu, Tray, Add, &Exit, k_MenuExit
 Menu, Tray, NoStandard
-
-version=2.5.1
 
 global databasemessage="~ ~ ~ ~ MAIN DATABASE Version 2 : Don't Edit anything here to avoid DATABASE CORRUPTION!!! ~ ~ ~ ~`n`n"
 global defaultshoutout="(Always Relaunch this Tool and Reinject all item sets everytime DOTA2 has an Update with Newly Arrived Items!)"
@@ -130,7 +150,7 @@ else
 	variablehllib=%A_ScriptDir%\Plugins\hllib246\bin\x86\HLExtract.exe
 }
 
-RegRead, SteamPath, HKEY_CURRENT_USER, Software\Valve\Steam, SteamPath
+RegRead,SteamPath,HKEY_CURRENT_USER,Software\Valve\Steam,SteamPath
 StringReplace,SteamPath,SteamPath,/,\,1
 IfExist,%A_ScriptDir%\Settings.aldrin_dota2mod
 {
@@ -154,6 +174,7 @@ else
 	mapdota2dir=%SteamPath%\steamapps\common\dota 2 beta
 	dota2dir=%SteamPath%\steamapps\common\dota 2 beta
 }
+dota2dir:=StrReplace(dota2dir,"/","\")
 GoSub,default_settings
 param=%A_ScriptDir%\Library\,%A_ScriptDir%\Generated MOD\,%A_ScriptDir%\External Files\
 loop,parse,param,`,
@@ -166,6 +187,7 @@ loop,parse,param,`,
 FileCopyDir,%A_ScriptDir%\Plugins\Sound,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Sound,1
 
 ;generate library files
+ToolTip,DOTA2 MOD Master:`nExtracting Library Files,0,0
 param=root\scripts\items\items_game.txt,root\scripts\npc\activelist.txt,root\scripts\npc\portraits.txt
 lib:=[]
 global GlobalArray:=[]
@@ -174,21 +196,24 @@ loop,parse,param,`,
 	
 	loop
 	{
-		run,"%A_ComSpec%" /c ""%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%A_ScriptDir%\Library" -e "%A_LoopField%"",,Hide UseErrorLevel,tmpr
+		run,"%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%A_ScriptDir%\Library" -e "%A_LoopField%",,Hide UseErrorLevel,tmpr
 		if ErrorLevel!=ERROR
 			break
 	}
 	lib[A_Index]:=tmpr
 }
 DetectHiddenWindows,On
-WinWait,% "ahk_pid " lib[lib.Count()] " ahk_exe cmd.exe ahk_class ConsoleWindowClass",,3 ; wait the cmd max of 3 seconds
+WinWait,% "ahk_pid " lib[lib.Count()] " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass",,3 ; wait the cmd max of 3 seconds
 for index,cPID in lib
 {
-	WinWaitClose,% "ahk_pid " cPID " ahk_exe cmd.exe ahk_class ConsoleWindowClass",,60 ;wait for max of 1 minute
+	if WinExist("ahk_pid " cPID " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass")
+		WinWaitClose,% "ahk_pid " cPID " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass",,60 ;wait for max of 1 minute
 }
+DetectHiddenWindows,Off
 VarSetCapacity(lib,0)
 loop,parse,param,`,
 {
+	ToolTip,DOTA2 MOD Master:`nReading %A_LoopField%,0,0
 	tmpr:=SubStr(A_LoopField,InStr(A_LoopField,"\",,0)+1)
 	FileRead,tempo,%A_ScriptDir%\Library\%tmpr%
 	GlobalArray[tmpr]:=tempo
@@ -199,7 +224,6 @@ fileread,tempo,%dota2dir%\game\dota\scripts\npc\npc_units.txt
 GlobalArray["npc_units.txt"]:=tempo
 ;
 
-DetectHiddenWindows,Off
 IfNotExist,%A_ScriptDir%\Library\items_game.txt
 {
 	msgbox,16,ERROR!!! "items_game.txt" is MISSING!,It looks like:`n`n"%A_ScriptDir%\Library\items_game.txt"`n`nIs missing. But since this tool already supports auto-extraction of "items_game.txt"`, please restart this application. Before using the "inject" feature of this tool`, make sure to add the original "items_game.txt" inside "%A_ScriptDir%\Library" Folder OR ELSE THE ID INJECTION WILL NOT WORK!`n`nIf you dont have an Idea where to find the "items_game.txt"`,here is a few steps:`n1)Download "GCFScape" application. Alternatively if GCFScape produces "ERROR" when opening "Pak01_dir.vpk"`, Download "Valve's Resource Viewer" application instead.`n2)Use "GCFScape" or "Valve's Resource Viewer" to open "Pak01_dir.vpk"(commonly it is located at "Steam\steamapps\common\dota 2 beta\game\dota\").`n3)Hit "CTRL+F"(or press "find" elsewhere) and search for "items_game.txt" without punctuation marks.`n4)If successfully found`,Right-Click the file(items_game.txt) and extract it to "%A_ScriptDir%\Library" folder.
@@ -214,9 +238,6 @@ Loop,parse,param,`,
 {
 	IniRead,%A_LoopField%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,%A_LoopField%
 }
-
-if disableautoupdate<>1
-	versionchecker(version)
 
 if version>%usedversion%
 {
@@ -280,6 +301,7 @@ GivenPath= ; forget the dragged file location to avoid rerunning the window gui 
 ;;;;
 
 ; generate hero list
+ToolTip,DOTA2 MOD Master:`nDetecting all Heroes,0,0
 VarSetCapacity(mapherochoice,0)
 Loop
 {
@@ -321,6 +343,7 @@ GlobalArray["herolist"]:=mapherochoice
 mapherochoice=None%mapherochoice%
 ;
 
+ToolTip,DOTA2 MOD Master:`nBuilding GUI Window,0,0
 IniRead,RegisteredDirectory,%mapdatadirview%,Edits,RegisteredDirectory
 IniRead,hRegisteredDirectory,%maphdatadirview%,Edits,hRegisteredDirectory
 checkparam=mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,mapgiloc,mapdota2dir
@@ -897,6 +920,7 @@ OnMessage("0x4E", "LVA_OnNotify")
 
 Gui, MainGUI:Submit, NoHide
 gosub, SelectOuterTab
+Tooltip
 Gui,MainGUI:Show, h500 w550,AJOM's Dota 2 MOD Master
 Gui, MainGUI: +hwndMainGUIHWND
 gosub,activatemiscgui
@@ -1380,55 +1404,29 @@ DetectHiddenWindows,%tempo%
 GuiControl,Text,searchnofound,Shutnik Method: Executing Batch File... It will take more time if there are many cosmetic items injected!
 loop
 {
-	vpkdeletefailed=0
-	VarSetCapacity(writer,0)
-	IfNotExist,%A_ScriptDir%\Generated MOD\
+	if FileExist(A_ScriptDir "\Generated MOD\")
+		FileCreateDir,%A_ScriptDir%\Generated MOD
+	
+	if FileExist(modloc "\Aldrin_Mods\")
+		FileCreateDir,%modloc%\Aldrin_Mods
+	
+	runwait,vpk.exe pak01_dir,%A_ScriptDir%\Plugins\VPKCreator,Hide UseErrorLevel
+	if (ErrorLevel<>"ERROR") and (A_LastError=0) and FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir.vpk") ;;  if the run is successful
 	{
-		writer=%writer%md "%A_ScriptDir%\Generated MOD"&
-	}
-	IfNotExist,%modloc%\Aldrin_Mods\
-	{
-		writer=%writer%md "%modloc%\Aldrin_Mods"&
-	}
-	else IfExist,%modloc%\Aldrin_Mods\pak01_dir.vpk
-	{
-		FileDelete,%modloc%\Aldrin_Mods\pak01_dir.vpk
-		if ErrorLevel>0 ;; if the deletion was unsuccessful, place the vpk at the generated mods folder
+		FileMove,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir.vpk,%modloc%\Aldrin_Mods\,1
+		if ErrorLevel ;; if the condition fails, the vpk file will be found at the generated mods folder
 		{
-			writer=%writer%"%A_ScriptDir%\Plugins\VPKCreator\vpk.exe" "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir"`r`nmove "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir.vpk" "%A_ScriptDir%\Generated MOD\"
-			vpkdeletefailed=1
 			if soundon=1
 			{
 				SoundPlay,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Sound\vpkdeletefailed.wav
 			}
+			FileMove,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir.vpk,%A_ScriptDir%\Generated MOD\,1
+			Run, %A_ScriptDir%\Generated MOD\,,UseErrorLevel
+			msgbox,16,ERROR!,Task:`nFile Move`n`nFilePath:`n%modloc%\Aldrin_Mods\pak01_dir.vpk`n`nStatus:`nFAILED`n`nResult:`n-pak01_dir.vpk was moved at"%A_ScriptDir%\Generated MOD\" Folder.`n`nPossible Inconvenience:`n- DOTA2 might be Running`n- pak01_dir.vpk is currently in used(opened) by other applications.`n`nFix:`n1) Manually delete the pak01_dir.vpk found at the "FilePath".`n2) Move the generated pak01_dir.vpk found at "%A_ScriptDir%\Generated MOD\" Folder directly to "FilePath".
 		}
-		else ;; else move the vpk at aldrin_mods folder
-		{
-			writer=%writer%"%A_ScriptDir%\Plugins\VPKCreator\vpk.exe" "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir"`r`nmove "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir.vpk" "%modloc%\Aldrin_Mods\"
-		}
-	}
-	else
-	{
-		writer=%writer%"%A_ScriptDir%\Plugins\VPKCreator\vpk.exe" "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir"`r`nmove "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir.vpk" "%modloc%\Aldrin_Mods\"
-	}
-	runwait,"%A_ComSpec%" /c "%writer%",,Hide UseErrorLevel
-	if (ErrorLevel<>"ERROR") and (A_LastError=0) ;;  if the run is successful
 		break ;; terminate the loop
+	}
 	;; if the there was an error, rerun the batch file
-}
-
-if vpkdeletefailed=1 ;; if unsuccessful vpk deletion lately, try the following
-{
-	FileDelete,%modloc%\Aldrin_Mods\pak01_dir.vpk
-	if ErrorLevel=0 ;; if the deletion was successful this time, place the vpk at aldrin_mods folder
-	{
-		FileMove,%A_ScriptDir%\Generated MOD\pak01_dir.vpk,%modloc%\Aldrin_Mods\,1
-	}
-	else ;; if the condition fails, the vpk file will be found at the generated mods folder
-	{
-		Run, %A_ScriptDir%\Generated MOD\,,UseErrorLevel
-		msgbox,16,ERROR!,Task:`nFile Deletion`n`nFilePath:`n%modloc%\Aldrin_Mods\pak01_dir.vpk`n`nStatus:`nFAILED`n`nResult:`n-pak01_dir.vpk was moved at"%A_ScriptDir%\Generated MOD\" Folder.`n`nPossible Inconvenience:`n- DOTA2 might be Running`n- pak01_dir.vpk is currently in used(opened) by other applications.`n`nFix:`n1) Manually delete the pak01_dir.vpk found at the "FilePath".`n2) Move the generated pak01_dir.vpk found at "%A_ScriptDir%\Generated MOD\" Folder directly to "FilePath".
-	}
 }
 
 GuiControl,+cDefault,searchnofound
@@ -4203,6 +4201,15 @@ ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 	GuiControl,MainGUI:Text,searchnofound,Deleting pak01_dir Folder.
 	FileRemoveDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir,1
 }
+IfNotExist,%A_ScriptDir%\Generated MOD\
+{
+	FileCreateDir, %A_ScriptDir%\Generated MOD
+}
+else ifexist,%A_ScriptDir%\Generated MOD\pak01_dir\
+{
+	GuiControl,Text,searchnofound,Deleting pak01_dir Folder at Generated MOD Folder
+	FileRemoveDir,%A_ScriptDir%\Generated MOD\pak01_dir,1
+}
 FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 filestring2:=masterfilecontent:=GlobalArray["items_game.txt"]
 portstring:=GlobalArray["portraits.txt"]
@@ -5219,6 +5226,15 @@ ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 	GuiControl,MainGUI:Text,searchnofound,Deleting pak01_dir Folder.
 	FileRemoveDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir,1
 }
+IfNotExist,%A_ScriptDir%\Generated MOD\
+{
+	FileCreateDir, %A_ScriptDir%\Generated MOD
+}
+else ifexist,%A_ScriptDir%\Generated MOD\pak01_dir\
+{
+	GuiControl,Text,searchnofound,Deleting pak01_dir Folder at Generated MOD Folder
+	FileRemoveDir,%A_ScriptDir%\Generated MOD\pak01_dir,1
+}
 FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 adder:=1000/LV_GetCount()
 if soundon=1
@@ -5894,9 +5910,50 @@ getmemoryspecs(key:="Capacity") ; by aldrinjohnom
 	}
 }
 
-Format_Msec(ms)
+Format_Msec(ms,TimeFormat:="")
 {
-    VarSetCapacity(t,256),DllCall("GetDurationFormat","uint",2048,"uint",0,"ptr",0,"int64",ms*10000,"wstr","d' Days 'h' Hours 'mm' Minutes 'ss' Seconds","wstr",t,"int",256)
+	VarSetCapacity(t,256),DllCall("GetDurationFormat","uint",2048,"uint",0,"ptr",0,"int64",ms*10000,"wstr","d' Days 'h' Hours 'm' Minutes 's' Seconds","wstr",t,"int",256)
+	
+	if (TimeFormat!="")
+	{
+		pos1:=InStr(t," Days ")+6
+		Days:=SubStr(t,1,pos1-7)
+		pos2:=InStr(t," Hours ")+7
+		Hours:=SubStr(t,pos1,pos2-7-pos1)
+		pos1:=InStr(t," Minutes ")+9
+		Minutes:=SubStr(t,pos2,pos1-9-pos2)
+		Seconds:=SubStr(t,pos1,InStr(t," Seconds")-pos1)
+		VarSetCapacity(t,0)
+		
+		if (TimeFormat="Array") ; isolate day,hour,minute,second
+		{
+			t:=[]
+			t["Day"]:=Days
+			t["Hour"]:=Hours
+			t["Minute"]:=Minutes
+			t["Second"]:=Seconds
+		}
+		else ; custom time formatting
+		{
+			if !InStr(TimeFormat,"Day")
+				Hours+=24*Days
+			else if (Days!=0)
+				t.=Days " Day" (Days>1 ? "s" : "") A_Space
+			if !InStr(TimeFormat,"Hour")
+				Minutes+=60*Hours
+			else if (Hours!=0)
+				t.=Hours " Hour" (Hours>1 ? "s" : "") A_Space
+			
+			if !InStr(TimeFormat,"Minute")
+				Seconds+=60*Minutes
+			else if (Minutes!=0)
+				t.=Minutes " Minute" (Minutes>1 ? "s" : "") A_Space
+				
+			if InStr(TimeFormat,"Second") and (Seconds!=0)
+				t.=Seconds " Second" (Seconds>1 ? "s" : "") A_Space
+		}
+	}
+	
     return t
 }
 
@@ -6009,7 +6066,7 @@ SetWorkingDir," A_ScriptDir "
 
 ;Attach
 DetectHiddenWindows, on
-Run, %A_ComSpec% /k ,,Hide UseErrorLevel, cPID
+Run,%A_ComSpec%,,Hide UseErrorLevel, cPID
 WinWait,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass,, 10
 DllCall(""AttachConsole"",""uint"",cPID)
 hCon:=DllCall(""CreateFile"",""str"",""CONOUT$"",""uint"",0xC0000000,""uint"",7,""uint"",0,""uint"",3,""uint"",0,""uint"",0)
@@ -6087,7 +6144,7 @@ loop
 		
 		;launch cmd
 		objShell := ComObjCreate(""WScript.Shell"")
-		objExec := objShell.Exec(""dotnet """""" A_WorkingDir ""\Plugins\Decompiler\Decompiler.dll"""" --block DATA --input """""" valvefile """""""")
+		objExec := objShell.Exec(""""""" dotnetfullpath """"" """""" A_WorkingDir ""\Plugins\Decompiler\Decompiler.dll"""" --block DATA --input """""" valvefile """""""")
 		strStdOut:=""""
 		while, !objExec.StdOut.AtEndOfStream
 			stdout := objExec.StdOut.ReadAll()
@@ -6128,6 +6185,7 @@ loop
 		}
 		repeater:
 		pid:=[]
+		DetectHiddenWindows,On
 		for index, in defaultmaterials
 		{
 			if !FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"")
@@ -6138,22 +6196,15 @@ loop
 			if debugmode
 				msgbox %command%
 			run,%command%,,Hide UseErrorLevel,material
-			DetectHiddenWindows,On
-			WinHide,ahk_pid %material% ahk_exe cmd.exe ahk_class ConsoleWindowClass
-			DetectHiddenWindows,Off
 			pid[index]:=material
 		}
-		DetectHiddenWindows,On
-		WinWait,ahk_pid %material% ahk_exe cmd.exe ahk_class ConsoleWindowClass,,1
+		Process,Wait,%material%,2
 		if debugmode
 			msgbox escape 1
 		for index,material in pid
 		{
-			WinHide,ahk_pid %material% ahk_exe cmd.exe ahk_class ConsoleWindowClass
-		}
-		for index,material in pid
-		{
-			WinWaitClose, ahk_pid %material% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+			Process,WaitClose,%material%,10
+			
 			if FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[A_Index,2])
 				FileMove,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[A_Index,2],% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[A_Index,2],1
 		}
@@ -7006,6 +7057,9 @@ Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,This Tool gives a bright
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.5.2
+*Improved Dotnet Detection
+
 v2.5.1
 *Fixed a bug where a Command Prompt(cmd) sometimes pops up.
 *Recallibrated "Maximum Threads", last time it wait for all "n" number of threads to close, now it makes sure that only "n" number of threads run always
@@ -9756,6 +9810,7 @@ versionchecker(version)
 {
 	if A_IsCompiled
 	{
+		ToolTip,DOTA2 MOD Master:`nChecking for New Version,0,0
 		UrlDownloadToFile,https://raw.githubusercontent.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/master/Version.ini,%A_ScriptDir%\Plugins\Unzip\Version.ini
 		if ErrorLevel
 			return
@@ -9776,6 +9831,7 @@ Tip: You can Disable Automatic-Updates at "Advanced" Section.
 }
 
 updateversion:
+ToolTip,DOTA2 MOD Master:`nDownloading New Version's Files,0,0
 if DownloadFileURL([["https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/archive/master.zip",A_ScriptDir "\Plugins\Unzip\master.zip","DOTA2 MOD Master v" webversion]],3)[1]
 	return
 updatewassuccessful=1
@@ -9804,7 +9860,7 @@ del /f /q "%A_ScriptDir%\Plugins\Unzip\master.zip"
 "%A_ScriptFullPath%"
 )
 temp:=StrReplace(temp,"\","/")
-run, %comspec% /c %temp%,%A_ScriptDir%\Plugins\Unzip,Hide UseErrorLevel
+run,%temp%,%A_ScriptDir%\Plugins\Unzip,Hide UseErrorLevel
 return
 ;~~~~~end of AutoUpdate~~~~~
 
@@ -9943,7 +9999,7 @@ DownloadFileURL(UrlToFile,attempcount:=1, Overwrite := True, UseProgressBar := T
       }
 	  
     ;Create the progressbar and the timer
-      Progress,% "A M1 H80 W" A_ScreenWidth/2,,Downloading...,Fetching`,Please Wait.
+      Progress,% "A M1 H120 W" A_ScreenWidth/2,,Downloading...,Fetching`,Please Wait.
       SetTimer, __UpdateProgressBar, 500
 	  
 	  for index, in UrlToFile
@@ -9981,7 +10037,7 @@ DownloadFileURL(UrlToFile,attempcount:=1, Overwrite := True, UseProgressBar := T
             CurrentSize := FileOpen(UrlToFile[index,2], "r").Length ;FileGetSize wouldn't return reliable results
             CurrentSizeTick := A_TickCount
           ;Calculate the downloadspeed
-            Speed := Round((CurrentSize/1024-LastSize/1024)/((CurrentSizeTick-LastSizeTick)/1000)) . " Kb/s"
+            Speed := Round(((CurrentSize-LastSize)/1024)/((CurrentSizeTick-LastSizeTick)/1000))
           ;Save the current filesize and tick for the next time
             LastSizeTick := CurrentSizeTick
             LastSize := FileOpen(UrlToFile[index,2], "r").Length
@@ -9993,11 +10049,22 @@ DownloadFileURL(UrlToFile,attempcount:=1, Overwrite := True, UseProgressBar := T
 			}
             else
 			{
+			;Calculate the remaining time
+				MSEC_Time:=Round((FinalSize-CurrentSize-FinishedSize)/Speed)
+				timesketch:=Format_Msec(MSEC_Time,"Array")
+				FinishedDate+=timesketch["Day"],D
+				FinishedDate+=timesketch["Hour"],H
+				FinishedDate+=timesketch["Minute"],M
+				FinishedDate+=timesketch["Second"],S
+				FormatTime,FinishedDate,%FinishedDate%
+				FinishedDate:="Time Remaining - " Format_Msec(MSEC_Time,"Day Hour Minute Second") "`nFinish Date - " FinishedDate
+				
 				PercentDone := Round((CurrentSize+FinishedSize)/FinalSize*100)
 				PercentDonetext=%PercentDone%`%
 			}
           ;Update the ProgressBar
-            Progress, %PercentDone%, %PercentDonetext% Done, Downloading...  (%Speed%),% "Downloading " UrlToFile[index,3] " (" PercentDonetext ")"
+			
+            Progress,%PercentDone%,Downloading at %Speed% KB/s`n%FinishedDate%,%PercentDonetext% Done,% "Downloading " UrlToFile[index,3] " (" PercentDonetext ")"
       Return haserror
 }
 
