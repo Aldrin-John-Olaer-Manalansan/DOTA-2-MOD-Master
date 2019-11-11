@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.5.2
+version=2.5.3
 if disableautoupdate<>1
 	versionchecker(version)
 
@@ -187,36 +187,52 @@ loop,parse,param,`,
 FileCopyDir,%A_ScriptDir%\Plugins\Sound,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Sound,1
 
 ;generate library files
+generatelibraryfiles:
 ToolTip,DOTA2 MOD Master:`nExtracting Library Files,0,0
 param=root\scripts\items\items_game.txt,root\scripts\npc\activelist.txt,root\scripts\npc\portraits.txt
-lib:=[]
+pidlist:=[]
 global GlobalArray:=[]
 loop,parse,param,`,
 {
-	
 	loop
 	{
 		run,"%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%A_ScriptDir%\Library" -e "%A_LoopField%",,Hide UseErrorLevel,tmpr
 		if ErrorLevel!=ERROR
 			break
 	}
-	lib[A_Index]:=tmpr
+	pidlist[A_Index]:=tmpr
 }
 DetectHiddenWindows,On
-WinWait,% "ahk_pid " lib[lib.Count()] " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass",,3 ; wait the cmd max of 3 seconds
-for index,cPID in lib
+SetTitleMatchMode,3
+SetTitleMatchMode,Slow
+WinWait,% "ahk_pid " pidlist[pidlist.Count()] " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass" ;,,3 ;wait for max of 3 seconds
+for index,cPID in pidlist
 {
 	if WinExist("ahk_pid " cPID " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass")
-		WinWaitClose,% "ahk_pid " cPID " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass",,60 ;wait for max of 1 minute
+		WinWaitClose,ahk_pid %cPID% ahk_exe HLExtract.exe ahk_class ConsoleWindowClass ;,,60 ;wait for max of 1 minute
 }
 DetectHiddenWindows,Off
-VarSetCapacity(lib,0)
+SetTitleMatchMode,Fast
+VarSetCapacity(pidlist,0)
 loop,parse,param,`,
 {
-	ToolTip,DOTA2 MOD Master:`nReading %A_LoopField%,0,0
 	tmpr:=SubStr(A_LoopField,InStr(A_LoopField,"\",,0)+1)
-	FileRead,tempo,%A_ScriptDir%\Library\%tmpr%
-	GlobalArray[tmpr]:=tempo
+	timeout:=A_TickCount
+	loop
+	{
+		if FileExist(A_ScriptDir "\Library\" tmpr)
+		{
+			ToolTip,DOTA2 MOD Master:`nReading %A_LoopField%,0,0
+			FileRead,tempo,%A_ScriptDir%\Library\%tmpr%
+			GlobalArray[tmpr]:=tempo
+			if (GlobalArray[tmpr]="")
+				continue
+			else break
+		}
+		else if (A_TickCount-timeout=10000) ; wait for max of 10 seconds
+			goto,generatelibraryfiles
+		else sleep 500
+	}
 }
 fileread,tempo,%dota2dir%\game\dota\scripts\npc\npc_heroes.txt
 GlobalArray["npc_heroes.txt"]:=tempo
@@ -224,13 +240,24 @@ fileread,tempo,%dota2dir%\game\dota\scripts\npc\npc_units.txt
 GlobalArray["npc_units.txt"]:=tempo
 ;
 
-IfNotExist,%A_ScriptDir%\Library\items_game.txt
+If !FileExist(A_ScriptDir "\Library\items_game.txt")
 {
 	msgbox,16,ERROR!!! "items_game.txt" is MISSING!,It looks like:`n`n"%A_ScriptDir%\Library\items_game.txt"`n`nIs missing. But since this tool already supports auto-extraction of "items_game.txt"`, please restart this application. Before using the "inject" feature of this tool`, make sure to add the original "items_game.txt" inside "%A_ScriptDir%\Library" Folder OR ELSE THE ID INJECTION WILL NOT WORK!`n`nIf you dont have an Idea where to find the "items_game.txt"`,here is a few steps:`n1)Download "GCFScape" application. Alternatively if GCFScape produces "ERROR" when opening "Pak01_dir.vpk"`, Download "Valve's Resource Viewer" application instead.`n2)Use "GCFScape" or "Valve's Resource Viewer" to open "Pak01_dir.vpk"(commonly it is located at "Steam\steamapps\common\dota 2 beta\game\dota\").`n3)Hit "CTRL+F"(or press "find" elsewhere) and search for "items_game.txt" without punctuation marks.`n4)If successfully found`,Right-Click the file(items_game.txt) and extract it to "%A_ScriptDir%\Library" folder.
 }
-else IfNotExist,%A_ScriptDir%\Library\activelist.txt
+else if (GlobalArray["items_game.txt"]="")
+{
+	FileRead,tempo,%A_ScriptDir%\Library\items_game.txt
+	GlobalArray["items_game.txt"]:=tempo
+}
+
+If !FileExist(A_ScriptDir "\Library\activelist.txt")
 {
 	msgbox,16,ERROR!!! "activelist.txt" is MISSING!,It looks like:`n`n"%A_ScriptDir%\Library\activelist.txt"`n`nIs missing. But since this tool already supports auto-extraction of "activelist.txt"`, please restart this application. Before using the "inject" feature of this tool`, make sure to add the original "activelist.txt" inside "%A_ScriptDir%\Library" Folder OR ELSE THE HERO Recognition for Handy Injection Section WILL NOT WORK!`n`nIf you dont have an Idea where to find the "activelist.txt"`,here is a few steps:`n1)Download "GCFScape" application. Alternatively if GCFScape produces "ERROR" when opening "Pak01_dir.vpk"`, Download "Valve's Resource Viewer" application instead.`n2)Use "GCFScape" or "Valve's Resource Viewer" to open "Pak01_dir.vpk"(commonly it is located at "Steam\steamapps\common\dota 2 beta\game\dota\").`n3)Hit "CTRL+F"(or press "find" elsewhere) and search for "activelist.txt" without punctuation marks.`n4)If successfully found`,Right-Click the file(activelist.txt) and extract it to "%A_ScriptDir%\Library" folder.
+}
+else if (GlobalArray["activelist.txt"]="")
+{
+	FileRead,tempo,%A_ScriptDir%\Library\activelist.txt
+	GlobalArray["activelist.txt"]:=tempo
 }
 
 param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate,cmdmaxinstances
@@ -7057,6 +7084,9 @@ Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,This Tool gives a bright
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.5.3
+*Fixed a Bug that Library files sometimes does not extract. and get fetched.
+
 v2.5.2
 *Improved Dotnet Detection
 
