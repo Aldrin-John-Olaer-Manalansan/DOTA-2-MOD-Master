@@ -1,7 +1,7 @@
 # DEVELOPER: Aldrin John Olaer Manalansan(AJOM)
 
 <div align="center">
-  # About
+  **About**
 </div>
 
 
