@@ -38,6 +38,12 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+v2.5.3
+- Fixed a Bug that Library files sometimes does not extract. and get fetched.
+
+v2.5.2
+- Improved Dotnet Detection
+
 v2.5.1
 - Fixed a bug where a Command Prompt(cmd) sometimes pops up.
 - Recallibrated "Maximum Threads", last time it wait for all "n" number of threads to close, now it makes sure that only "n" number of threads run always
@@ -53,7 +59,7 @@ v2.4.0
 - DOTA2 MOD Master can now detect Material files(.vmat_c). Say goodbye to "bad item coloring when playing online".
 - Reworked the Resizing Logic... "Anchor" changed into "AutoXYWH".
 - Some Bug fixes...
-~~~~Author Comment: "Decompile > Modify parameters > Compile" Scheme for VMDL_C,VTEX_C,VANIM_C COMING SOON.... Long working progress....~~~~~
+> Author Comment: "Decompile > Modify parameters > Compile" Scheme for VMDL_C,VTEX_C,VANIM_C COMING SOON.... Long working progress....
 
 v2.3.3
 - Added Rarity Color Coding.
