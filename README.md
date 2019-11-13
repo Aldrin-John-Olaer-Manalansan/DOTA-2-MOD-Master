@@ -5,10 +5,10 @@
 <div align="center">
 <b>ABOUT</b></div>
 
-	Dota 2 MOD Master is a "code analyzing tool" which targets present "ID" and copies its contents, thus replacing the other target "ID's" contents simultaneously.
-	Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough,this tool is best and can sacrifice less effort on your time.
+*Dota 2 MOD Master is a "**code analyzing tool"** which targets present "ID" and copies its contents, thus replacing the other target "ID's" contents simultaneously.
+Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough,this tool is best and can sacrifice less effort on your time.*
 
-One of the best reasons why I(Aldrin John Olaer Manalansan) created this tool is that:
+One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool is that:
 - Imagine every released "patch" of DOTA2, they add new codes inside "items_game.txt" so that they can register its "use". Also,you might not notice, they change some existed "ID's Contents" into something new, without you ever knowing.
 - Generates a "Modified Clone" of "items_game.txt" from the "Library" Folder where all the desired code are injected.
 
@@ -17,7 +17,7 @@ One of the best reasons why I(Aldrin John Olaer Manalansan) created this tool is
 <div align="center">
 <b>LIMITATIONS</b></div>
 
-	This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING, but there will always be Limitations that this Injector(Until now) Cannot Fix.
+*This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING, but **there will always be Limitations** that this Tool(Until now) Cannot Fix.*
 
 ###### Current Issues that exist(7.03 patch):
 
