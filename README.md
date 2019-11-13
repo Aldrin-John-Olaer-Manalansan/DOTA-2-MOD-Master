@@ -15,6 +15,66 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 ------------
 
 <div align="center">
+<b>TUTORIALS</b></div>
+
+- [General Section](https://www.youtube.com/watch?v=N8POaZ2nXbA&t=25s "General Section")
+
+- [Handy Injection Section](https://www.youtube.com/watch?v=-BETnaBBLME&t=25s "Handy Injection Section")
+
+- [Miscellaneous Section](https://www.youtube.com/watch?v=y9HYHBtBYXs&t=834s "Miscellaneous Section")
+
+- [External Files](https://www.youtube.com/watch?v=eG2XRCj7Sy0&t=365s "External Files")
+
+- [Create your Own Database](https://www.youtube.com/watch?v=kC1-2UtXp_U "Create your Own Database")
+
+- [Edit a Database](https://www.youtube.com/watch?v=wF2DnfrgWkg "Edit a Database")
+
+- [ERROR! Items_game.txt is missing!](https://www.youtube.com/watch?v=l4w2fT_lY10&t=3s "ERROR! Items_game.txt is missing!")
+
+------------
+
+<div align="center">
+<b>FACTS</b></div>
+
+- Right-Click an item to change "Styles"(if it has an available alternative style).
+
+- At "Handy Injection>Hero Items Selection" Section,every Hero can ONLY have ONE ITEM PER ITEM SLOT. Adding a "Check" Mark on an item will REMOVE THE OTHER CHECK MARK ON AN ITEM WITH THE SAME ITEM SLOT(eg. juggernaut's bladeform legacy is an Head Item slot, it will deselect any item that are Head Item Slot Like Mask of a Thousand Faces).
+
+- On every Dropdownlist(eg. The Custom Items Location Path Found at the General Section... The gameinfo.gi Location Path found at the Advanced Section), to clear the control just left click the dropdownlist and left click the location path. This will clear the location path and disable its future controls.
+
+- To Manually Patch gameinfo.gi using the injector, go to "advanced>patch gameinfo.gi". Clicking this button will Activate the MOD(pak01_dir.vpk) found at "%dota2dir%\" Folder.
+
+- It is good that "use miscellaneous on future injection" Feature at "Miscellaneous" Section is "TURNED OFF" if you do not use any feature on that section. Because every start, this Tool will need to preload all miscellaneous assets which will consume much time
+
+- "AUTO-SHUTNIK METHOD" is a very important feature of this Tool,it was built for users who dont know how to "Manually MOD DOTA2".
+
+- Turning Off "AUTO-SHUTNIK METHOD" will Generate a "pak01_dir" folder at the "Generated MOD" Folder found on the same folder of this Tool. This is HELPFUL for users who wants to MANUALLY MOD DOTA2
+
+- Turning ON "Low-Processor Mode" at "Advanced" Section will command this Tool not to consume alot of RAM when "Injecting items", executing only ONE COMMAND PROMPT to execute the Extraction of Items through their specific locations. BUT AS PENALTY, it will CONSUME ALOT OF TIME for the Injection to Finish!!! So if you are "Injecting 400 items"... I appoximate each items will be extracted after "5 seconds", so 400 x 5 is equal to 2000 seconds(33 minutes)
+
+- "Save Settings" button on the bottom left does NOT SAVE DATALISTS,it only saves "directories" which you selected and checkboxes that are not inside a "DATALIST". If you want to save a Datalist. Use "Save DataBase List" instead.
+
+- "Save DataBase List" at "Hero Items Selection" and "Used Items Database" from Handy Injection Section do the same thing.
+
+- "Save DataBase List" at the "General" Section is different on "Save DataBase List" for "Handy Injection". In other words, it only saves the datalist PRESENT ON THAT SECTION PLUS ALL Miscellaneous DATALIST(if enabled).
+
+- "Migration" Feature only prioritize items with "prefab=default_item". In other words, it does not support "terrain,weather,hud,loadingscreen,ect"
+
+- At "Search" Section,You can press "Enter/Return" Key and it will do the same job pressing "Search for(keyword)" button.
+
+- Pressing "Search for(keyword)" Button(Or Enter/Return) with the same "Keyword" you have searched last time will move to the next occurence... Until there is no match found`, it will go back to the very first occurence.
+
+- The "ERROR LOG" at "Advanced" Section reports certain coincidence that is rarely different from what the injector has scanned before the last launch. This happens when a new update comes out with newly added cosmetic items, those items are registered at the "items_game.txt" that have unique ID's that not present on the earlier patches. But sometimes, they are REGISTERED AT AN EXISTED ID... While the OLD REGISTERED item on that ID that was REPLACED by this newly arrived item`,was MOVED INTO ANOTHER UNIQUE ID!!! So this Tool will able to detect those coincidence WHEN YOU HAVE A DATABASE.
+
+- Expect that when an "ITEM was Announced" at the "ERROR LOG",it will be UNCHECKED at either "Handy Injection" section or "General" Section, in other words it will be unused. You need to "recheck" it again on that section to "Activate" it again.
+
+- This Tool detects the DOTA2 Directory by pairing a combination pattern... It scans all Folder inside the "steamapps\common" then scans if the picked folder has "game\dota" subfolder inside.
+
+- The Injector needs 150MB of RAM when making its Operation. If your computer is very weak to handle this amount of memory, then please do not use this injector and Throw this Tool at your Recycle Bin!
+
+------------
+
+<div align="center">
 <b>LIMITATIONS</b></div>
 
 *This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING, but **there will always be Limitations** that this Tool(Until now) Cannot Fix.*
@@ -211,67 +271,7 @@ v0.0.1
 ------------
 
 <div align="center">
-<b>FACTS</b></div>
-
-- Right-Click an item to change "Styles"(if it has an available alternative style).
-
-- At "Handy Injection>Hero Items Selection" Section,every Hero can ONLY have ONE ITEM PER ITEM SLOT. Adding a "Check" Mark on an item will REMOVE THE OTHER CHECK MARK ON AN ITEM WITH THE SAME ITEM SLOT(eg. juggernaut's bladeform legacy is an Head Item slot, it will deselect any item that are Head Item Slot Like Mask of a Thousand Faces).
-
-- On every Dropdownlist(eg. The Custom Items Location Path Found at the General Section... The gameinfo.gi Location Path found at the Advanced Section), to clear the control just left click the dropdownlist and left click the location path. This will clear the location path and disable its future controls.
-
-- To Manually Patch gameinfo.gi using the injector, go to "advanced>patch gameinfo.gi". Clicking this button will Activate the MOD(pak01_dir.vpk) found at "%dota2dir%\" Folder.
-
-- It is good that "use miscellaneous on future injection" Feature at "Miscellaneous" Section is "TURNED OFF" if you do not use any feature on that section. Because every start, this Tool will need to preload all miscellaneous assets which will consume much time
-
-- "AUTO-SHUTNIK METHOD" is a very important feature of this Tool,it was built for users who dont know how to "Manually MOD DOTA2".
-
-- Turning Off "AUTO-SHUTNIK METHOD" will Generate a "pak01_dir" folder at the "Generated MOD" Folder found on the same folder of this Tool. This is HELPFUL for users who wants to MANUALLY MOD DOTA2
-
-- Turning ON "Low-Processor Mode" at "Advanced" Section will command this Tool not to consume alot of RAM when "Injecting items", executing only ONE COMMAND PROMPT to execute the Extraction of Items through their specific locations. BUT AS PENALTY, it will CONSUME ALOT OF TIME for the Injection to Finish!!! So if you are "Injecting 400 items"... I appoximate each items will be extracted after "5 seconds", so 400 x 5 is equal to 2000 seconds(33 minutes)
-
-- "Save Settings" button on the bottom left does NOT SAVE DATALISTS,it only saves "directories" which you selected and checkboxes that are not inside a "DATALIST". If you want to save a Datalist. Use "Save DataBase List" instead.
-
-- "Save DataBase List" at "Hero Items Selection" and "Used Items Database" from Handy Injection Section do the same thing.
-
-- "Save DataBase List" at the "General" Section is different on "Save DataBase List" for "Handy Injection". In other words, it only saves the datalist PRESENT ON THAT SECTION PLUS ALL Miscellaneous DATALIST(if enabled).
-
-- "Migration" Feature only prioritize items with "prefab=default_item". In other words, it does not support "terrain,weather,hud,loadingscreen,ect"
-
-- At "Search" Section,You can press "Enter/Return" Key and it will do the same job pressing "Search for(keyword)" button.
-
-- Pressing "Search for(keyword)" Button(Or Enter/Return) with the same "Keyword" you have searched last time will move to the next occurence... Until there is no match found`, it will go back to the very first occurence.
-
-- The "ERROR LOG" at "Advanced" Section reports certain coincidence that is rarely different from what the injector has scanned before the last launch. This happens when a new update comes out with newly added cosmetic items, those items are registered at the "items_game.txt" that have unique ID's that not present on the earlier patches. But sometimes, they are REGISTERED AT AN EXISTED ID... While the OLD REGISTERED item on that ID that was REPLACED by this newly arrived item`,was MOVED INTO ANOTHER UNIQUE ID!!! So this Tool will able to detect those coincidence WHEN YOU HAVE A DATABASE.
-
-- Expect that when an "ITEM was Announced" at the "ERROR LOG",it will be UNCHECKED at either "Handy Injection" section or "General" Section, in other words it will be unused. You need to "recheck" it again on that section to "Activate" it again.
-
-- This Tool detects the DOTA2 Directory by pairing a combination pattern... It scans all Folder inside the "steamapps\common" then scans if the picked folder has "game\dota" subfolder inside.
-
-- The Injector needs 150MB of RAM when making its Operation. If your computer is very weak to handle this amount of memory, then please do not use this injector and Throw this Tool at your Recycle Bin!
-
-------------
-
-<div align="center">
-<b>TUTORIALS</b></div>
-
-- General Section: https://www.youtube.com/watch?v=N8POaZ2nXbA&t=25s
-
-- Handy Injection Section: https://www.youtube.com/watch?v=-BETnaBBLME&t=25s
-
-- Miscellaneous Section: https://www.youtube.com/watch?v=y9HYHBtBYXs&t=834s
-
-- External Files: https://www.youtube.com/watch?v=eG2XRCj7Sy0&t=365s
-
-- Create your Own Database: https://www.youtube.com/watch?v=kC1-2UtXp_U
-
-- Edit a Database: https://www.youtube.com/watch?v=wF2DnfrgWkg
-
-- ERROR! Items_game.txt is missing!: https://www.youtube.com/watch?v=l4w2fT_lY10&t=3s
-
-------------
-
-<div align="center">
-<b>CREADITS</b></div>
+<b>CREDITS</b></div>
 
 This are lifetime credits to those people who suffered bugs and are concerned to report to us. Making this tool More better every time!
 
