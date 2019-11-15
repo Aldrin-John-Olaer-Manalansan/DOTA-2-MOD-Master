@@ -37,10 +37,10 @@
 - Unprotect all Target Files - Will UNPROTECT all CHECKED Targets on the List.
 
 - MIX File Attributes Exclusion - there are four types of header attribute settled at its 3rd byte:
- 00(Expansion) - Inside this mix file are expansion mixes included to the game(first became possible when Yuri's Revenge was released)
- 01(CheckSummed)- Has a unique header and footer algorithm detecting if there are ERRORS/CORRUPTION on each file stored on the MIX
- 02(Encrypted) - Compacted the MIX, making it size even more smaller. But is HEADER DEPENDENT, meaning having a BAD Header will crash RA2YR
- 03(Local) - Files that existed on RA2(without expansion), although its Algorithm for calculating the header is still unknown. HAVING A BAD HEADER WILL also CRASH RA2YR.
+> 00(Expansion) - Inside this mix file are expansion mixes included to the game(first became possible when Yuri's Revenge was released)
+01(CheckSummed)- Has a unique header and footer algorithm detecting if there are ERRORS/CORRUPTION on each file stored on the MIX
+02(Encrypted) - Compacted the MIX, making it size even more smaller. But is HEADER DEPENDENT, meaning having a BAD Header will crash RA2YR
+03(Local) - Files that existed on RA2(without expansion), although its Algorithm for calculating the header is still unknown. HAVING A BAD HEADER WILL also CRASH RA2YR.
 
 CheckSummed, Encrypted, and Local are almost untouchable(invulnerable to protection) meaning MIX files having this three attributes are automatically UNPROTECTED.
 You can UNCHECK this parameters to include them on scans(UNRECOMMENDED but still works).
