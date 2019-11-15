@@ -11,7 +11,8 @@
 
 <div align="center">
 <b>Trivia</b></div>
--  What is a .mix File?
+
+- What is a .mix File?
  - it is a Compressed File like ".zip/.rar" used by RA2/RA2YR to store all of their crucial files in one place. It is the ART of being ORGANIZED!
 
 - What is MIX Protection?
@@ -22,8 +23,9 @@
 
 ------------
 
-</div>
+<div align="center">
 <b>Usage</b></div>
+
 - Add a Target File - Browse a Target file with a respective extension(eg .mix) that will be added on the Target List ->
 
 - Add a Target Folder - Browse a folder and scans for any existing file that has the respective extension(eg .mix) to be added on the Target File List ->
