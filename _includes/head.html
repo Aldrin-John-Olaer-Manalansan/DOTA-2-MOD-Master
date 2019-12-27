@@ -1,1 +1,4 @@
-{% if site.google_ad_client %}{% include google_analytics.html %}{% endif %} 
+<head>
+  {% if site.google_ad_client %}{% include google_analytics.html %}{% endif %}
+  {% if site.google_tracking %} {% include google_analytics.html %} {% endif %}
+</head>
