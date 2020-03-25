@@ -1647,8 +1647,11 @@ for intsaver, in param
 				}
 				else
 				{
-					;produces animation bug on creeps thats why disabled
-					if (param[intsaver,2]="radiantcreeps") or (param[intsaver,2]="direcreeps") or (param[intsaver,2]="radianttowers") or (param[intsaver,2]="diretowers")
+					;cavernite creeps produces animation bug on creeps thats why disabled
+					tmpr:=searchstringdetector(filecontent,"""name""")
+					if ((param[intsaver,2]="radiantcreeps") and (tmpr!="Cavernite Radiant Creeps"))
+					or ((param[intsaver,2]="direcreeps") and (tmpr!="Cavernite Dire Creeps"))
+					or (param[intsaver,2]="radianttowers") or (param[intsaver,2]="diretowers")
 					{
 						LV_GetText(numcheck,A_Index,4)
 						LV_GetText(stylechecker,A_Index,5)
