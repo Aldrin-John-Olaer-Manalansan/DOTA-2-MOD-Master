@@ -59,7 +59,8 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.5.3
+version=2.5.4
+
 if disableautoupdate<>1
 	versionchecker(version)
 
@@ -175,6 +176,7 @@ else
 	dota2dir=%SteamPath%\steamapps\common\dota 2 beta
 }
 dota2dir:=StrReplace(dota2dir,"/","\")
+mapdota2dir:=dota2dir
 GoSub,default_settings
 param=%A_ScriptDir%\Library\,%A_ScriptDir%\Generated MOD\,%A_ScriptDir%\External Files\
 loop,parse,param,`,
@@ -208,8 +210,11 @@ SetTitleMatchMode,Slow
 WinWait,% "ahk_pid " pidlist[pidlist.Count()] " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass" ;,,3 ;wait for max of 3 seconds
 for index,cPID in pidlist
 {
-	if WinExist("ahk_pid " cPID " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass")
-		WinWaitClose,ahk_pid %cPID% ahk_exe HLExtract.exe ahk_class ConsoleWindowClass ;,,60 ;wait for max of 1 minute
+	;if WinExist("ahk_pid " cPID " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass")
+	;	WinWaitClose,ahk_pid %cPID% ahk_exe HLExtract.exe ahk_class ConsoleWindowClass ;,,60 ;wait for max of 1 minute
+	Process,Exist,%cPID%
+	if ErrorLevel
+		Process,WaitClose,%cPID%
 }
 DetectHiddenWindows,Off
 SetTitleMatchMode,Fast
@@ -1523,7 +1528,12 @@ param:=[["terrainchoice","terrain"]
 ,["versuscreenchoice","versus_screen"]
 ,["emoticonchoice","emoticon_tool"]]
 IPS:=A_TickCount
-miscinfo:=[[]]
+
+;declare a 2d array
+miscinfo:=[]
+loop 4
+	miscinfo[A_Index]:=[]
+
 for intsaver, in param
 {
 	if A_DefaultListView<>% param[intsaver,1]
@@ -1554,139 +1564,57 @@ for intsaver, in param
 		StringMid,misccontent,masterfilecontent,%startpos%,%ipos3%
 		if InStr(misccontent,extrafilter)>0
 		{
-			filecontent=%misccontent%
-			if (subject="courier") or (subject="ward") ;;; information generation for extraction about cour,ward
-			{
-				itemname:=visualsdetector(filecontent) ; detects the Visual Section of the content
-				StringLen,tmplength,itemname
-				if (subject="courier")
-				{
-					namecount=4
-				}
-				else if (subject="ward")
-				{
-					namecount=2
-				}
-				loop,%namecount%
-				{
-					StringGetPos, ipos1, itemname,.vmdl,L%A_Index%
-					StringGetPos, ipos2, itemname,",,%ipos1%
-					rightpos:=tmplength-ipos1
-					StringGetPos, ipos3, itemname,",R1,%rightpos%
-					tmp:=ipos2-ipos3-1
-					startpos:=ipos3+2
-					StringMid,defaultfile,itemname,%startpos%,%tmp%
-					defaultfile=%defaultfile%_c
-					StringReplace,defaultfile,defaultfile,/,\,1
-					StringGetPos, pos, itemname,`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%},,%ipos1%
-					StringGetPos, pos1, itemname,`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%{,R1,%rightpos%
-					tmp:=pos-pos1
-					startpos:=pos1+1
-					StringMid,modifierstring,itemname,%startpos%,%tmp%
-					StringLen,varlength,defaultfile
-					StringGetPos, ipos1, defaultfile,\,R1
-					StringTrimLeft,defaultname,defaultfile,% ipos1+1
-					StringTrimRight,defaultloc,defaultfile,% varlength-ipos1
-					if (subject="courier")
-					{
-						miscparam:=[["""type""		""courier""",["""asset""		""radiant""","""asset""		""dire"""]]
-						,["""type""		""courier_flying""",["""asset""		""radiant""","""asset""		""dire"""]]]
-						for saveindex, in miscparam
-						{
-							saveparam:=miscparam[saveindex,1]
-							saveindex=%A_Index%
-							for index,value in miscparam[saveindex,2]
-							{
-								if (InStr(modifierstring,saveparam)>0) and (InStr(modifierstring,value)>0)
-								{
-									miscinfo[1].Push(defaultname)
-									miscinfo[2].Push(defaultloc)
-								}
-							}
-						}
-						VarSetCapacity(miscparam,0)
-					}
-					if (subject="ward")
-					{
-						miscparam="asset"%A_Tab%%A_Tab%"npc_dota_observer_wards","asset"%A_Tab%%A_Tab%"npc_dota_sentry_wards"
-						loop,parse,miscparam,`,
-						{
-							saveindex:=A_Index+4
-							if InStr(modifierstring,A_LoopField)>0
-							{
-								miscinfo[1].Push(defaultname)
-								miscinfo[2].Push(defaultloc)
-							}
-						}
-					}
-				}
-			}
-			tmpbar:=iddetector(filecontent) ;filecontent := extracted content from items_game.txt
-			defid=%tmpbar%
+			defid:=iddetector(misccontent) ;filecontent := extracted content from items_game.txt
 			LV_GetText(tmpstring,LV_GetNext(,"Checked"),3)
-			tmpfind=%subject%
-			filecontent:=miscdetector("prefab",tmpfind,tmpstring) ;filecontent:=miscdetector("prefab",tmpfind,tmpstring,filestring) ; detects the contents of a miscellaneous item... In expression "prefab" means item_slot
+			filecontent:=miscdetector("prefab",subject,tmpstring) ;filecontent:=miscdetector("prefab",tmpfind,tmpstring,filestring) ; detects the contents of a miscellaneous item... In expression "prefab" means item_slot
 			StringReplace,filecontent,filecontent,%tmpstring%"`r`n%A_Tab%%A_Tab%{,%defid%"`r`n%A_Tab%%A_Tab%{
 			if (subject="courier") or (subject="ward")
 			{
+				defaultvisualscontent:=visualsdetector(misccontent) ; detects the Visual Section of the default content... this saves time for the engine to search over and over again.
+				
+				LV_GetText(numcheck,LV_GetNext(,"Checked"),4)
+				LV_GetText(stylechecker,LV_GetNext(,"Checked"),5)
 				itemname:=visualsdetector(filecontent) ; detects the Visual Section of the content
-				tmp:=StrReplace(itemname,.vmdl",.vmdl",extractcount)
+				StrReplace(itemname,.vmdl",.vmdl",extractcount)
 				loop,%extractcount%
 				{
-					StringGetPos, ipos1, itemname,.vmdl,L%A_Index%
-					StringGetPos, ipos2, itemname,",,%ipos1%
-					rightpos:=tmplength-ipos1
-					StringGetPos, ipos3, itemname,",R1,%rightpos%
-					tmp:=ipos2-ipos3-1
-					startpos:=ipos3+2
-					StringMid,defaultfile,itemname,%startpos%,%tmp%
-					defaultfile=%defaultfile%_c
-					StringReplace,defaultfile,defaultfile,/,\,1
-					StringGetPos, pos, itemname,`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%},,%ipos1%
-					StringGetPos, pos1, itemname,`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%{,R1,%rightpos%
-					tmp:=pos-pos1
-					startpos:=pos1+1
-					StringMid,modifierstring,itemname,%startpos%,%tmp%
-					StringLen,varlength,defaultfile
-					StringGetPos, ipos1, defaultfile,\,R1
-					StringTrimLeft,extractname,defaultfile,% ipos1+1
-					LV_GetText(numcheck,LV_GetNext(,"Checked"),4)
-					LV_GetText(stylechecker,LV_GetNext(,"Checked"),5)
-					tmp="style"%A_Tab%%A_Tab%"%stylechecker%"
-					save1="style"
-					if ((subject="courier") and (numcheck>0) and (InStr(modifierstring,tmp)>0)) or ((subject="ward") and (numcheck>0) and (InStr(modifierstring,tmp)>0)) or (numcheck=0) or ((numcheck>0) and (InStr(modifierstring,save1)<1))
+					ipos1:=InStr(itemname,".vmdl",,,A_Index)
+					ipos1:=InStr(itemname,"`r`n				""asset_modifier",,-strlen(itemname)+1+ipos1)
+					ipos2:=InStr(itemname,"`r`n				}",,ipos1)
+					modifierstring:=SubStr(itemname,ipos1,ipos2-ipos1)
+					
+					if ((numcheck=0) or (instr(modifierstring,"""style""		""" stylechecker """") and (numcheck>0)))
 					{
-						if (subject="courier")
+						loop
 						{
-							miscparam:=[["""type""		""courier""",["""asset""		""radiant""","""asset""		""dire"""]]
-							,["""type""		""courier_flying""",["""asset""		""radiant""","""asset""		""dire"""]]]
-							for saveindex, in miscparam
+							ipos1:=InStr(defaultvisualscontent,".vmdl",,,A_Index)
+							ipos1:=InStr(defaultvisualscontent,"`r`n				""asset_modifier",,-strlen(defaultvisualscontent)+1+ipos1)
+							ipos2:=InStr(defaultvisualscontent,"`r`n				}",,ipos1)
+							defaultmodifierstring:=SubStr(defaultvisualscontent,ipos1,ipos2-ipos1)
+							
+							if ((searchstringdetector(modifierstring,"""asset""")=searchstringdetector(defaultmodifierstring,"""asset"""))
+							and (searchstringdetector(modifierstring,"""type""")=searchstringdetector(defaultmodifierstring,"""type""")))
 							{
-								saveparam:=miscparam[saveindex,1]
-								saveindex=%A_Index%
-								for index,value in miscparam[saveindex,2]
-								{
-									if (InStr(modifierstring,saveparam)>0) and (InStr(modifierstring,value)>0)
-									{
-										miscinfo[3].Push(extractname)
-										miscinfo[4].Push(defaultfile)
-									}
-								}
+								;defaultloc:=StrReplace(searchstringdetector(defaultmodifierstring,"""modifier""") "_c","/","\")
+								;defaultname:=SubStr(defaultloc,InStr(defaultloc,"\",,0)+1)
+								;defaultloc:=SubStr(defaultloc,1,InStr(defaultloc,"\",,0)-1)
+								;
+								;extractfile:=StrReplace(searchstringdetector(modifierstring,"""modifier""") "_c","/","\")
+								;realname:=SubStr(extractfile,InStr(extractfile,"\",,0)+1)
+								
+								defaultloc:=StrReplace(searchstringdetector(defaultmodifierstring,"""modifier""") "_c","/","\")
+								miscinfo[1].Push(SubStr(defaultloc,InStr(defaultloc,"\",,0)+1))
+								miscinfo[2].Push(SubStr(defaultloc,1,InStr(defaultloc,"\",,0)-1))
+								
+								extractfile:=StrReplace(searchstringdetector(modifierstring,"""modifier""") "_c","/","\")
+								miscinfo[3].Push(SubStr(extractfile,InStr(extractfile,"\",,0)+1))
+								miscinfo[4].Push(extractfile)
+								
+								break
 							}
-							VarSetCapacity(miscparam,0)
-						}
-						if (subject="ward")
-						{
-							miscparam="asset"%A_Tab%%A_Tab%"npc_dota_observer_wards","asset"%A_Tab%%A_Tab%"npc_dota_sentry_wards"
-							loop,parse,miscparam,`,
-							{
-								saveindex:=A_Index+4
-								if InStr(modifierstring,A_LoopField)>0
-								{
-									miscinfo[3].Push(extractname)
-									miscinfo[4].Push(defaultfile)
-								}
-							}
+							
+							if ErrorLevel
+								break
 						}
 					}
 				}
@@ -1720,13 +1648,13 @@ for intsaver, in param
 				else
 				{
 					;produces animation bug on creeps thats why disabled
-					;if (intsaver=8) or (intsaver=9)
-					;{
-					;	LV_GetText(numcheck,A_Index,4)
-					;	LV_GetText(stylechecker,A_Index,5)
-					;	contentport=%filecontent%
-					;	gosub,extractmodel
-					;}
+					if (param[intsaver,2]="radiantcreeps") or (param[intsaver,2]="direcreeps") or (param[intsaver,2]="radianttowers") or (param[intsaver,2]="diretowers")
+					{
+						LV_GetText(numcheck,A_Index,4)
+						LV_GetText(stylechecker,A_Index,5)
+						contentport=%filecontent%
+						gosub,extractmodel
+					}
 					StringReplace,filecontent,filecontent,%replacefrom%,%replaceto%
 				}
 				
@@ -1791,6 +1719,9 @@ loop % LV_GetCount()
 		Loop
 		{
 			StringGetPos, ipos, masterfilecontent,%htarget%,L%A_Index%
+			if ipos<0
+				break
+			
 			StringLen,filelength,masterfilecontent
 			rightpos:=filelength-ipos
 			StringGetPos, ipos1, masterfilecontent,%sfinder%,,%ipos%
@@ -1838,6 +1769,9 @@ if LV_GetNext(,"Checked")>0
 	Loop
 	{
 		StringGetPos, ipos, masterfilecontent,%htarget%,L%A_Index%
+		if ipos<0
+			break
+		
 		StringLen,filelength,masterfilecontent
 		rightpos:=filelength-ipos
 		StringGetPos, ipos1, masterfilecontent,%sfinder%,,%ipos%
@@ -1893,6 +1827,8 @@ if LV_GetNext(,"Checked")>0
 	Loop
 	{
 		StringGetPos, ipos, masterfilecontent,%htarget%,L%A_Index%
+		if ipos<0
+			break
 		StringLen,filelength,masterfilecontent
 		rightpos:=filelength-ipos
 		StringGetPos, ipos1, masterfilecontent,%sfinder%,,%ipos%
@@ -1973,6 +1909,8 @@ if peton=1
 	Loop
 	{
 		StringGetPos, ipos, masterfilecontent,%htarget%,L%A_Index%
+		if ipos<0
+			break
 		StringLen,filelength,masterfilecontent
 		rightpos:=filelength-ipos
 		StringGetPos, ipos1, masterfilecontent,%sfinder%,,%ipos%
@@ -1994,6 +1932,8 @@ if peton=1
 				Loop
 				{
 					StringGetPos, ipos, masterfilecontent,%filter%,L%A_Index%
+					if ipos<0
+						break
 					StringLen,filelength,masterfilecontent
 					rightpos:=filelength-ipos
 					StringGetPos, ipos1, masterfilecontent,%sfinder%,,%ipos%
@@ -2077,7 +2017,7 @@ npcunit:=GlobalArray["npc_units.txt"]
 itemname:=visualsdetector(filecontent) ; detects the Visual Section of the content
 StringLen,modeltmplength,itemname
 modelcount:=rptpermit:=0
-tmp:=StrReplace(itemname,.vmdl",.vmdl",modelcount)
+StrReplace(itemname,".vmdl""",".vmdl""",modelcount)
 
 loop,%modelcount%
 {
@@ -2086,13 +2026,14 @@ loop,%modelcount%
 	rightpos:=modeltmplength-ipos1
 	StringGetPos, ipos3, itemname,`r`n,R1,%rightpos%
 	StringMid,modifierconfirm,itemname,% ipos3+2,% ipos2-ipos3-1
-	tmp="asset"
-	if InStr(modifierconfirm,tmp)>0
+	
+	if InStr(modifierconfirm,"asset")>0
 	{
 		continue
 	}
 	StringGetPos, ipos3, itemname,",R1,%rightpos% ;"
-	StringMid,extractfile,itemname,% ipos3+2,% ipos2-ipos3-1
+	StringMid,extractfile,itemname,% ipos3+2,% ipos2-ipos3-1 ; the location and name of the file inside vpk
+	
 	portfind=`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%"game"`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%{
 	if InStr(contentport,portfind)>0
 	{
@@ -2109,7 +2050,8 @@ loop,%modelcount%
 	StringGetPos, newpos, modifierstring,"asset"%A_Tab%%A_Tab%"
 	StringGetPos, newpos1, modifierstring,",L3,newpos
 	StringGetPos, newpos, modifierstring,",L2,newpos1 ;"
-	StringMid,check,modifierstring,% newpos1+2, % newpos-newpos1-1
+	StringMid,check,modifierstring,% newpos1+2, % newpos-newpos1-1 ; the "check" is the npc_dota that will be searched either npc_heroes.txt or npc_units.txt
+	
 	IfInString,check,npc_dota_hero
 	{
 		readdir=%npchero%
@@ -2153,18 +2095,45 @@ loop,%modelcount%
 	if ((numcheck>0) and (InStr(modifierstring,save)>0)) or (numcheck=0) or ((numcheck>0) and (InStr(modifierstring,save1)<1))
 	{
 		StringGetPos, newpos, readdir,`r`n%A_Tab%"%check% ;"
-		StringGetPos, newpos1, readdir,`r`n%A_Tab%},,%newpos%
-		StringMid,subjectcontent,readdir,% newpos+1, % newpos1-newpos-1
-		StringGetPos, newpos, subjectcontent,`r`n%A_Tab%%A_Tab%"Model"
-		StringGetPos, newpos1, subjectcontent,",L3,%newpos% ;"
-		StringGetPos, newpos, subjectcontent,",L2,%newpos1% ;"
-		StringMid,subjectcontent,subjectcontent,% newpos1+2, % newpos-newpos1-1
-		subjectcontent=%subjectcontent%_c
-		StringLen,modelvarlength,subjectcontent
-		StringReplace,subjectcontent,subjectcontent,/,\,1
-		StringGetPos, newpos, subjectcontent,\,R1
-		StringTrimLeft,defaultname,subjectcontent,% newpos+1
-		StringTrimRight,defaultloc,subjectcontent,% modelvarlength-newpos
+		if (newpos<0)
+		{
+			herouser:=itemuserdetector(filecontent)
+			if (herouser="npc_dota_hero_tiny")
+			{
+				subjectcontent:=npcherodetector(herouser,dota2dir "\game\dota\scripts\npc\npc_heroes.txt")
+				
+				growvalue:=substr(check,0)
+				if (growvalue<=0) ; if zero or below this should have no value
+					growvalue=
+				subjectcontent:=strreplace(searchstringdetector(subjectcontent,"""Model" growvalue """") "_c","/","\")
+				
+				defaultname:=substr(subjectcontent,instr(subjectcontent,"\",,0)+1) ; name of the default file
+				defaultloc:=substr(subjectcontent,1,-strlen(defaultname)-1) ; directory of the default file
+			}
+			else
+			{
+				msgbox cannot find %check%! Report this to the Developer Immediately!
+				continue
+			}
+		}
+		else
+		{
+			StringGetPos, newpos1, readdir,`r`n%A_Tab%},,%newpos%
+			StringMid,subjectcontent,readdir,% newpos+1, % newpos1-newpos-1
+			
+			StringGetPos, newpos, subjectcontent,`r`n%A_Tab%%A_Tab%"Model"
+			StringGetPos, newpos1, subjectcontent,",L3,%newpos% ;"
+			StringGetPos, newpos, subjectcontent,",L2,%newpos1% ;"
+			StringMid,subjectcontent,subjectcontent,% newpos1+2, % newpos-newpos1-1
+			subjectcontent=%subjectcontent%_c
+			StringLen,modelvarlength,subjectcontent
+			StringReplace,subjectcontent,subjectcontent,/,\,1
+			
+			StringGetPos, newpos, subjectcontent,\,R1
+			StringTrimLeft,defaultname,subjectcontent,% newpos+1
+			StringTrimRight,defaultloc,subjectcontent,% modelvarlength-newpos
+		}
+		
 		if (defaultloc<>"") and (extractfile<>"")
 		{
 			tmp="item_rarity"%A_Tab%%A_Tab%"arcana"
@@ -2257,26 +2226,32 @@ loop,%modelcount%
 return
 
 extractfileruncmd:
+DetectHiddenWindows,On
+if ((SubStr(extractname,-1)!="_c") or (SubStr(defaultname,-1)!="_c"))
+	msgbox fatal! a model file has no compiled parameter on it:`nextractfile=%extractfile%`nextractname=%extractname%`ndefaultloc=%defaultloc%`ndefaultname=%defaultname%`n`nYOU ARE OBLIGED TO REPORT THIS TO AJO Manalansan Immediately!
 loop ; retry running the cmd until it succeed
 {
 	if !lowprocessor or (cmdmaxinstances!=1) ; if not lowprocessor or cmdmaxinstances not equal to 1(cmdmaxinstances=1 is synonymous to low processor mode since only one cmd can be actived at a time)
 	{
-		run,"%A_ComSpec%" /c "md "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%"&"%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%" -e "root\%extractfile%"&rename "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%extractname%" "%defaultname%"",,Hide UseErrorLevel,tmpr
+		if !FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\" defaultloc "\")
+			FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%
+		run,"%A_ComSpec%" /c ""%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%" -e "root\%extractfile%"&move /y "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%extractname%" "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%defaultname%"",,Hide UseErrorLevel,tmpr
 		
 		if (cmdmaxinstances>1)
 		{
 			cmdcountoverflow:=InStr(extractpid,",",,,cmdmaxinstances-1) ; detects when number of registered cmd pid's in the pid list is above the maximum number of simutaneous running cmd's
 			if cmdcountoverflow
 			{
-				DetectHiddenWindows,On
+				;DetectHiddenWindows,On
 				WinWait,ahk_pid %tmpr% ahk_exe cmd.exe ahk_class ConsoleWindowClass
 			}
 		}
 	}
-	else runwait,"%A_ComSpec%" /c "md "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%"&"%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%" -e "root\%extractfile%"&rename "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%extractname%" "%defaultname%"",,Hide UseErrorLevel
+	else runwait,"%A_ComSpec%" /c "md "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%"&"%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%" -e "root\%extractfile%"&rename "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%extractname%" "%defaultname%"",,Hide UseErrorLevel,tmpr
 	if ErrorLevel!=ERROR
 		break ;; terminate the loop
 	;; if the there was an error, rerun
+	WinWait,ahk_pid %tmpr% ahk_exe cmd.exe ahk_class ConsoleWindowClass,,0.25 ; this causes a 250 milliseconds delay on the operation on each failure, I do not advise this t be on but it gives help
 }
 
 ;after successfull run, save pid to extract process list
@@ -2309,9 +2284,10 @@ if !lowprocessor
 			;remove the first pid at extractpid list
 			extractpid:=RegExReplace(extractpid,"(\b" tmpr "\b,)|(,\b" tmpr "\b$)|(^\b" tmpr "\b$)|(\b" tmpr "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
 		}
-		DetectHiddenWindows,Off
+		;DetectHiddenWindows,Off
 	}
 }
+DetectHiddenWindows,Off
 return
 
 gipatcher:
@@ -2326,9 +2302,8 @@ if InStr(vpktmp,finder)
 	{
 		StringGetPos, ipos, vpktmp,%finder%,L%A_Index%
 		if ipos<0
-		{
 			Break
-		}
+		
 		rightpos:=filelength-ipos
 		StringGetPos, ipos1, vpktmp,`r`n,L2,%ipos%
 		StringGetPos, ipos2, vpktmp,`r`n,R1,%rightpos%
@@ -3106,6 +3081,12 @@ if invfolder<>
 			GuiControl,Text,dota2dir,%invfolder%||
 			dota2dir=%invfolder%
 			mapdota2dir=%invfolder%
+			IfExist,%A_ScriptDir%\Settings.aldrin_dota2mod
+			{
+				FileSetAttrib,-R,%A_ScriptDir%\Settings.aldrin_dota2mod
+				IniWrite,%dota2dir%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,mapdota2dir
+				FileSetAttrib,+R,%A_ScriptDir%\Settings.aldrin_dota2mod
+			}
 		}
 		else
 		{
@@ -4354,6 +4335,8 @@ Loop % LV_GetCount()
 		
 		
 		StringGetPos, pos, filestring2,%Finder%,L%A_Index%
+		if pos<0
+			break
 		;rightpos:=filelength-pos
 		;StringGetPos, pos1, filestring2,%Barrier%,,%pos%
 		;StringGetPos, pos2, filestring2,%Barrier%,R1,%rightpos%
@@ -4401,7 +4384,7 @@ Loop % LV_GetCount()
 				loop %modelplayercount%
 				{
 					defaultloc:=modelpathdetector(filecontent,A_Index-1) ;detect the item root directory and change all slash into backslash
-					defaultname:=SubStr(defaultloc,InStr(defaultloc,"\",,0)+1)
+					defaultname:=SubStr(defaultloc,InStr(defaultloc,"\",,0)+1) "_c"
 					defaultloc:=SubStr(defaultloc,1,InStr(defaultloc,"\",,0)-1)
 					
 					if (defaultloc<>"") and (defaultname<>"")
@@ -6397,6 +6380,13 @@ ExecScript(Script,ScriptName:="",ahkfullpath:="")
 ;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~END of Extractors~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Detectors~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+itemuserdetector(filecontent)
+{ ; detects what hero uses the item in npc_dota_hero_ format
+	filecontent:=miscusersdetector(filecontent)
+	pos1:=instr(filecontent,"""",,,2)+1
+	pos2:=instr(filecontent,"""",,,3)
+	return substr(filecontent,pos1,pos2-pos1)
+}
 
 miscusersdetector(filecontent) {
 ;miscusersdetector detects multiple hero users from an item, example: almond the frondillo pet has multiple hero users
@@ -6757,22 +6747,19 @@ miscdetector(searchedfilter,tmpfind,tmpstring,newfilestring:="") {
 	Loop
 	{
 		StringGetPos, pos, filestring,%Finder%,L%A_Index%
+		if pos<0
+		{
+			VarSetCapacity(filecontent,0)
+			Break
+		}
+		
 		pos1:=pos+FinderLength
 		StringGetPos, pos2, filestring,%Barrier%,,%pos1%
 		startpos:=pos+6
 		pos3:=pos2-pos
 		StringMid,filecontent,filestring,%startpos%,%pos3%
-		if InStr(filecontent,filter1)>0
+		if (ErrorLevel=1) or (InStr(filecontent,filter1)>0) ; hunt this errorlevel
 		{
-			Break
-		}
-		if ErrorLevel=1 ; hunt this errorlevel
-		{
-			Break
-		}
-		if pos<0
-		{
-			VarSetCapacity(filecontent,0)
 			Break
 		}
 	}
@@ -7080,10 +7067,32 @@ Gui, aboutgui:+Resize +MinSize
 Gui, aboutgui:Add, Tab2,x0 y0 h450 w500 vtababout, About|Limitations|What's New|Fact|Tutorials|Credits
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext35,Version %version%`n`nAJOM's Dota 2 MOD Master is a "code analyzing tool" which targets present "ID" and copies its contents`, thus replacing the other target "ID's" contents simultaneously. Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough`,this tool is best and can sacrifice less effort on your time.`n`nOne of the best reasons why I(Aldrin John Olaer Manalansan) created this tool is that:`n->Imagine every released "patch" of DOTA2`, they add new codes inside "items_game.txt" so that they can register its "use". Also`,you might not notice`, they change some existed "ID's Contents" into something new`, without you ever knowing.`n->Generates a "Modified Clone" of "items_game.txt" from the "Library" Folder where all the desired code are injected.
 Gui, aboutgui:Tab,2
-Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING`, but there will always be Limitations that this Injector(Until now) Cannot Fix.Current Issues that exist(7.03 patch):`n`n*This Tool needs to ReRun and ReInject all Item Sets every New Update/Patch with newly arrived items. It is because "items_game.txt" which is the script inside the MOD needs to be Reupdated/Repatched`, the injector's work is to ReUpdate the Script to be compatible with the newly arrived items listed at the new "items_game.txt". IF THIS INSTRUCTION IS NOT FOLLOWED`, YOU WILL ENCOUNTER WHEN LAUNCHING DOTA2 "ERROR PARSING SCRIPT" WHICH WILL IMMEDIATELY CRASH YOUR DOTA2 AND WILL REMAIN UNPLAYABLE UNTIL YOU EITHER "REMOVE THE MOD FROM YOUR DOTA2" OR "RELAUNCH THE TOOL AND REINJECT ALL ITEM SETS". Take Responsibility on the Risks!!!`n`n*Bristleback's "Piston Impaler" item does not stack with "Mace of the Wrathrunner(morning-star like)" item. This is due to the unhandled process of bristleback's "piston impaler animation" vs bristleback's "morning-star animation".`n`n*When playing "Online" Mode`, some item skin parts for heroes do not show if "it has no default cosmetic item". In other words`, this following posibilities will occur:`n-Ancient Apparition's "Shattering Blast Crown" "Head" item does not show up because "there is no default head item attached to Ancient Apparition".`n-Tinker's "Boots of Travel" "Misc" item does not show up because "there is no default misc item attached to Tinker".`n`nThis problem is common on "Modding by Scripting Method" but the MOD perfectly works on "offline/LAN mode".`n`n*Cosmetic items that "the model's item animation was substituted into the default model animation" does not function properly as expected`, Example:`n-The animation of Legion Commander's "Blades of Voth Domosh" functions as single wield type animation (wields only one sword).`n-Techies "Swine of the Sunken Gallery Set's" third member(which is Spoon) does not walk properly.`n-Witch Doctor's "Bonkers the Mad's" Monkey was not moving properly but instead was touching witch doctor's Butt.
+Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,
+(
+This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING, but there will always be Limitations that this Injector(Until now) Cannot Fix.Current Issues that exist(7.25 patch):
+
+*This Tool needs to ReRun and ReInject all Item Sets every New Update/Patch with newly arrived items. It is because "items_game.txt" which is the script inside the MOD needs to be Reupdated/Repatched, the injector's work is to ReUpdate the Script to be compatible with the newly arrived items listed at the new "items_game.txt". IF THIS INSTRUCTION IS NOT FOLLOWED, YOU WILL ENCOUNTER WHEN LAUNCHING DOTA2 "ERROR PARSING SCRIPT" WHICH WILL IMMEDIATELY CRASH YOUR DOTA2 AND WILL REMAIN UNPLAYABLE UNTIL YOU EITHER "REMOVE THE MOD FROM YOUR DOTA2" OR "RELAUNCH THE TOOL AND REINJECT ALL ITEM SETS". Take Responsibility on the Risks!!!
+
+*Bristleback's "Piston Impaler" item does not stack with "Mace of the Wrathrunner(morning-star like)" item. This is due to the unhandled process of bristleback's "piston impaler animation" vs bristleback's "morning-star animation".
+
+*When playing "Online" Mode, some item skin parts for heroes do not show if "it has no default cosmetic item". In other words, this following posibilities will occur:
+-Ancient Apparition's "Shattering Blast Crown" "Head" item does not show up because "there is no default head item attached to Ancient Apparition".
+-Tinker's "Boots of Travel" "Misc" item does not show up because "there is no default misc item attached to Tinker".
+
+This problem is common on "Modding by Scripting Method" but the MOD perfectly works on "offline/LAN mode".
+
+*Cosmetic items that "the model's item animation was substituted into the default model animation" does not function properly as expected, Example:
+-The animation of Legion Commander's "Blades of Voth Domosh" functions as single wield type animation (wields only one sword).
+-Techies "Swine of the Sunken Gallery Set's" third member(which is Spoon) does not walk properly.
+-Witch Doctor's "Bonkers the Mad's" Monkey was not moving properly but instead was touching witch doctor's Butt.
+)
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.5.4
+*Fixed a Bug where all .vmdl files are not flagged as "compiled", resulting all units to have statued animation.
+*Fixed a Bug when the tool wants you to determe "dota 2 beta location", it does not fetch the selected location
+
 v2.5.3
 *Fixed a Bug that Library files sometimes does not extract. and get fetched.
 
