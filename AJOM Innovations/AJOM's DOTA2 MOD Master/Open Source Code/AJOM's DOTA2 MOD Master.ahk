@@ -1651,7 +1651,8 @@ for intsaver, in param
 					tmpr:=searchstringdetector(filecontent,"""name""")
 					if ((param[intsaver,2]="radiantcreeps") and (tmpr!="Cavernite Radiant Creeps"))
 					or ((param[intsaver,2]="direcreeps") and (tmpr!="Cavernite Dire Creeps"))
-					or (param[intsaver,2]="radianttowers") or (param[intsaver,2]="diretowers")
+					or (param[intsaver,2]="radianttowers")
+					or ((param[intsaver,2]="diretowers") and (tmpr!="Guardians of the Lost Path Dire Towers"))
 					{
 						LV_GetText(numcheck,A_Index,4)
 						LV_GetText(stylechecker,A_Index,5)
