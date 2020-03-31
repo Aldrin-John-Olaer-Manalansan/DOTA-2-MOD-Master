@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.5.5
+version=2.5.6
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -70,7 +70,7 @@ if shellcmdrunning
 {
 	DetectHiddenWindows, On
 	Run,%A_ComSpec%,,Hide UseErrorLevel,cPID
-	WinWait,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+	WinWait,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass,,60 ; wait for 60 seconds, this is better than waiting indefinitely
 	;WinHide,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
 	DllCall("kernel32\AttachConsole", "UInt",cPID)
 	cshell:=comobjcreate("wscript.shell")
@@ -207,14 +207,14 @@ loop,parse,param,`,
 DetectHiddenWindows,On
 SetTitleMatchMode,3
 SetTitleMatchMode,Slow
-WinWait,% "ahk_pid " pidlist[pidlist.Count()] " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass" ;,,3 ;wait for max of 3 seconds
+WinWait,% "ahk_pid " pidlist[pidlist.Count()] " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass",,3 ;wait for max of 3 seconds
 for index,cPID in pidlist
 {
 	;if WinExist("ahk_pid " cPID " ahk_exe HLExtract.exe ahk_class ConsoleWindowClass")
 	;	WinWaitClose,ahk_pid %cPID% ahk_exe HLExtract.exe ahk_class ConsoleWindowClass ;,,60 ;wait for max of 1 minute
 	Process,Exist,%cPID%
 	if ErrorLevel
-		Process,WaitClose,%cPID%
+		Process,WaitClose,%cPID%,60 ; wait for 60 seconds, this is better than waiting indefinitely
 }
 DetectHiddenWindows,Off
 SetTitleMatchMode,Fast
@@ -2247,7 +2247,7 @@ loop ; retry running the cmd until it succeed
 			if cmdcountoverflow
 			{
 				;DetectHiddenWindows,On
-				WinWait,ahk_pid %tmpr% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+				WinWait,ahk_pid %tmpr% ahk_exe cmd.exe ahk_class ConsoleWindowClass,,10 ; wait for 10 seconds, this is better than waiting indefinitely
 			}
 		}
 	}
@@ -2284,7 +2284,7 @@ if !lowprocessor
 			if instr(extractpid,",",1)
 				tmpr:=substr(extractpid,1,instr(extractpid,",",1)-1) ; get the first pid at the extractpid list
 			else tmpr:=extractpid
-			WinWaitClose,% "ahk_pid " tmpr " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+			WinWaitClose,% "ahk_pid " tmpr " ahk_exe cmd.exe ahk_class ConsoleWindowClass",,60 ; wait for 60 seconds, this is better than waiting indefinitely ;wait indefinitely until it closes
 			;remove the first pid at extractpid list
 			extractpid:=RegExReplace(extractpid,"(\b" tmpr "\b,)|(,\b" tmpr "\b$)|(^\b" tmpr "\b$)|(\b" tmpr "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
 		}
@@ -5904,7 +5904,7 @@ getmemoryspecs(key:="Capacity") ; by aldrinjohnom
 	{
 		Run,%A_ComSpec%,,Hide UseErrorLevel,cPID
 		DetectHiddenWindows,On
-		WinWait,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass
+		WinWait,ahk_pid %cPID% ahk_exe cmd.exe ahk_class ConsoleWindowClass,,30 ; wait for 30 seconds, this is better than waiting indefinitely
 		DllCall("kernel32\AttachConsole", "UInt",cPID)
 		shell := ComObjCreate("WScript.Shell")
 		; Execute a single command via cmd.exe
@@ -7093,6 +7093,9 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.5.6
+*Unallowed the Tool to wait indefinitely for external plugins to launch, this fixes the bug where the script was stuck on certain operations and cannot proceed anymore.
+
 v2.5.5
 *Fixed a bug where Aldrin_Mods Folder was not created, and it is being assesed as a file by this tool.
 
