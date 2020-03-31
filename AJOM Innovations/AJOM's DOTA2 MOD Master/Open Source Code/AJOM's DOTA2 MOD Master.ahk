@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.5.4
+version=2.5.5
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -1436,10 +1436,10 @@ DetectHiddenWindows,%tempo%
 GuiControl,Text,searchnofound,Shutnik Method: Executing Batch File... It will take more time if there are many cosmetic items injected!
 loop
 {
-	if FileExist(A_ScriptDir "\Generated MOD\")
+	if !FileExist(A_ScriptDir "\Generated MOD\")
 		FileCreateDir,%A_ScriptDir%\Generated MOD
 	
-	if FileExist(modloc "\Aldrin_Mods\")
+	if !FileExist(modloc "\Aldrin_Mods\")
 		FileCreateDir,%modloc%\Aldrin_Mods
 	
 	runwait,vpk.exe pak01_dir,%A_ScriptDir%\Plugins\VPKCreator,Hide UseErrorLevel
@@ -7093,6 +7093,9 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.5.5
+*Fixed a bug where Aldrin_Mods Folder was not created, and it is being assesed as a file by this tool.
+
 v2.5.4
 *Fixed a Bug where all .vmdl files are not flagged as "compiled", resulting all units to have statued animation.
 *Fixed a Bug when the tool wants you to determe "dota 2 beta location", it does not fetch the selected location
