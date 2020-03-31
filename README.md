@@ -98,6 +98,13 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+v2.5.5
+- Fixed a bug where Aldrin_Mods Folder was not created, and it is being assesed as a file by this tool.
+
+v2.5.4
+- Fixed a Bug where all .vmdl files are not flagged as "compiled", resulting all units to have statued animation.
+- Fixed a Bug when the tool wants you to determe "dota 2 beta location", it does not fetch the selected location
+
 v2.5.3
 - Fixed a Bug that Library files sometimes does not extract. and get fetched.
 
