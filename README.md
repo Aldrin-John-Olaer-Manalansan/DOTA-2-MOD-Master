@@ -98,6 +98,9 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+v2.5.7
+-Effectively improved folder creation.
+
 v2.5.6
 - Unallowed the Tool to wait indefinitely for external plugins to launch, this fixes the bug where the script was stuck on certain operations and cannot proceed anymore.
 

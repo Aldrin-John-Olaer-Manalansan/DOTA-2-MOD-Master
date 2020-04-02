@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.5.6
+version=2.5.7
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -87,14 +87,16 @@ if !FileExist(dotnetfullpath) ; stage 1 - if programfiles dotnet is missing
 		if !FileExist(dotnetfullpath) ; stage 3 - if "where dotnet" cmd command cannot really detect dotnet
 		{
 			msgbox,16,DotNet Core Required!,Material File Extraction and Detection feature of this tool requires Dotnet Core installed on your computer. Please install the corresponding installers after pressing "OK" to maximize the full potential of DOTA2 MOD Master.
-			IfNotExist,%A_ScriptDir%\Plugins\Installers\
+			if !instr(fileexist(A_ScriptDir "\Plugins\Installers\"),"D") 
 			{
 				FileCreateDir,%A_ScriptDir%\Plugins\Installers
 			}
-			IfNotExist,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\
+			
+			if !instr(fileexist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\"),"D")
 			{
 				FileCreateDir,%A_Temp%\AJOM Innovations\DOTA2 MOD Master
 			}
+			
 			DLarray:=[]
 			if A_Is64bitOS
 			{
@@ -181,7 +183,7 @@ GoSub,default_settings
 param=%A_ScriptDir%\Library\,%A_ScriptDir%\Generated MOD\,%A_ScriptDir%\External Files\
 loop,parse,param,`,
 {
-	IfNotExist,%A_LoopField%
+	if !instr(fileexist(A_LoopField),"D")
 	{
 		FileCreateDir,%A_LoopField%
 	}
@@ -1352,7 +1354,7 @@ return
 createvpk:
 ifnotexist,%A_ScriptDir%\Plugins\VPKCreator\vpk.exe
 {
-	IfNotExist,%A_ScriptDir%\Generated MOD\
+	if !instr(fileexist(A_ScriptDir "\Generated MOD\"),"D")
 	{
 		FileCreateDir, %A_ScriptDir%\Generated MOD
 	}
@@ -1367,7 +1369,7 @@ ifnotexist,%A_ScriptDir%\Plugins\VPKCreator\vpk.exe
 }
 else ifnotexist,%giloc%
 {
-	IfNotExist,%A_ScriptDir%\Generated MOD\
+	if !instr(fileexist(A_ScriptDir "\Generated MOD\"),"D")
 	{
 		FileCreateDir, %A_ScriptDir%\Generated MOD
 	}
@@ -1382,7 +1384,7 @@ else ifnotexist,%giloc%
 }
 gosub,hideprogress
 GuiControl,Text,searchnofound,Shutnik Method: patching gameinfo.gi
-IfNotExist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\
+if !instr(fileexist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\items\"),"D")
 {
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items
 }
@@ -1391,7 +1393,7 @@ else ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game
 	FileDelete,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
 }
 FileAppend,%masterfilecontent%,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
-IfNotExist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\
+if !instr(fileexist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\npc\"),"D")
 {
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\
 }
@@ -1436,10 +1438,10 @@ DetectHiddenWindows,%tempo%
 GuiControl,Text,searchnofound,Shutnik Method: Executing Batch File... It will take more time if there are many cosmetic items injected!
 loop
 {
-	if !FileExist(A_ScriptDir "\Generated MOD\")
+	if !instr(fileexist(A_ScriptDir "\Generated MOD\"),"D")
 		FileCreateDir,%A_ScriptDir%\Generated MOD
 	
-	if !FileExist(modloc "\Aldrin_Mods\")
+	if !instr(fileexist(modloc "\Aldrin_Mods\"),"D")
 		FileCreateDir,%modloc%\Aldrin_Mods
 	
 	runwait,vpk.exe pak01_dir,%A_ScriptDir%\Plugins\VPKCreator,Hide UseErrorLevel
@@ -2237,8 +2239,9 @@ loop ; retry running the cmd until it succeed
 {
 	if !lowprocessor or (cmdmaxinstances!=1) ; if not lowprocessor or cmdmaxinstances not equal to 1(cmdmaxinstances=1 is synonymous to low processor mode since only one cmd can be actived at a time)
 	{
-		if !FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\" defaultloc "\")
+		if !instr(FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\" defaultloc "\"),"D")
 			FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%
+		
 		run,"%A_ComSpec%" /c ""%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%" -e "root\%extractfile%"&move /y "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%extractname%" "%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%defaultname%"",,Hide UseErrorLevel,tmpr
 		
 		if (cmdmaxinstances>1)
@@ -3437,7 +3440,7 @@ if masterfilecontent=%filechecker%
 }
 else
 {
-	IfNotExist,%A_ScriptDir%\Generated MOD\
+	if !instr(FileExist(A_ScriptDir "\Generated MOD\"),"D")
 	{
 		FileCreateDir, %A_ScriptDir%\Generated MOD
 	}
@@ -3523,7 +3526,7 @@ WinWaitClose, ahk_pid %skinextract% ; wait for the skinextract thread to close
 ;
 DetectHiddenWindows,%tempo%
 
-IfNotExist,%A_ScriptDir%\Generated MOD\
+if !instr(FileExist(A_ScriptDir "\Generated MOD\"),"D")
 {
 	FileCreateDir, %A_ScriptDir%\Generated MOD
 }
@@ -3532,7 +3535,7 @@ else ifexist,%A_ScriptDir%\Generated MOD\pak01_dir\
 	GuiControl,Text,searchnofound,Deleting pak01_dir Folder at Generated MOD Folder
 	FileRemoveDir,%A_ScriptDir%\Generated MOD\pak01_dir,1
 }
-IfNotExist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\
+if !instr(FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\items\"),"D")
 {
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\
 }
@@ -3541,7 +3544,7 @@ else ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game
 	FileDelete,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
 }
 FileAppend,%masterfilecontent%,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
-IfNotExist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\
+if !instr(FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\npc\"),"D")
 {
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\
 }
@@ -4213,7 +4216,7 @@ ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 	GuiControl,MainGUI:Text,searchnofound,Deleting pak01_dir Folder.
 	FileRemoveDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir,1
 }
-IfNotExist,%A_ScriptDir%\Generated MOD\
+if !instr(FileExist(A_ScriptDir "\Generated MOD\"),"D")
 {
 	FileCreateDir, %A_ScriptDir%\Generated MOD
 }
@@ -5240,7 +5243,7 @@ ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 	GuiControl,MainGUI:Text,searchnofound,Deleting pak01_dir Folder.
 	FileRemoveDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir,1
 }
-IfNotExist,%A_ScriptDir%\Generated MOD\
+if !instr(FileExist(A_ScriptDir "\Generated MOD\"),"D")
 {
 	FileCreateDir, %A_ScriptDir%\Generated MOD
 }
@@ -6202,7 +6205,7 @@ loop
 		DetectHiddenWindows,On
 		for index, in defaultmaterials
 		{
-			if !FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"")
+			if !instr(FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\""),""D"")
 				FileCreateDir,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1]
 			else FileDelete,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[A_Index,2]
 			
@@ -7093,6 +7096,9 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.5.7
+*Effectively improved folder creation.
+
 v2.5.6
 *Unallowed the Tool to wait indefinitely for external plugins to launch, this fixes the bug where the script was stuck on certain operations and cannot proceed anymore.
 
@@ -10245,7 +10251,7 @@ externalfiles:
 if useextfile=1
 {
 	Gui,MainGUI:Show,NA,AJOM's Dota 2 MOD Master ; remove that irritating items per second
-	IfNotExist,%A_ScriptDir%\Generated MOD\
+	if !instr(FileExist(A_ScriptDir "\Generated MOD\"),"D")
 	{
 		FileCreateDir, %A_ScriptDir%\Generated MOD
 	}
@@ -10265,7 +10271,7 @@ if useextfile=1
 		{
 			if useextportraitfile<>1
 			{
-				ifnotexist,%A_ScriptDir%\Plugins\VPKCreator\backup\
+				if !instr(FileExist(A_ScriptDir "\Plugins\VPKCreator\backup\"),"D")
 				{
 					FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\backup
 				}
@@ -10273,7 +10279,7 @@ if useextfile=1
 			}
 			if useextitemgamefile<>1
 			{
-				ifnotexist,%A_ScriptDir%\Plugins\VPKCreator\backup\
+				if !instr(FileExist(A_ScriptDir "\Plugins\VPKCreator\backup\"),"D")
 				{
 					FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\backup
 				}
@@ -10309,7 +10315,7 @@ return
 
 extlistrefresh:
 Gui, MainGUI:+Disabled
-IfNotExist,%A_ScriptDir%\External Files\
+if !instr(FileExist(A_ScriptDir "\External Files\"),"D")
 {
 	FileCreateDir,%A_ScriptDir%\External Files\
 }
