@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.5.7
+version=2.6.0
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -193,7 +193,7 @@ FileCopyDir,%A_ScriptDir%\Plugins\Sound,%A_Temp%\AJOM Innovations\DOTA2 MOD Mast
 ;generate library files
 generatelibraryfiles:
 ToolTip,DOTA2 MOD Master:`nExtracting Library Files,0,0
-param=root\scripts\items\items_game.txt,root\scripts\npc\activelist.txt,root\scripts\npc\portraits.txt
+param=root\scripts\items\items_game.txt,root\scripts\npc\items.txt,root\scripts\npc\activelist.txt,root\scripts\npc\portraits.txt
 pidlist:=[]
 global GlobalArray:=[]
 loop,parse,param,`,
@@ -391,7 +391,7 @@ loop,parse,checkparam,`,
 DllCall("QueryPerformanceFrequency", "Int64P", freq)
 Gui, MainGUI:+Resize +MinSize
 IniRead,choosetab,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,choosetab,3
-tablist=General|Search|Handy Injection|Migration|Miscellaneous|Advanced
+tablist=General|Search|Handy Injection|Migration|Miscellaneous|Item Builds|Hacks|Advanced
 Gui, MainGUI:Add, Tab2,x0 y0 h500 w550 -Wrap vOuterTab gSelectOuterTab choose%choosetab%, %tablist%
 Gui, MainGUI:Tab,2
 Gui, MainGUI:Add, Button,gbuttonsearch vtext9 x1 y30 h20 Default,Search for(keyword):
@@ -422,6 +422,44 @@ Gui, MainGUI:Font
 Gui, MainGUI:Add, Text,x6 y80 w540 vtext24,"Migration System" is a Technique specially supported by this tool which allows the user to easily migrate all "default_item" assets of his/her old "items_game.txt" into the new "items_game.txt"(commonly targeted on newer patches of DOTA2). what this system do is:`n`n1)It copies every single item that has "prefab=default_item"`n2)Analyze every single item's "Unique ID" and remembers it`n3)Scans for "default_item" occurence on the "new items_game.txt" and compares both "old items_game.txt VS. new items_game.txt" using "ID assets comparement method"`n4)If the assets of both "old ID"(from old items_game.txt) assets does not pair the "new ID"(from new items_game.txt) assets`, that is where the migration will start. It will inject the "old ID assets" inside the "new ID assets"`,in other words "Copy the old assets then replace all new assets by paste ".
 Gui, MainGUI:Tab,5
 Gui, MainGUI:Tab,6
+Gui, MainGUI:Add, ListBox,x1 y30 w155 r5 Choose4 AltSubmit gitemclasschoice vitemclasschoice,Starting Items|Early-Game Items|Mid-Game Items|Late-Game Items|Suggested Items
+Gui, MainGUI:Add, ComboBox,x1 y100 w155 h350 gheroitemchoice vheroitemchoice Choose1 Simple,%mapherochoice%
+GuiControlGet,heroitemchoice,MainGUI:,heroitemchoice
+Gui, MainGUI:Add, Text,x160 y25 w190 vitembuildherotext cblue,% "Item Build: " Format("{:T}",StrReplace(heroitemchoice,"_",A_Space))
+Menu, IBContextMenu, Add, Delete, IBbuttondelete
+Menu, IBContextMenu, Add, Move Up, IBmoveup
+Menu, IBContextMenu, Add, Move Down, IBmovedown
+Gui, MainGUI:Add, ListView,x160 y42 w190 h410 -LV0x10 AltSubmit vitembuildlist gitembuildlist,Alias|Cost|Quality|ID|Unique Name
+Gui, MainGUI:Add, Text,x425 y25 vtext58 cgreen,Item List
+Gui, MainGUI:Add, ListView,x355 y42 w190 h410 -LV0x10 AltSubmit checked vallitemlist gaddtoitembuild,Alias|Cost|Quality|ID|Unique Name
+gosub,generateallitemlist
+Gui, MainGUI:Font,Bold
+Gui, MainGUI:Add, Button,x97 y475 gsaveitembuild vtext59 hwndHBTN,Save Hero Item Build
+tmpr=
+(
+Save this custom hero item build by generating an overriding "default_hero.txt" found at "dota 2 beta\game\Aldrin_Mods\itembuilds" directory.
+)
+WM_MOUSEMOVE("text59",tmpr)
+SetBtnTxtColor(HBTN, "Green")
+Gui, MainGUI:Add, Button,x247 y475 w165 gresetitembuild vresetitembuild hwndHBTN,Load Default Hero Item Build
+tmpr=
+(
+Load the Default item build for the current hero found at "dota 2 beta\game\dota\itembuilds".
+)
+WM_MOUSEMOVE("resetitembuild",tmpr)
+SetBtnTxtColor(HBTN, "Red")
+Gui, MainGUI:Font
+Gui, MainGUI:Tab,7
+Gui, MainGUI:Add, Text, x1 y60 cred,
+(
+NOTICE:
+There is a possibility that valve will ban your account when you use the features found on this section. USE AT YOUR OWN RISK!
+)
+Gui, MainGUI:Add, Edit, x1 y30 w100 Number gnumberlimiter vdummynl
+Gui, MainGUI:Add, UpDown, x1 y30 w100 0x80 vcameradistance Range1200-9999,0
+WM_MOUSEMOVE("cameradistance","Sets the elevation height of the camera, higher values allows you to see more areas in your screen.`n`nDefault Value: 1200`nRecommended values: 1200-2500")
+Gui, MainGUI:Add, Button, x110 y30 h21 ginjectcameradistance,Inject Camera Distance
+Gui, MainGUI:Tab,8
 Gui, MainGUI:Add, CheckBox, checked%autovpk% x9 y70 gautovpkon vautovpkon,Auto-Shutnik Method(Requires "VPKCreator" present on same Directory)(SELF-ACTIVE)
 tmpr=
 (
@@ -450,7 +488,7 @@ WM_MOUSEMOVE("autovpkon",tmpr)
 
 GUI, MainGUI:Add, Text,x80 y90,Maximum Threads
 GUI, MainGUI:Add, edit,number Center -WantReturn x1 y90 w75 h15
-GUI, MainGUI:Add, updown,0x80 vcmdmaxinstances x1 y90 w75 h15 range2-4294967297,%cmdmaxinstances%
+GUI, MainGUI:Add, updown,0x80 vcmdmaxinstances x1 y90 w75 h15 range0-4294967295,%cmdmaxinstances%
 tmpr=
 (
 *Specify how many threads can be actived at a time. High number of threads will make items such models and particles-effects extraction faster but will consume lots of memory and processing power.
@@ -598,7 +636,7 @@ WM_MOUSEMOVE("text30","All Settings found at ""Advanced"" Section will be Saved`
 Gui, MainGUI:Font,Bold
 Gui, MainGUI:Add, Button, x430 y475 h23 ginvccabout vtext31 hwndHBTN, About MOD Master
 SetBtnTxtColor(HBTN, "Gold")
-Gui, MainGUI:Add, Text,x450 y5 hwndHBTN vtext45,v%version%
+Gui, MainGUI:Add, Text,x500 y5 hwndHBTN vtext45,v%version%
 SetBtnTxtColor(HBTN, "Bronze")
 Gui, MainGUI:Font
 Gui, MainGUI:Add, Text,vsearchnofound x4 y455 w540,%defaultshoutout%
@@ -852,8 +890,8 @@ SetBtnTxtColor(HBTN, "Blue")
 Gui, MainGUI:Font
 Menu, MyContextMenu, Add, Delete, hbuttondelete
 Menu, MyContextMenu, Add, Change Style, hbuttonstyle
-Menu, MyContextMenu, Add, Increase Priority, hincprio
 Menu, MyContextMenu, Add, Decrease Priority, hdecprio
+Menu, MyContextMenu, Add, Increase Priority, hincprio
 Gui, MainGUI:Tab,3
 Gui, MainGUI:Add, Text, x1 y45,Calibrator Settings
 Gui, MainGUI:Add, ListView,NoSort vstatscalibrator gstatscalibrator x1 y60 w150 h390 checked AltSubmit,Item Slot
@@ -955,6 +993,7 @@ OnMessage("0x4E", "LVA_OnNotify")
 Gui, MainGUI:Submit, NoHide
 gosub, SelectOuterTab
 Tooltip
+GuiControl,,cameradistance,% cameradistancehack()
 Gui,MainGUI:Show, h500 w550,AJOM's Dota 2 MOD Master
 Gui, MainGUI: +hwndMainGUIHWND
 gosub,activatemiscgui
@@ -1045,6 +1084,302 @@ if version<>%usedversion%
 gosub,leakdestroyer
 gosub,showtooltips
 Gui, MainGUI:Default
+return
+
+saveitembuild:
+if !IsObject(ItemBuilds)
+	return
+GuiControlGet,itembuildherotext,MainGUI:,itembuildherotext
+itembuildherotext:=StrReplace(itembuildherotext,"Item Build: ")
+heroitemchoice:=StrReplace(Format("{:L}",itembuildherotext),A_Space,"_")
+FileContent=
+(
+"itembuilds"
+{
+	"author"		"Aldrin John Olaer Manalansan"
+	"hero"			"npc_dota_hero_%heroitemchoice%"
+	"Title"			"Item Build for %itembuildherotext% generated by DOTA2 MOD Master v%version%"
+	
+	"Items"
+	{
+)
+param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Other_Items"
+Loop,Parse,param,`,
+{
+	parseindex:=A_Index
+	FileContent .= (parseindex>1?"`r`n		":"") "`r`n		""#DOTA_Item_Build_" . A_LoopField . """`r`n		{"
+	Loop % ItemBuilds[parseindex].Count()
+		FileContent .= "`r`n			""item""		""" . ItemBuilds[parseindex,A_Index] . """"
+	FileContent .= "`r`n		}"
+}
+FileContent .= "`r`n	}`r`n}"
+tmpr1:=dota2dir "\game\Aldrin_Mods\itembuilds\"
+if !FileExist(tmpr1)
+	FileCreateDir,%tmpr1%
+tmpr1.="default_" heroitemchoice ".txt"
+if FileExist(tmpr1)
+	FileDelete,%tmpr1%
+FileAppend,%FileContent%,%tmpr1%
+OldItemBuilds := ObjFullyClone(ItemBuilds)
+if soundon=1
+	SoundPlay,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Sound\OperationFinished.wav
+else SoundPlay,*48
+return
+
+addtoitembuild:
+Critical
+if (A_GuiEvent!="I")
+	return
+if InStr(ErrorLevel, "C", true)
+{
+	Gui, MainGUI:+Disabled
+	tmpr1:=[]
+	if A_DefaultListView<>allitemlist
+		Gui,MainGUI:ListView,allitemlist
+	Loop 5
+	{
+		LV_GetText(tmpr2,A_EventInfo,A_Index)
+		tmpr1[A_Index]:=tmpr2
+	}
+	Gui, MainGUI:ListView,itembuildlist
+	LV_Add(,tmpr1*)
+	ItemBuilds[itemclasschoice].Push(tmpr1[5])
+	gosub,lvautosize
+	Gui, MainGUI:-Disabled
+}
+else if InStr(ErrorLevel, "c", true)
+{
+	Gui, MainGUI:+Disabled
+	if A_DefaultListView<>%A_GuiControl%
+		Gui, MainGUI:ListView,allitemlist
+	LV_GetText(tmpr1,A_EventInfo,5)
+	arraydeletevalue(ItemBuilds[itemclasschoice],tmpr1)
+	Gui, MainGUI:ListView,itembuildlist
+	loop % LV_GetCount()
+	{
+		LV_GetText(tmpr2,A_Index,5)
+		if (tmpr1=tmpr2)
+		{
+			LV_Delete(A_Index)
+			break
+		}
+	}
+	Gui, MainGUI:-Disabled
+}
+return
+
+itembuildlist:
+if (A_GuiControl=A_ThisLabel) and (A_GuiEvent="RightClick")
+	Menu, IBContextMenu, Show
+return
+
+IBbuttondelete:
+Gui,MainGUI:+Disabled
+Gui, MainGUI:Default
+GuiControl, MainGUI:-Redraw,itembuildlist
+GuiControlGet,itemclasschoice,MainGUI:,itemclasschoice
+invrownumber = 0
+Loop
+{
+	Gui, MainGUI:ListView, itembuildlist
+    invrownumber := LV_GetNext(invrownumber - 1)
+    if not invrownumber
+        break
+    LV_GetText(tmpr1,invrownumber,5)
+    arraydeletevalue(ItemBuilds[itemclasschoice],tmpr1)
+    LV_Delete(invrownumber)
+	Gui, MainGUI:ListView, allitemlist
+	loop % LV_GetCount()
+	{
+		LV_GetText(tmpr2,A_Index,5)
+		if (tmpr1==tmpr2)
+		{
+			LV_Modify(A_Index,"-Check")
+			break
+		}
+	}
+}
+GoSub,lvautosize
+GuiControl, MainGUI:+Redraw,itembuildlist
+Gui,MainGUI:-Disabled
+return
+
+IBmovedown:
+lvrowswapper("itembuildlist",False)
+return
+
+IBmoveup:
+lvrowswapper("itembuildlist")
+return
+
+heroitemchoice:
+if (A_GuiEvent<>"DoubleClick")
+	return
+resetitembuild:
+oldheroitemchoice:=heroitemchoice
+GuiControlGet,heroitemchoice,MainGUI:,heroitemchoice
+if !equal2darray(ItemBuilds,OldItemBuilds)
+{
+	MsgBox,547,Confirmation,
+(
+You still haven't saved %heroitemchoice%'s item build.
+
+Press Yes to Save the Modified Item Build.
+Press No to Reject the Modified Item Build.
+Press Cancel to continue modifying this item build
+)
+	IfMsgBox,Yes
+		gosub,saveitembuild
+	else IfMsgBox,Cancel
+	{
+		GuiControl,MainGUI:ChooseString,heroitemchoice,%oldheroitemchoice%
+		return
+	}
+}
+
+if A_DefaultListView<>itembuildlist
+	Gui,MainGUI:ListView,itembuildlist
+LV_Delete()
+ItemBuilds:=[]
+if (heroitemchoice="None")
+	return
+tmpr:=dota2dir "\game\Aldrin_Mods\itembuilds\default_" heroitemchoice ".txt"
+if !FileExist(tmpr) or (A_GuiControl="resetitembuild")
+{
+	tmpr:=dota2dir "\game\dota\itembuilds\default_" heroitemchoice ".txt"
+	if !FileExist(tmpr)
+		return
+}
+FileRead,FileContent,%tmpr%
+param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Other_Items"
+loop,parse,param,`,
+{
+	parseindex:=A_Index
+	pos1:=InStr(FileContent,"""#DOTA_Item_Build_" A_LoopField """",False)
+	pos2:=InStr(FileContent,"}",False,pos1)
+	ItemContent:=SubStr(FileContent,pos1,pos2-pos1)
+	Loop
+	{
+		if (pos1:=inStr(ItemContent,"""item""",False,,A_Index))
+		{
+			pos1:=inStr(ItemContent,"""",True,pos1,3)+1
+			ItemBuilds[parseindex,A_Index]:=SubStr(ItemContent,pos1,inStr(ItemContent,"""",True,pos1)-pos1)
+		}
+		else break
+	}
+}
+OldItemBuilds := ObjFullyClone(ItemBuilds)
+GuiControl,MainGUI:Text,itembuildherotext,% "Item Build: " Format("{:T}",StrReplace(heroitemchoice,"_",A_Space))
+showitemclassbuildinfo:
+Gui, MainGUI:+Disabled
+GuiControl,MainGUI:-g,allitemlist
+GuiControl,-Redraw,itembuildlist
+GuiControl,-Redraw,allitemlist
+if A_DefaultListView<>itembuildlist
+	Gui,MainGUI:ListView,itembuildlist
+LV_Delete()
+FileContent:=GlobalArray["items.txt"]
+GuiControlGet,itemclasschoice,MainGUI:,itemclasschoice
+For tmp,ItemName in ItemBuilds[itemclasschoice]
+{
+	if (pos1:=InStr(FileContent,"`r`n	""" ItemName """",False))
+	{
+		pos2:=InStr(FileContent,"`r`n	}",True,pos1)
+		ItemContent:=SubStr(FileContent,pos1,pos2-pos1)
+		gosub,getitemalias
+		LV_Add(,ItemAlias,searchstringdetector(ItemContent,"""ItemCost"""),searchstringdetector(ItemContent,"""ItemQuality"""),searchstringdetector(ItemContent,"""ID"""),ItemName)
+	}
+}
+GoSub,lvautosize
+LV_ModifyCol(2,"Integer"),LV_ModifyCol(4,"Integer")
+Gui,MainGUI:ListView,allitemlist
+count:=ItemBuilds[itemclasschoice].Count()
+loop % LV_GetCount()
+{
+	parseindex:=A_Index
+	LV_GetText(ItemName,A_index,5)
+	loop %count%
+	{
+		if (ItemBuilds[itemclasschoice,A_Index]=ItemName)
+		{
+			LV_Modify(parseindex,"+Check")
+			break
+		}
+		else if (A_Index=count)
+			LV_Modify(parseindex,"-Check")
+	}
+}
+Gui,MainGUI:ListView,itembuildlist
+GuiControl,+Redraw,itembuildlist
+GuiControl,+Redraw,allitemlist
+GuiControl,MainGUI:+gaddtoitembuild,allitemlist
+Gui, MainGUI:-Disabled
+return
+
+itemclasschoice:
+if (A_GuiEvent<>"Normal")
+	return
+goto,showitemclassbuildinfo
+
+generateallitemlist:
+Gui, MainGUI:Default
+GuiControl,-Redraw,allitemlist
+if A_DefaultListView<>allitemlist
+	Gui,MainGUI:ListView,allitemlist
+FileContent:=GlobalArray["items.txt"]
+while (pos1 := InStr(FileContent,"""`r`n	{",True))
+{
+	pos2 := InStr(FileContent,"""",True,pos1-strlen(FileContent)-1)+1
+	ItemName:=SubStr(FileContent,pos2,pos1-pos2)
+	pos2 := InStr(FileContent,"`r`n	}",True,pos1)
+	ItemContent := SubStr(FileContent,pos1,pos2-pos1)
+	FileContent := SubStr(FileContent,pos2)
+
+	gosub,getitemalias
+
+	if (searchstringdetector(ItemContent,"""ItemRecipe""")<>1) and (searchstringdetector(ItemContent,"""ItemPurchasable""")<>0)
+		LV_Add(,ItemAlias,searchstringdetector(ItemContent,"""ItemCost"""),searchstringdetector(ItemContent,"""ItemQuality"""),searchstringdetector(ItemContent,"""ID"""),ItemName)
+}
+GoSub,lvautosize
+LV_ModifyCol(2,"Integer"),LV_ModifyCol(4,"Integer")
+LV_ModifyCol(3,"Sort")
+VarSetCapacity(FileContent,0),VarSetCapacity(ItemContent,0)
+GuiControl,MainGUI:+Redraw,allitemlist
+return
+
+getitemalias:
+ItemAlias:=Format("{:T}",StrReplace(StrReplace(ItemName,"item_"),"_"," "))
+tmpr:=searchstringdetector(ItemContent,"""ItemAliases""")
+if (pos2:=InStr(tmpr,";",True,0))
+	tmpr:=SubStr(tmpr,pos2+1)
+tmpr:=Format("{:T}",tmpr)
+if (StrLen(tmpr)>StrLen(ItemAlias))
+	ItemAlias:=tmpr
+return
+
+numberlimiter:
+focustedcontrol:=A_GuiControl
+Loop
+{
+	GuiControlGet,cameradistance,FocusV
+	if (cameradistance<>focustedcontrol)
+		break
+}
+GuiControlGet,cameradistance,,%focustedcontrol%
+if (cameradistance > 9999)
+	GuiControl,,%focustedcontrol%,9999
+else if (cameradistance < 1200)
+	GuiControl,,%focustedcontrol%,1200
+return
+
+injectcameradistance:
+Gui, MainGUI:+Disabled
+GuiControlGet,cameradistance,,%cameradistance%
+cameradistancehack(cameradistance)
+if soundon=1
+	SoundPlay,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Sound\OperationFinished.wav
+else SoundPlay,*48
+Gui, MainGUI:-Disabled
 return
 
 rescanresources:
@@ -3212,28 +3547,21 @@ Loop %customherocount%
 	IniRead,tmp2,%A_ScriptDir%\CustomHeroes.aldrin_dota2mod,CustomHeroes,CustomHero%A_Index%
 	tmp := StrReplace(tmp,chbar,chbar,existencecount)
 	LV_Add(,tmp2,existencecount)
-	GoSub,lvautosize
 }
+GoSub,lvautosize
 Gui, MainGUI:-Disabled 
 return
 
 chbuttondelete:
 Gui, MainGUI:Default
 if A_DefaultListView<>chview
-{
 	Gui, MainGUI:ListView, chview
-}
 gosub,deleterow
 return
 
 chview:
-if A_GuiControl=chview
-{
-	if A_GuiEvent=RightClick
-	{
-		Menu, chContextMenu, Show
-	}
-}
+if (A_GuiControl=A_ThisLabel) and (A_GuiEvent="RightClick")
+	Menu, chContextMenu, Show
 return
 
 chadd:
@@ -3476,9 +3804,7 @@ return
 hbuttondelete:
 Gui, MainGUI:Default
 if A_DefaultListView<>itemview
-{
 	Gui, MainGUI:ListView, itemview
-}
 gosub,deleterow
 checkdetector() ; check any field that exist on the listview "itemview"
 return
@@ -7096,6 +7422,11 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.6.0
+*Added "Item Builds" Section. You can now create your custom hero item build guide.
+*Added "Hacks" Section. All possible exploits that can be done to DOTA2 can be found in this section.
+	-Camera Distance Hack
+
 v2.5.7
 *Effectively improved folder creation.
 
@@ -7178,6 +7509,7 @@ Gui,aboutgui:Add, Link,vtext54,*<a href="https://github.com/SteamDatabase/ValveR
 Gui,aboutgui:Add, Link,vtext55,*<a href="http://nemesis.thewavelength.net/index.php?p=35">Nem's HLLib</a>
 Gui,aboutgui:Add, Link,vtext56,*<a href="http://gnuwin32.sourceforge.net/packages/unzip.htm">Unzip by Info-Zip</a>
 Gui,aboutgui:Add, Link,vtext57,*<a href="https://dota2modss.blogspot.com/2016/05/how-to-install-mods-dota-2-reborn-with.html">VPKCreator by Steam</a>
+Gui,aboutgui:Add, Link,vtext60,*<a href="http://stahlworks.com/dev/swiss-file-knife.html">Swiss File Knife by StahlWorks Technologies</a>
 Gui, aboutgui:Tab
 Gui, aboutgui:Add, Button, vtext43 x230 y420, OK
 Gui,aboutgui:Show,h450 w500,About AJOM's Dota 2 MOD Master
@@ -10134,11 +10466,128 @@ EmptyMem(PID=""){ ; removes junk memories making the injector run lightly
 	
     DllCall("CloseHandle", "Int", h)
 }
+
+cameradistancehack(patch4bytehex:="")
+{
+	Gui,MainGUI:Default
+	GuiControlGet,dota2dir,,dota2dir
+	file:= dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll"
+	binfile := FileOpen(file,"rw")
+	oldoffset := gethexoffset(file,"00000000725f70726f70736d617864697374") ; "0x00000000 . r_propsmaxdist"
+	binfile.Pos := oldoffset
+	loop
+	{
+		binfile.Pos--
+		if (binfile.ReadUChar()=0) ; a null terminator
+		{
+			if (A_Index > 1) and (patch4bytehex >= 0) and (patch4bytehex <= 0xFFFFFFFF)
+			{
+				offset := binfile.Pos
+				binfile.Pos := oldoffset
+				binlength:=binfile.Length-oldoffset
+				binfile.RawRead(bindata,binlength)
+				oldoffset := offset+strlen(patch4bytehex)
+				binfile.Pos := oldoffset
+				binfile.RawWrite(bindata,binlength)
+				binfile.Length:=oldoffset+binlength
+				binfile.Pos := offset
+				binfile.Write(patch4bytehex)
+				binfile.Pos := offset
+			}
+			break
+		}
+		else binfile.Pos--
+	}
+	return binfile.Read(4)
+}
+
+gethexoffset(file,hex)
+{
+	sfkdir:= A_ScriptDir "\Plugins\Swiss File Knife"
+	if FileExist(sfkdir "\dump_offset.txt")
+		FileDelete,%sfkdir%\dump_offset.txt
+	run,"%A_Comspec%" /c ""%sfkdir%\sfk.exe" hexfind "%file%" -firsthit -quiet -bin /%hex%/ > "%sfkdir%\dump_offset.txt"",,hide,cmdpid
+
+	DetectHiddenWindows,On
+	SetTitleMatchMode, 2
+	SetTitleMatchMode, Slow
+	Process,Exist,%cmdpid%
+	If ErrorLevel
+		Process,WaitClose,%cmdpid%
+	DetectHiddenWindows,Off
+	
+	FileRead,report,%sfkdir%\dump_offset.txt
+	posin:=instr(report,"hit at offset ")+14
+	if posin<=14
+		return 0
+	posout:=instr(report,"`r`n",,posin)
+	offset:=SubStr(report,posin,posout-posin)
+	FileDelete,%sfkdir%\dump_offset.txt
+
+	return offset
+}
+
+equal2darray(array1,array2)
+{
+	if (array1.Count() != array2.Count())
+		return False
+	for key1,subarray1 in array1
+	{
+		for key2,subarray2 in array2
+		{
+			if (key1==key2)
+			{
+				if !equalarray(subarray1,subarray2)
+					return False
+			}
+		}
+	}
+	return True
+}
+
+equalarray(array1,array2)
+{
+	if (array1.Count() != array2.Count())
+		return False
+	for key1,value1 in array1
+	{
+		for key2,value2 in array2
+		{
+			if (key1==key2) and (value1!=value2)
+				return False
+		}
+	}
+	return True
+}
+
+arraydeletevalue(ByRef array,value := "",recursive := False)
+{
+	loop % array.Count()
+	{
+		if (array[A_Index]=value)
+		{
+			array.RemoveAt(A_Index)
+			if !recursive
+				break
+		}
+	}
+	return
+}
+
+ObjFullyClone(obj)
+{
+	nobj := ObjClone(obj)
+	;nobj := obj.Clone()
+	for k,v in nobj
+		if IsObject(v)
+			nobj[k] := ObjFullyClone(v)
+	return nobj
+}
 ;;~~~~~~~~~~~~~~~~~~~~~~~End of Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 aboutguiguisize:
 Gui,aboutgui:Default
-AutoXYWH("w",["text39","text40","text41","text42","text33","text34","text50","text53","text54","text55","text56","text57"]) ; resize all links
+AutoXYWH("w",["text39","text40","text41","text42","text33","text34","text50","text53","text54","text55","text56","text57","text60"]) ; resize all links
 AutoXYWH("x0.5 y","text43") ; resize buttons
 AutoXYWH("wh",["text35","text36","text37","text38","tababout","text44"]) ; resize texts
 ;if sO_ci_siwfwimbuqparam=
@@ -10174,10 +10623,10 @@ if !IsObject(xv1d2_wv1d2_param)
 	xv1d2_wv1d2_param:=["injectto"]
 	
 if !IsObject(xv1d2_wv1d2_h_param)
-	xv1d2_wv1d2_h_param:=["showitems","announcerview","reportshow","terrainchoice","weatherchoice","multikillchoice","emblemchoice","musicchoice","cursorchoice","loadingscreenchoice","courierchoice","wardchoice","hudchoice","radcreepchoice","direcreepchoice","radtowerchoice","diretowerchoice","versuscreenchoice","emoticonchoice"]
+	xv1d2_wv1d2_h_param:=["showitems","announcerview","reportshow","terrainchoice","weatherchoice","multikillchoice","emblemchoice","musicchoice","cursorchoice","loadingscreenchoice","courierchoice","wardchoice","hudchoice","radcreepchoice","direcreepchoice","radtowerchoice","diretowerchoice","versuscreenchoice","emoticonchoice","allitemlist"]
 	
 if !IsObject(wv1d2_h_param)
-	wv1d2_h_param:=["herochoice","tauntview","errorshow","singlesourcechoicegui","multiplestyleschoicegui"]
+	wv1d2_h_param:=["herochoice","tauntview","errorshow","singlesourcechoicegui","multiplestyleschoicegui","itembuildlist"]
 	
 if !IsObject(x_y_param)
 	x_y_param:=["text31","text51"]
@@ -10193,19 +10642,21 @@ if !IsObject(w_h_param)
 }
 	
 if !IsObject(wv1d2_param)
-	wv1d2_param:=["injectfrom"]
+	wv1d2_param:=["injectfrom","itembuildherotext"]
 	
 if !IsObject(xv1d2_param)
 	xv1d2_param:=["text4","text32"]
+if !IsObject(xv3d4_param)
+	xv3d4_param:=["text58"]
 if !IsObject(xv5d16_param)
 	xv5d16_param:=["extlistup","extlistdown"]
 if !IsObject(xv11d16_param)
 	xv11d16_param:=["extlistrefresh"]
 	
 if !IsObject(xv1d3_y_param)
-	xv1d3_y_param:=["text7","text17","text20"]
+	xv1d3_y_param:=["text7","text17","text20","text59"]
 if !IsObject(xv2d3_y_param)
-	xv2d3_y_param:=["text8","text16","text19"]
+	xv2d3_y_param:=["text8","text16","text19","resetitembuild"]
 if !IsObject(xv1d2_y_param)
 	xv1d2_y_param:=["text23","usemiscon","text26","useextfile"]
 	
@@ -10216,10 +10667,10 @@ if !IsObject(y_param)
 if !IsObject(w_param)
 	w_param:=["searchbar","idbar","namebar","prefabbar","itemslotbar","modelpathbar","heroesbar","invdirview","mdirview","text24","giloc","dota2dir","useextitemgamefile","useextportraitfile"]
 if !IsObject(h_param)
-	h_param:=["statscalibrator"]
+	h_param:=["statscalibrator","heroitemchoice"]
 
 if quv_widqw_vngowuparam=
-	quv_widqw_vngowuparam=w_h_param,x_y_param,y_w_param,x_param,y_param,xv1d2_wv1d2_h_param,w_param,wv1d2_param,xv1d2_wv1d2_param,xv1d2_param,xv1d2_y_param,wv1d2_h_param,xv1d3_y_param,xv2d3_y_param,x_h_param,xv5d16_param,xv11d16_param,h_param
+	quv_widqw_vngowuparam=w_h_param,x_y_param,y_w_param,x_param,y_param,xv1d2_wv1d2_h_param,w_param,wv1d2_param,xv1d2_wv1d2_param,xv1d2_param,xv3d4_param,xv1d2_y_param,wv1d2_h_param,xv1d3_y_param,xv2d3_y_param,x_h_param,xv5d16_param,xv11d16_param,h_param
 loop,parse,quv_widqw_vngowuparam,`,
 {
 	StringTrimRight,command,A_LoopField,5
@@ -10567,23 +11018,22 @@ if (InStr(ErrorLevel, "C", true)) or (InStr(ErrorLevel, "c", true))
 return
 
 hincprio:
-Gui, MainGUI:Default
-Gui, MainGUI:Submit,NoHide
-Gui, MainGUI:ListView,itemview
-lvrowswapper(A_DefaultListView,"7",1)
+lvrowswapper("itemview",False)
 return
 
 hdecprio:
 Gui, MainGUI:Default
 Gui, MainGUI:Submit,NoHide
 Gui, MainGUI:ListView,itemview
-lvrowswapper(A_DefaultListView,"7")
+lvrowswapper("itemview")
 return
 
-lvrowswapper(listview,columncount,isincrement:=0)
+lvrowswapper(listview,movedown:=True)
 {
+	Gui, MainGUI:Default
 	Gui, MainGUI:ListView,%listview%
-	if (isincrement=0)
+	columncount:=LV_GetCount("Col")
+	if movedown
 	{
 		Loop % LV_GetCount()
 		{

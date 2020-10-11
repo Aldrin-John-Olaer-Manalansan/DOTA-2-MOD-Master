@@ -82,7 +82,7 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 ###### Current Issues that exist(7.03 patch):
 
 - This Tool needs to ReRun and ReInject all Item Sets every New Update/Patch with newly arrived items. It is because "items_game.txt" which is the script inside the MOD needs to be Reupdated/Repatched, the injector's work is to ReUpdate the Script to be compatible with the newly arrived items listed at the new "items_game.txt".
- - IF THIS INSTRUCTION IS NOT FOLLOWED, YOU WILL ENCOUNTER WHEN LAUNCHING DOTA2 "ERROR PARSING SCRIPT" WHICH WILL IMMEDIATELY CRASH YOUR DOTA2 AND WILL REMAIN UNPLAYABLE UNTIL YOU EITHER "REMOVE THE MOD FROM YOUR DOTA2" OR "RELAUNCH THE TOOL AND REINJECT ALL ITEM SETS". Take Responsibility on the Risks!!!
+	- IF THIS INSTRUCTION IS NOT FOLLOWED, YOU WILL ENCOUNTER WHEN LAUNCHING DOTA2 "ERROR PARSING SCRIPT" WHICH WILL IMMEDIATELY CRASH YOUR DOTA2 AND WILL REMAIN UNPLAYABLE UNTIL YOU EITHER "REMOVE THE MOD FROM YOUR DOTA2" OR "RELAUNCH THE TOOL AND REINJECT ALL ITEM SETS". Take Responsibility on the Risks!!!
 - Bristleback's "Piston Impaler" item does not stack with "Mace of the Wrathrunner(morning-star like)" item. This is due to the unhandled process of bristleback's "piston impaler animation" vs bristleback's "morning-star animation".
 - When playing "Online" Mode, some item skin parts for heroes do not show if "it has no default cosmetic item". In other words, this following posibilities will occur:
 -Ancient Apparition's "Shattering Blast Crown" "Head" item does not show up because "there is no default head item attached to Ancient Apparition".
@@ -97,6 +97,11 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 
 <div align="center">
 <b>CHANGELOG</b></div>
+
+v2.6.0
+- Added "Item Builds" Section. You can now create your custom hero item build guide.
+- Added "Hacks" Section. All possible exploits that can be done to DOTA2 can be found in this section.
+	- Camera Distance Hack
 
 v2.5.7
 - Effectively improved folder creation.
@@ -286,32 +291,10 @@ v0.0.1
 <div align="center">
 <b>CREDITS</b></div>
 
-This are lifetime credits to those people who suffered bugs and are concerned to report to us. Making this tool More better every time!
-
-v2.1.0
-- 7u7u74n9- inspected a bug where the injector only extracts npc_dota assets. Eg. Spirits of the Mothbinder's vmdl counterpart is "dota_death_prophet_exorcism_spirit" that has no "npc" at the beggining, making the injector to ignore this asset.
-
-v2.0.0
-- Alpha Bravo- as I currently use his "WM_MOUSEMOVE" Function.
-- Obi-Wahn- for his "LV_MoveRow" Function that is integrated on this tool.
-- Pulover [Rodolfo U. Batista]- for his "Eval" Function that I currently used evaluating strings into numbers.
-- V for Vendetta- for his "VarWrite" and "VarRead" Function.
-
-
-v1.7.2
-- Klark92-as I currently use his "Draw" Function
-
-v1.6.1
-- 7u7u74n9-inspected how the injector generates all files and confirmed its inaccuracy. Reported main cost problems including missing .vmdl files extracted at pak01_dir, Alternate Models(for three level grow of tiny,night stalker at night,terrorblade's demon form,lycan's shapeshift,lone druid' druid form,ect) failed to extract. Suggested Keyholes and some details.
-
-v1.3.4
-- Kush Manek-reported the bug where when he relocated his steam folder to another path,the tool cant identify the location anymore. Concluding "Cats are not good on hide and seek".
-
-v1.0.1
-- John Kris Uytiepo-reported specific heroes which has bugs which the items does not show when playing online. This Bug was fixed by optimizing detection to prevent dislocations on its specific location.
-
-v0.1.1
-- Edwin Santos-reported the bug of not showing items even if a good procedure was met.
-
-v0.1.1
-- Titan-as I currently use his "Anchor" Logic Function
+- All Loyal Supporters of this Tool, my Love is eternity!
+- [AutoHotkey Community](https://www.autohotkey.com/boards/ "AutoHotkey Community")
+- [xPaw's Valve's Source 2 resource file format Decompiler](https://github.com/SteamDatabase/ValveResourceFormat "xPaw's Valve's Source 2 resource file format Decompiler")
+- [Nem's HLLib](http://nemesis.thewavelength.net/index.php?p=35 "Nem's HLLib")
+- [Unzip by Info-Zip](http://gnuwin32.sourceforge.net/packages/unzip.htm "Unzip by Info-Zip")
+- [VPKCreator by Steam](https://dota2modss.blogspot.com/2016/05/how-to-install-mods-dota-2-reborn-with.html "VPKCreator by Steam")
+- [Swiss File Knife by StahlWorks Technologies](http://stahlworks.com/dev/swiss-file-knife.html "Swiss File Knife by StahlWorks Technologies")
