@@ -1,3 +1,0 @@
-"C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta\game\bin\win64\DotA 2 AutoHotkeys\AJOM's Tools\Dota2 MOD Injector\Plugins\hllib246\bin\x64\HLExtract.exe" -p "C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta\game\dota\pak01_dir.vpk" -d "C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta\game\bin\win64\DotA 2 AutoHotkeys\AJOM's Tools\Dota2 MOD Injector\Library\tested" -e "root\scripts\items\items_game.txt"
-
-"C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta\game\bin\win64\DotA 2 AutoHotkeys\AJOM's Tools\Dota2 MOD Injector\Plugins\hllib246\bin\x64\HLExtract.exe" -p "C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta\game\dota\pak01_dir.vpk" -c find "items_game.txt"
