@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.6.0
+version=2.6.1
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -7422,6 +7422,9 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.6.1
+*Improved Camera Distance Detection.
+
 v2.6.0
 *Added "Item Builds" Section. You can now create your custom hero item build guide.
 *Added "Hacks" Section. All possible exploits that can be done to DOTA2 can be found in this section.
@@ -10473,8 +10476,16 @@ cameradistancehack(patch4bytehex:="")
 	GuiControlGet,dota2dir,,dota2dir
 	file:= dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll"
 	binfile := FileOpen(file,"rw")
-	oldoffset := gethexoffset(file,"00000000725f70726f70736d617864697374") ; "0x00000000 . r_propsmaxdist"
+	oldoffset := gethexoffset(file,"725f70726f70736d617864697374") ; "r_propsmaxdist"
 	binfile.Pos := oldoffset
+	loop
+	{
+		binfile.Pos--
+		if (binfile.ReadUChar()!=0) ; a null terminator
+			break
+		else binfile.Pos--
+	}
+
 	loop
 	{
 		binfile.Pos--

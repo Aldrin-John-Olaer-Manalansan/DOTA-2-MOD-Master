@@ -98,6 +98,9 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+v2.6.1
+- Improved Camera Distance Detection.
+
 v2.6.0
 - Added "Item Builds" Section. You can now create your custom hero item build guide.
 - Added "Hacks" Section. All possible exploits that can be done to DOTA2 can be found in this section.
