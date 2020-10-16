@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.6.1
+version=2.6.2
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -7422,7 +7422,7 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-v2.6.1
+v2.6.2
 *Improved Camera Distance Detection.
 
 v2.6.0
@@ -10485,6 +10485,7 @@ cameradistancehack(patch4bytehex:="")
 			break
 		else binfile.Pos--
 	}
+	oldoffset := binfile.Pos
 
 	loop
 	{

@@ -98,7 +98,7 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
-v2.6.1
+v2.6.2
 - Improved Camera Distance Detection.
 
 v2.6.0
