@@ -98,7 +98,8 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
-v2.6.2
+v2.6.3
+- Fixed a Bug Report from L0n3lyK1n9 where Using the ANSI Version of this tool, Weird Characters shows up when Saving a Database file.
 - Improved Camera Distance Detection.
 
 v2.6.0

@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.6.2
+version=2.6.3
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -4373,8 +4373,7 @@ Gui, MainGUI:+Disabled
 ;;; FileTypeIndex	-	the chosen Filter(Files of type dropdownlist of the explorer gui)... This will Return the number of row of the selected filetype extension
 MyObject := SaveFile( [0, "Name your Database and Specify where to Save"]    ; [owner, title/prompt]
              , ""    ; RootDir\Filename
-             , {"Handy Injection Database Version 1.5": "*.aldrin_dota2hidb","Handy Injection Database Version 2 (EXPERIMENTAL)": "*.aldrin_dota2hidb"}     ; Filter
-			 , 1	 ; Chosen Row at Filter Dropdownlist. Take note that the arrangement IS SORTED FIRST at the beggining, so after the arrangement of filter was sorted it will next choose the "2nd" row.
+             , {"`nHandy Injection Database Version 1.5": "*.aldrin_dota2hidb","Handy Injection Database Version 2 (EXPERIMENTAL)": "*.aldrin_dota2hidb"}     ; Filter
              , ""    ; CustomPlaces
              , 2)    ; Options ( 2 = FOS_OVERWRITEPROMPT )
 invfile := MyObject.File
@@ -7422,7 +7421,8 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-v2.6.2
+v2.6.3
+*Fixed a Bug Report from L0n3lyK1n9 where Using the ANSI Version of this tool, Weird Characters shows up when Saving a Database file.
 *Improved Camera Distance Detection.
 
 v2.6.0
@@ -7652,8 +7652,7 @@ Gui, MainGUI:-Disabled
 ;;; FileTypeIndex	-	the chosen Filter(Files of type dropdownlist of the explorer gui)... This will Return the number of row of the selected filetype extension
 MyObject := SaveFile( [0, "Name your Database and Specify where to Save"]    ; [owner, title/prompt]
              , ""    ; RootDir\Filename
-             , {"General Database Version 1.5": "*.aldrin_dota2db"} ; Filter
-			 , 2	 ; Chosen Row at Filter Dropdownlist. Take note that the arrangement IS SORTED FIRST at the beggining, so after the arrangement of filter was sorted it will next choose the "2nd" row.
+             , {"`nGeneral Database Version 1.5": "*.aldrin_dota2db"} ; Filter
              , ""    ; CustomPlaces
              , 2)    ; Options ( 2 = FOS_OVERWRITEPROMPT )
 invfile := MyObject.File
@@ -9188,10 +9187,18 @@ DirExist(DirName)
     loop Files, % DirName, D
         return A_LoopFileAttrib
 }
+StrPutVar(string, ByRef var, encoding)
+{
+    ; Ensure capacity.
+    VarSetCapacity( var, StrPut(string, encoding)
+        ; StrPut returns char count, but VarSetCapacity needs bytes.
+        * ((encoding="utf-16"||encoding="cp1200") ? 2 : 1) )
+    ; Copy or convert the string.
+    return StrPut(string, &var, encoding)
+} ; https://www.autohotkey.com/docs/commands/StrPut.htm#Examples
 
 /*
     Displays a standard dialog that allows the user to save a file.
-    Parámetros:
     Parameters:
         Owner / Title:
             The identifier of the window that owns this dialog. This value can be zero.
@@ -9201,14 +9208,11 @@ DirExist(DirName)
         Filter:
             Specify a file filter. You must specify an object, each key represents the description and the value the file types.
             To specify the filter selected by default, add the "`n" character to the value.
-		FileTypeIndex:
-			Specify the Chosen Row at Filter Dropdownlist. Defaults to first row
-			Take note that the filter dropdownlist will first sort the lists in alphanumerical order before the dropdownlist will choose the row...
         CustomPlaces:
             Specify an Array with the custom directories that will be displayed in the left pane. Missing directories will be omitted.
             To specify the location in the list, specify an Array with the directory and its location (0 = Lower, 1 = Upper).
         Options:
-            Determina el comportamiento del diálogo. Este parámetro debe ser uno o más de los siguientes valores.
+            Determines the behavior of the dialog. This parameter must be one or more of the following values.
                 0x00000002  (FOS_OVERWRITEPROMPT) = When saving a file, prompt before overwriting an existing file of the same name.
                 0x00000004  (FOS_STRICTFILETYPES) = Only allow the user to choose a file that has one of the file name extensions specified through Filter.
                 0x00040000 (FOS_HIDEPINNEDPLACES) = Hide items shown by default in the view's navigation pane.
@@ -9218,7 +9222,7 @@ DirExist(DirName)
     Return:
         Returns 0 if the user canceled the dialog, otherwise returns the path of the selected file.
 */
-SaveFile(Owner, FileName := "", Filter := "", FileTypeIndex := 1, CustomPlaces := "", Options := 0x6)
+SaveFile(Owner, FileName := "", Filter := "", CustomPlaces := "", Options := 0x6)
 {
     ; IFileSaveDialog interface
     ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb775688(v=vs.85).aspx
@@ -9242,14 +9246,16 @@ SaveFile(Owner, FileName := "", Filter := "", FileTypeIndex := 1, CustomPlaces :
                 SplitPath FileName, File, Directory
                 ; IFileDialog::SetFileName
                 ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb775974(v=vs.85).aspx
-                DllCall(NumGet(NumGet(IFileSaveDialog+0)+15*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", &File)
+                StrPutVar(File, FileW, "UTF-16")
+                DllCall(NumGet(NumGet(IFileSaveDialog+0)+15*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", &FileW)
             }
             
             while ( InStr(Directory,"\") && !DirExist(Directory) )                   ; si el directorio no existe buscamos directorios superiores
                 Directory := SubStr(Directory, 1, InStr(Directory, "\",, -1) - 1)    ; recupera el directorio superior
             if ( DirExist(Directory) )
             {
-                DllCall("Shell32.dll\SHParseDisplayName", "UPtr", &Directory, "Ptr", 0, "UPtrP", PIDL, "UInt", 0, "UInt", 0)
+                StrPutVar(Directory, DirectoryW, "UTF-16")
+                DllCall("Shell32.dll\SHParseDisplayName", "UPtr", &DirectoryW, "Ptr", 0, "UPtrP", PIDL, "UInt", 0, "UInt", 0)
                 DllCall("Shell32.dll\SHCreateShellItem", "Ptr", 0, "Ptr", 0, "UPtr", PIDL, "UPtrP", IShellItem)
                 ObjRawSet(Obj, IShellItem, PIDL)
                 ; IFileDialog::SetFolder method
@@ -9257,21 +9263,25 @@ SaveFile(Owner, FileName := "", Filter := "", FileTypeIndex := 1, CustomPlaces :
                 DllCall(NumGet(NumGet(IFileSaveDialog+0)+12*A_PtrSize), "Ptr", IFileSaveDialog, "UPtr", IShellItem)
             }
         }
-        else    ; si «FileName» es únicamente el nombre de un archivo
-            DllCall(NumGet(NumGet(IFileSaveDialog+0)+15*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", &FileName)
+        else
+        {
+            StrPutVar(FileName, FileNameW, "UTF-16")
+            DllCall(NumGet(NumGet(IFileSaveDialog+0)+15*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", &FileNameW)
+        }
     }
 
 
     ; COMDLG_FILTERSPEC structure
     ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb773221(v=vs.85).aspx
-    local Description := "", FileTypes := "" ; , FileTypeIndex := 1
+    local Description := "", FileTypes := "", FileTypeIndex := 1
     ObjSetCapacity(Obj, "COMDLG_FILTERSPEC", 2*Filter.Count() * A_PtrSize)
     for Description, FileTypes in Filter
     {
         FileTypeIndex := InStr(FileTypes,"`n") ? A_Index : FileTypeIndex
-        ObjRawSet(Obj, "#" . A_Index, Trim(Description)), ObjRawSet(Obj, "@" . A_Index, Trim(StrReplace(FileTypes,"`n")))
-        NumPut(ObjGetAddress(Obj,"#" . A_Index), ObjGetAddress(Obj,"COMDLG_FILTERSPEC") + A_PtrSize * 2*(A_Index-1))        ; COMDLG_FILTERSPEC.pszName
-        NumPut(ObjGetAddress(Obj,"@" . A_Index), ObjGetAddress(Obj,"COMDLG_FILTERSPEC") + A_PtrSize * (2*(A_Index-1)+1))    ; COMDLG_FILTERSPEC.pszSpec
+        StrPutVar(Trim(Description), desc_%A_Index%, "UTF-16")
+        StrPutVar(Trim(StrReplace(FileTypes,"`n")), ft_%A_Index%, "UTF-16")
+        NumPut(&desc_%A_Index%, ObjGetAddress(Obj,"COMDLG_FILTERSPEC") + A_PtrSize * 2*(A_Index-1))        ; COMDLG_FILTERSPEC.pszName
+        NumPut(&ft_%A_Index%, ObjGetAddress(Obj,"COMDLG_FILTERSPEC") + A_PtrSize * (2*(A_Index-1)+1))    ; COMDLG_FILTERSPEC.pszSpec
     }
 
     ; IFileDialog::SetFileTypes method
@@ -9285,13 +9295,13 @@ SaveFile(Owner, FileName := "", Filter := "", FileTypeIndex := 1, CustomPlaces :
 
     if ( IsObject(CustomPlaces := IsObject(CustomPlaces) || CustomPlaces == "" ? CustomPlaces : [CustomPlaces]) )
     {
-        local Directory := ""
         for foo, Directory in CustomPlaces    ; foo = index
         {
             foo := IsObject(Directory) ? Directory[2] : 0    ; FDAP enumeration (https://msdn.microsoft.com/en-us/library/windows/desktop/bb762502(v=vs.85).aspx)
             if ( DirExist(Directory := IsObject(Directory) ? Directory[1] : Directory) )
             {
-                DllCall("Shell32.dll\SHParseDisplayName", "UPtr", &Directory, "Ptr", 0, "UPtrP", PIDL, "UInt", 0, "UInt", 0)
+                StrPutVar(Directory, DirectoryW, "UTF-16")
+                DllCall("Shell32.dll\SHParseDisplayName", "UPtr", &DirectoryW, "Ptr", 0, "UPtrP", PIDL, "UInt", 0, "UInt", 0)
                 DllCall("Shell32.dll\SHCreateShellItem", "Ptr", 0, "Ptr", 0, "UPtr", PIDL, "UPtrP", IShellItem)
                 ObjRawSet(Obj, IShellItem, PIDL)
                 ; IFileDialog::AddPlace method
@@ -9304,7 +9314,8 @@ SaveFile(Owner, FileName := "", Filter := "", FileTypeIndex := 1, CustomPlaces :
 
     ; IFileDialog::SetTitle method
     ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb761834(v=vs.85).aspx
-    DllCall(NumGet(NumGet(IFileSaveDialog+0)+17*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", Title == "" ? 0 : &Title)
+    StrPutVar(Title, TitleW, "UTF-16")
+    DllCall(NumGet(NumGet(IFileSaveDialog+0)+17*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", Title == "" ? 0 : &TitleW)
 
     ; IFileDialog::SetOptions method
     ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb761832(v=vs.85).aspx
@@ -9326,7 +9337,8 @@ SaveFile(Owner, FileName := "", Filter := "", FileTypeIndex := 1, CustomPlaces :
         {
             VarSetCapacity(Result, 32767 * 2, 0)
             DllCall("Shell32.dll\SHGetIDListFromObject", "UPtr", IShellItem, "UPtrP", PIDL)
-            DllCall("Shell32.dll\SHGetPathFromIDListEx", "UPtr", PIDL, "Str", Result, "UInt", 32767, "UInt", 0)
+            DllCall("Shell32.dll\SHGetPathFromIDListEx", "UPtr", PIDL, "Str", Result, "UInt", 2000, "UInt", 0)
+            Result := StrGet(&Result, "UTF-16")
             ObjRawSet(Obj, IShellItem, PIDL)
         }
     }
@@ -9337,8 +9349,8 @@ SaveFile(Owner, FileName := "", Filter := "", FileTypeIndex := 1, CustomPlaces :
             ObjRelease(foo), DllCall("Ole32.dll\CoTaskMemFree", "UPtr", bar)
     ObjRelease(IFileSaveDialog)
 
-    return Result ? {File: Result, FileTypeIndex: FileTypeIndex} : FALSE
-} ; https://github.com/flipeador/AutoHotkey/blob/master/Lib/dlg/SaveFile.ahk
+    return (Result!=FALSE) ? {File:Result,FileTypeIndex:FileTypeIndex} : FALSE
+}
 
 ; ----------------------------------------------------------------------------------------------------------------------
 ; Advanced Library for ListViews
