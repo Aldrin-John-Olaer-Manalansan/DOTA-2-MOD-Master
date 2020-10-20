@@ -98,7 +98,7 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
-v2.7.2
+v2.7.3
 - Fixed Auto-Update not Working.
 - Added "Auto-Check for Latest Handy-Injection Database" Checkbox at "Advanced" Section. With this, DOTA2 MOD Master can check for latest handy-injection database released at URL:
 	- https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/LatestHIDB/
