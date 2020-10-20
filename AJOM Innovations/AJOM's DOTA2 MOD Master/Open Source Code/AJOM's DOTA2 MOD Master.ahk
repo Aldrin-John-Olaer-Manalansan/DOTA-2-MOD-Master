@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.6.3
+version=2.7.0
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -267,7 +267,7 @@ else if (GlobalArray["activelist.txt"]="")
 	GlobalArray["activelist.txt"]:=tempo
 }
 
-param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate,cmdmaxinstances
+param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate,disableautohidbupdate,cmdmaxinstances
 Loop,parse,param,`,
 {
 	IniRead,%A_LoopField%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,%A_LoopField%
@@ -623,7 +623,14 @@ UNCHECKED : It always scan Miscellaneous Resources at items_game.txt file every 
 WM_MOUSEMOVE("fastmisc",tmpr)
 
 Gui, MainGUI:Add, CheckBox, checked%showtooltips% x9 y190 vshowtooltips gshowtooltips,Show Tooltip Guides on every Controls.
-Gui, MainGUI:Add, CheckBox, checked%disableautoupdate% x9 y210 vdisableautoupdate,Disable Automatic Updates.
+Gui, MainGUI:Add, CheckBox, checked%disableautoupdate% x9 y210 vdisableautoupdate,Disable Auto-Update DOTA2 MOD Master.
+Gui, MainGUI:Add, CheckBox, checked%disableautohidbupdate% x235 y210 vdisableautohidbupdate,Disable Auto-
+Gui, MainGUI:Font,Bold
+Gui, MainGUI:Add, Button,gHDBupdater w270 h15 x320 y210 hwndHBTN vHDBupdater,Check for New Handy-Injection Database Release
+SetBtnTxtColor(HBTN, "Green")
+tmpr=Press this button to manually check for Newly Released Handy-Injection Database.
+WM_MOUSEMOVE("HDBupdater",tmpr)
+Gui, MainGUI:Font
 Gui, MainGUI:Add, text,x4 y230,ERROR Log
 Gui, MainGUI:Add, Edit, verrorshow x4 y245 w266 h206 +ReadOnly,
 Gui, MainGUI:Add, text,x276 y230 vtext32,Report Log
@@ -1084,6 +1091,8 @@ if version<>%usedversion%
 gosub,leakdestroyer
 gosub,showtooltips
 Gui, MainGUI:Default
+if A_IsCompiled and (disableautohidbupdate!=1)
+	gosub,HDBupdater
 return
 
 saveitembuild:
@@ -3616,7 +3625,7 @@ IfNotExist,%A_ScriptDir%\Settings.aldrin_dota2mod
 	if !(tmpr>=1)
 		tmpr:=5
 	IniWrite,%tmpr%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,cmdmaxinstances
-	param:=[["pet",0],["usemisc",1],["mappetstyle",3],["soundon",1],["useextportraitfile",0],["useextfile",0],["useextitemgamefile",0],["fastmisc",0],["showtooltips",1],["singlesourcechoice",1],["multiplestyleschoice",1],["disableautoupdate",0],["ucr",0]]
+	param:=[["pet",0],["usemisc",1],["mappetstyle",3],["soundon",1],["useextportraitfile",0],["useextfile",0],["useextitemgamefile",0],["fastmisc",0],["showtooltips",1],["singlesourcechoice",1],["multiplestyleschoice",1],["disableautoupdate",0],["disableautohidbupdate",0],["ucr",0]]
 	for index, in param
 	{
 		IniWrite,% param[index,2],%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,% param[index,1]
@@ -4912,7 +4921,6 @@ if InStr(ErrorLevel, "C", true)
 	}
 	LV_Add(, itemat1,itemat2,itemat3,itemat4,itemat5,itemat6,itemat7)
 	GoSub,lvautosize
-	LV_ModifyCol(2,"Sort")
 }
 else if InStr(ErrorLevel, "c", true)
 {
@@ -4965,6 +4973,7 @@ hdatabrowse: ;;;When user clicks browse database at handy injection section
 Gui MainGUI:+OwnDialogs
 gosub,leakdestroyer
 FileSelectFile,invfile,3,,.aldrin_dota2hidb,*.aldrin_dota2hidb
+hdataload:
 If SubStr(invfile,-16,17)=.aldrin_dota2hidb
 {
 	timeconsumed:=A_TickCount
@@ -5773,8 +5782,8 @@ gosub,leakdestroyer
 Gui, MainGUI:Submit, NoHide
 GoSub,default_settings
 FileSetAttrib,-R,%A_ScriptDir%\Settings.aldrin_dota2mod
-param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,pet,autovpk,usemisc,mappetstyle,mapgiloc,maplowprocessor,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate,cmdmaxinstances
-param1=%ucron%|%invdirview%|%datadirview%|%hdatadirview%|%mdirview%|%peton%|%autovpkon%|%usemiscon%|%petstyle%|%giloc%|%lowprocessor%|%dota2dir%|%soundon%|%useextportraitfile%|%useextfile%|%useextitemgamefile%|%fastmisc%|%showtooltips%|%singlesourcechoicegui%|%multiplestyleschoicegui%|%disableautoupdate%|%cmdmaxinstances%
+param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,pet,autovpk,usemisc,mappetstyle,mapgiloc,maplowprocessor,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate,disableautohidbupdate,cmdmaxinstances
+param1=%ucron%|%invdirview%|%datadirview%|%hdatadirview%|%mdirview%|%peton%|%autovpkon%|%usemiscon%|%petstyle%|%giloc%|%lowprocessor%|%dota2dir%|%soundon%|%useextportraitfile%|%useextfile%|%useextitemgamefile%|%fastmisc%|%showtooltips%|%singlesourcechoicegui%|%multiplestyleschoicegui%|%disableautoupdate%|%disableautohidbupdate%|%cmdmaxinstances%
 Loop,parse,param1,|
 {
 	tmpstring=%A_LoopField%
@@ -7421,6 +7430,11 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+2.7.0
+*Added "Auto-Check for Latest Handy-Injection Database" Checkbox at "Advanced" Section. With this, DOTA2 MOD Master can check for latest handy-injection database released at URL:
+ -https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/LatestHIDB/
+  -You can manually check for Latest Handy-Injection Database by visiting this URL on your web browser.
+
 v2.6.3
 *Fixed a Bug Report from L0n3lyK1n9 where Using the ANSI Version of this tool, Weird Characters shows up when Saving a Database file.
 *Improved Camera Distance Detection.
@@ -10208,6 +10222,80 @@ LVA_Info(Switch, Name, Row := 0, Col := 0, Data := 0)
 ;~~~~End of LVA~~~~
 
 ;~~~~~AutoUpdate by Aldrin John O. Manalansan~~~~~
+HDBupdater:
+	ToolTip,DOTA2 MOD Master:`nChecking for New Handy-Injection Database Released by:`nAldrin John Olaer Manalansan,0,0
+	tmpr1:=A_ScriptDir "\Plugins\Unzip\Release.ini"
+	UrlDownloadToFile,https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/release/Release.ini,%tmpr1%
+	if !ErrorLevel
+	{
+		IniRead,newHDBversion,%tmpr1%,HandyInjectionDatabase,version,%A_Space%
+		if newHDBversion is time
+		{
+			IniRead,oldHDBversion,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,HDBversion,%A_Space%
+			if !(oldHDBversion is time) or (oldHDBversion<newHDBversion)
+			{
+				FormatTime,HDBDate,%newHDBversion%,MMMM d`, yyyy - h;m;stt
+				IniRead,HDBAuthor,%tmpr1%,HandyInjectionDatabase,Author,%A_Space%
+				msgbox,262179,Handy-Injection Database Update,
+(
+A new Handy-Injection Database has been released:
+Author: %HDBAuthor%
+Date: %HDBDate%
+
+Would you like to Download this Handy-Injection Database? Press Cancel to Remind you about this next time.
+
+Tip: You can Disable Handy-Injection Database Automatic-Updates at "Advanced" Section.
+)
+				IfMsgBox Cancel
+				{}
+				else
+				{
+					FileSetAttrib,-R,%A_ScriptDir%\Settings.aldrin_dota2mod
+					IniWrite,%newHDBversion%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,HDBversion
+					FileSetAttrib,+R,%A_ScriptDir%\Settings.aldrin_dota2mod
+				}
+				IfMsgBox Yes
+				{
+					if !FileExist(A_ScriptDir "\Database\")
+						FileCreateDir,%A_ScriptDir%\Database
+					tmpr1:="https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/LatestHIDB/" newHDBversion ".aldrin_dota2hidb"
+					UrlDownloadToFile,%tmpr1%,%A_ScriptDir%\Database\%HDBDate%.aldrin_dota2hidb
+					if ErrorLevel
+					{
+						msgbox,16,Update Failed!,
+(
+There was a problem when downloading the Database File. Please try again later.
+URL=%tmpr1%
+
+You can either:
+- Go to Advanced Section and then click "check new handy-injection database release".
+- Manually Visit the URL above and download the database.
+)
+					}
+					else
+					{
+						msgbox,262180,Download Complete!,
+(
+Downloaded Handy-Injection Database can be found at:
+%A_ScriptDir%\Database\%HDBDate%.aldrin_dota2hidb
+
+Would you like to Preload this Database File?
+)
+						IfMsgBox Yes
+						{
+							GuiControl,MainGUI:ChooseString,OuterTab,|Handy Injection
+							GuiControl,MainGUI:ChooseString,InnerTab1,|Used Items Database
+							invfile:=A_ScriptDir "\Database\" HDBDate ".aldrin_dota2hidb"
+							gosub,hdataload
+						}
+					}
+				}
+			}
+		}
+	}
+	ToolTip
+return
+
 versionchecker(version)
 {
 	if A_IsCompiled
@@ -10488,6 +10576,8 @@ cameradistancehack(patch4bytehex:="")
 	GuiControlGet,dota2dir,,dota2dir
 	file:= dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll"
 	binfile := FileOpen(file,"rw")
+	if (binfile=0)
+		return
 	oldoffset := gethexoffset(file,"725f70726f70736d617864697374") ; "r_propsmaxdist"
 	binfile.Pos := oldoffset
 	loop

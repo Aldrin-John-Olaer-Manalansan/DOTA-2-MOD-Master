@@ -98,6 +98,11 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+v2.7.0
+- Added "Auto-Check for Latest Handy-Injection Database" Checkbox at "Advanced" Section. With this, DOTA2 MOD Master can check for latest handy-injection database released at URL:
+	- https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/LatestHIDB/
+	> You can manually check for Latest Handy-Injection Database by visiting this URL on your web browser.
+
 v2.6.3
 - Fixed a Bug Report from L0n3lyK1n9 where Using the ANSI Version of this tool, Weird Characters shows up when Saving a Database file.
 - Improved Camera Distance Detection.
