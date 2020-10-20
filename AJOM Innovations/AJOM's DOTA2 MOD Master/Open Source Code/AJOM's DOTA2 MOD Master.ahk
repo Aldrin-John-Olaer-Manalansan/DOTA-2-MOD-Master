@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.7.0
+version=2.7.1
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -7430,7 +7430,8 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-2.7.0
+2.7.1
+*Fixed Auto-Update not Working.
 *Added "Auto-Check for Latest Handy-Injection Database" Checkbox at "Advanced" Section. With this, DOTA2 MOD Master can check for latest handy-injection database released at URL:
  -https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/LatestHIDB/
   -You can manually check for Latest Handy-Injection Database by visiting this URL on your web browser.
@@ -10318,7 +10319,6 @@ Tip: You can Disable Automatic-Updates at "Advanced" Section.
 		}
 		;FileDelete,%A_ScriptDir%\Plugins\Unzip\Version.ini
 	}
-}
 
 updateversion:
 ToolTip,DOTA2 MOD Master:`nDownloading New Version's Files,0,0
@@ -10339,18 +10339,19 @@ ifexist,%A_ScriptDir%\Plugins\Unzip\master.zip
 	SetTimer,updateversion,Off
 }
 return
+}
 
 updatemigrator:
-temp=
+tmpr=
 (join&
-unzip.exe -o -qq master.zip "DOTA-2-MOD-Master-master/AJOM Innovations/AJOM's DOTA2 MOD Master/*"
-xcopy "%A_ScriptDir%\Plugins\Unzip\DOTA-2-MOD-Master-master\AJOM Innovations\AJOM's DOTA2 MOD Master" "%A_ScriptDir%" /r /y /c /i /q /s
-RD /S /Q "%A_ScriptDir%\Plugins\Unzip\DOTA-2-MOD-Master-master"
-del /f /q "%A_ScriptDir%\Plugins\Unzip\master.zip"
-"%A_ScriptFullPath%"
+cd /d "%A_ScriptDir%"
+Plugins\Unzip\unzip.exe -o -qq Plugins\Unzip\master.zip "DOTA-2-MOD-Master-master\AJOM Innovations\AJOM's DOTA2 MOD Master\*" -d Plugins\Unzip
+xcopy "Plugins\Unzip\DOTA-2-MOD-Master-master\AJOM Innovations\AJOM's DOTA2 MOD Master" /r /y /c /i /q /s
+rd /s /q Plugins\Unzip\DOTA-2-MOD-Master-master
+del /f /q Plugins\Unzip\master.zip
+start /b "" "%A_ScriptName%"
 )
-temp:=StrReplace(temp,"\","/")
-run,%temp%,%A_ScriptDir%\Plugins\Unzip,Hide UseErrorLevel
+run,%A_ComSpec% /c "%tmpr%",%A_ScriptDir%\Plugins\Unzip,UseErrorLevel Hide
 return
 ;~~~~~end of AutoUpdate~~~~~
 
