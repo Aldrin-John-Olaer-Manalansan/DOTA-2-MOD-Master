@@ -59,7 +59,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.7.1
+version=2.7.2
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -7430,7 +7430,7 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-2.7.1
+2.7.2
 *Fixed Auto-Update not Working.
 *Added "Auto-Check for Latest Handy-Injection Database" Checkbox at "Advanced" Section. With this, DOTA2 MOD Master can check for latest handy-injection database released at URL:
  -https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/LatestHIDB/
@@ -10319,6 +10319,7 @@ Tip: You can Disable Automatic-Updates at "Advanced" Section.
 		}
 		;FileDelete,%A_ScriptDir%\Plugins\Unzip\Version.ini
 	}
+	return
 
 updateversion:
 ToolTip,DOTA2 MOD Master:`nDownloading New Version's Files,0,0
