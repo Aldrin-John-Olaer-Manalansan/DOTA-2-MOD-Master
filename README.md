@@ -98,6 +98,11 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+v2.8.0
+- Added "Streak Effect" Feature at "Miscellaneous" Section > "Single-Source" Sub-Section, Cool!
+- Fixed Environment Announcer and Mega-Kills Announcer not working.
+- Fixed some Text Encoding Problem reported by L0n3lyK1n9
+
 v2.7.4
 - Fixed Auto-Update not Working.
 - Added "Auto-Check for Latest Handy-Injection Database" Checkbox at "Advanced" Section. With this, DOTA2 MOD Master can check for latest handy-injection database released at URL:

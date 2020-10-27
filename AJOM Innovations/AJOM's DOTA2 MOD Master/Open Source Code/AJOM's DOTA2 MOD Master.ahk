@@ -1,3 +1,4 @@
+﻿FileEncoding,UTF-8-RAW
 ; force run as admin
 if not (A_IsAdmin or RegExMatch(DllCall("GetCommandLine", "str"), " /restart(?!\S)"))
 {
@@ -59,7 +60,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.7.4
+version=2.8.0
 
 if disableautoupdate<>1
 	versionchecker(version)
@@ -458,7 +459,12 @@ There is a possibility that valve will ban your account when you use the feature
 Gui, MainGUI:Add, Edit, x1 y30 w100 Number gnumberlimiter vdummynl
 Gui, MainGUI:Add, UpDown, x1 y30 w100 0x80 vcameradistance Range1200-9999,0
 WM_MOUSEMOVE("cameradistance","Sets the elevation height of the camera, higher values allows you to see more areas in your screen.`n`nDefault Value: 1200`nRecommended values: 1200-2500")
-Gui, MainGUI:Add, Button, x110 y30 h21 ginjectcameradistance,Inject Camera Distance
+Gui, MainGUI:Font,Bold
+Gui, MainGUI:Add, Button, x110 y30 w130 h21 ginjectcameradistance hwndHBTN,Inject Camera Distance
+SetBtnTxtColor(HBTN, "Blue")
+Gui, MainGUI:Add, Button, x245 y30 w50 h21 grestorecameradistance hwndHBTN,Restore
+SetBtnTxtColor(HBTN, "Green")
+Gui, MainGUI:Font
 Gui, MainGUI:Tab,8
 Gui, MainGUI:Add, CheckBox, checked%autovpk% x9 y70 gautovpkon vautovpkon,Auto-Shutnik Method(Requires "VPKCreator" present on same Directory)(SELF-ACTIVE)
 tmpr=
@@ -927,36 +933,57 @@ IniRead,inchoosetab,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,inchoosetab
 intablist=Single Source|Multiple Styles|Multiple Source|Optional Features
 Gui, MainGUI:Add, Tab2,x0 y20 h480 w550 -Wrap vInnerTab hwndInnerTab choose%inchoosetab%,%intablist%
 Gui, MainGUI:Tab,1
-singlesourcefamily=Weather-Effect|Multikill-Banner|Emblem|Music Pack|Cursor Pack|Loading Screen|Versus Screen|Emoticons
-Gui, MainGUI:Add, ComboBox,x1 y45 w155 h405 gmiscchoose vsinglesourcechoicegui Choose%singlesourcechoice% Simple AltSubmit,%singlesourcefamily%
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden vweatherchoice AltSubmit checked,Weather-Effect Name|Rarity|ID
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden vmultikillchoice AltSubmit checked,Multikill-Banner Name|Rarity|ID
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden vemblemchoice AltSubmit checked,Emblem Name|Rarity|ID
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden vmusicchoice AltSubmit checked,Music Pack Name|Rarity|ID
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden vcursorchoice AltSubmit checked,Cursor Pack Name|Rarity|ID
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden vloadingscreenchoice AltSubmit checked,Loading Screen Name|Rarity|ID
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden vversuscreenchoice AltSubmit checked,Versus Screen Name|Rarity|ID
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden vemoticonchoice AltSubmit checked,Emoticons Name|Rarity|ID
-WM_MOUSEMOVE(["weatherchoice","multikillchoice","emblemchoice","musicchoice","cursorchoice","loadingscreenchoice","versuscreenchoice","emoticonchoice"],"Only one item can be selected.")
+global singlesourcefamily:="",multiplestylesfamily:="",misclvparam:=""
+tmpr:=[["weatherchoice","Weather Effect"]
+	  ,["multikillchoice","Multikill Banner"]
+	  ,["emblemchoice","Emblem"]
+	  ,["musicchoice","Music Pack"]
+	  ,["cursorchoice","Cursor Pack"]
+	  ,["loadingscreenchoice","Loading Screen"]
+	  ,["versuscreenchoice","Versus Screen"]
+	  ,["emoticonchoice","Emoticons"]
+	  ,["streakeffectchoice","Streak Effect"]]
+tmpr1:=[]
+tmpr2:=""
+Loop % tmpr.Count()
+{
+	Gui, MainGUI:Add, ListView,% "-LV0x10 x173 y45 w375 h405 gbasicmisc Hidden AltSubmit checked v" tmpr[A_Index,1],% tmpr[A_Index,2] " Name|Rarity|ID"
+	tmpr1.Push(tmpr[A_Index,1])
+	singlesourcefamily.= (singlesourcefamily==""?"":"|") . tmpr[A_Index,1]
+	tmpr2.= (tmpr2==""?"":"|") . tmpr[A_Index,2]
+}
+misclvparam:=singlesourcefamily
+Gui, MainGUI:Add, ComboBox,x1 y45 w155 h405 gmiscchoose vsinglesourcechoicegui Choose%singlesourcechoice% Simple AltSubmit,%tmpr2%
+WM_MOUSEMOVE(tmpr1,"Only one item can be selected.")
 
 Gui, MainGUI:Tab,2
-multiplestylesfamily=Courier|Ward|HUD-Skin|Radiant Creeps|Dire Creeps|Radiant Towers|Dire Towers|Terrain
-Gui, MainGUI:Add, ComboBox,x1 y45 w155 h405 gmiscchoose vmultiplestyleschoicegui Choose%multiplestyleschoice% Simple AltSubmit,%multiplestylesfamily%
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden vterrainchoice AltSubmit checked,Terrain Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden vhudchoice AltSubmit checked,HUD-Skin Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden vradcreepchoice AltSubmit checked,Radiant Creeps Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden vdirecreepchoice AltSubmit checked,Dire Creeps Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden vradtowerchoice AltSubmit checked,Radiant Towers Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden vdiretowerchoice AltSubmit checked,Dire Towers Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden vcourierchoice AltSubmit checked,Courier Name|Rarity|ID|Styles Count|Active Style
-Gui, MainGUI:Add, ListView,-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden vwardchoice AltSubmit checked,Ward Name|Rarity|ID|Styles Count|Active Style
-WM_MOUSEMOVE(["terrainchoice","hudchoice","radcreepchoice","direcreepchoice","radtowerchoice","diretowerchoice","courierchoice","wardchoice"],"Only one item can be selected.`n`nRight-Click an item to change its Item Style.")
+tmpr:=[["courierchoice","Courier"]
+	  ,["wardchoice","Ward"]
+	  ,["hudchoice","HUD Skin"]
+	  ,["radcreepchoice","Radiant Creep"]
+	  ,["direcreepchoice","Dire Creeps"]
+	  ,["radtowerchoice","Radiant Towers"]
+	  ,["diretowerchoice","Dire Towers"]
+	  ,["terrainchoice","Terrain"]]
+tmpr1:=[]
+tmpr2:=""
+Loop % tmpr.Count()
+{
+	Gui, MainGUI:Add, ListView,% "-LV0x10 x173 y45 w375 h405 gmiscstyle Hidden AltSubmit checked v" tmpr[A_Index,1],% tmpr[A_Index,2] " Name|Rarity|ID|Styles Count|Active Style"
+	tmpr1.Push(tmpr[A_Index,1])
+	multiplestylesfamily.= (multiplestylesfamily==""?"":"|") . tmpr[A_Index,1]
+	tmpr2.= (tmpr2==""?"":"|") . tmpr[A_Index,2]
+}
+misclvparam.= "|" . multiplestylesfamily
+Gui, MainGUI:Add, ComboBox,x1 y45 w155 h405 gmiscchoose vmultiplestyleschoicegui Choose%multiplestyleschoice% Simple AltSubmit,%tmpr2%
+WM_MOUSEMOVE(tmpr1,"Only one item can be selected.`n`nRight-Click an item to change its Item Style.")
 
 Gui, MainGUI:Tab,3
 Gui, MainGUI:Add, ListView,-LV0x10 x275 y45 w272 h404 gannouncerview vannouncerview AltSubmit NoSort checked,Announcer Name|Item Slot|Rarity|ID
 WM_MOUSEMOVE("announcerview","Only one Announcer can be selected.`n`nOnly one Mega-Kill Announcer can be selected.")
 Gui, MainGUI:Add, ListView,-LV0x10 x1 y45 w272 h404 gtauntview vtauntview AltSubmit NoSort checked,Taunt Name|Rarity|ID|Used by
 WM_MOUSEMOVE("tauntview","Only one Taunt per Hero can be selected.")
+misclvparam.= "|announcerview|tauntview"
 Gui, MainGUI:Tab,4
 Gui, MainGUI:Add, CheckBox, checked%pet% x9 y60 vpeton,Active "Almond the Frondillo" Pet with Style:
 if (mappetstyle="") or (mappetstyle="ERROR")
@@ -989,18 +1016,17 @@ loop,parse,innertabparam,`,
 
 Gui, MainGUI:Default
 
-listviewparam=showitems,weatherchoice,multikillchoice,emblemchoice,musicchoice,cursorchoice,loadingscreenchoice,versuscreenchoice,emoticonchoice,terrainchoice,hudchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,courierchoice,wardchoice,announcerview,tauntview ; register this listviews as colored listviews
-loop,parse,listviewparam,`,
-{
+loop,parse,misclvparam,|
 	LVA_ListViewAdd(A_LoopField)
-}
-VarSetCapacity(listviewparam,0)
 OnMessage("0x4E", "LVA_OnNotify")
 
 Gui, MainGUI:Submit, NoHide
 gosub, SelectOuterTab
+
 Tooltip
 GuiControl,,cameradistance,% cameradistancehack()
+Gui, MainGUI:+Disabled
+
 Gui,MainGUI:Show, h500 w550,AJOM's Dota 2 MOD Master
 Gui, MainGUI: +hwndMainGUIHWND
 gosub,activatemiscgui
@@ -1093,6 +1119,7 @@ gosub,showtooltips
 Gui, MainGUI:Default
 if A_IsCompiled and (disableautohidbupdate!=1)
 	gosub,HDBupdater
+;FileEncoding
 return
 
 saveitembuild:
@@ -1391,6 +1418,19 @@ else SoundPlay,*48
 Gui, MainGUI:-Disabled
 return
 
+restorecameradistance:
+tmpr:=A_ScriptDir "\Library\client.bak"
+if FileExist(tmpr)
+{
+	Gui, MainGUI:+Disabled
+	FileCopy,%tmpr%,% dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll",1
+	if soundon=1
+		SoundPlay,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Sound\OperationFinished.wav
+	else SoundPlay,*48
+	Gui, MainGUI:-Disabled
+}
+return
+
 rescanresources:
 ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 {
@@ -1405,9 +1445,7 @@ return
 miscchoose:
 Gui, MainGUI:Submit, NoHide
 if ((A_GuiControl="singlesourcechoicegui") and (singlesourcechoicegui=singlesourcechoice)) or ((A_GuiControl="multiplestyleschoicegui") and (multiplestyleschoicegui=multiplestyleschoice))
-{
 	return
-}
 else if A_GuiEvent=DoubleClick
 {
 	gosub,activatemiscgui
@@ -1420,8 +1458,7 @@ return
 
 activatemiscgui:
 Gui, MainGUI:Submit, NoHide
-param=weatherchoice,multikillchoice,emblemchoice,musicchoice,cursorchoice,loadingscreenchoice,versuscreenchoice,emoticonchoice
-loop,parse,param,`,
+loop,parse,singlesourcefamily,|
 {
 	if (A_Index=singlesourcechoicegui)
 		GuiControl, Show, %A_LoopField%
@@ -1432,8 +1469,7 @@ loop,parse,param,`,
 	
 }
 
-param=courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,terrainchoice
-loop,parse,param,`,
+loop,parse,multiplestylesfamily,|
 {
 	if (A_Index=multiplestyleschoicegui)
 		GuiControl, Show, %A_LoopField%
@@ -1856,23 +1892,20 @@ replaceto=`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%
 replaceto4=`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%%A_Tab%"item_slot"%A_Tab%%A_Tab%"courier"`r`n%A_Tab%%A_Tab%%A_Tab%"name"
 replaceto5=`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%%A_Tab%"item_slot"%A_Tab%%A_Tab%"ward"`r`n%A_Tab%%A_Tab%%A_Tab%"name"
 sfinder=`r`n%A_Tab%%A_Tab%}`r`n%A_Tab%%A_Tab%" ;"
-;param=terrain,hud_skin,loading_screen,courier,ward,music,cursor_pack,radiantcreeps,direcreeps,radianttowers,diretowers,versus_screen,emoticon_tool
-;param2=terrainchoice,hudchoice,loadingscreenchoice,courierchoice,wardchoice,musicchoice,cursorchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
-multiplestyleparam=courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,terrainchoice
-;multiplesourceparam=tauntview,announcerview
-param:=[["terrainchoice","terrain"]
-,["hudchoice","hud_skin"]
-,["loadingscreenchoice","loading_screen"]
-,["courierchoice","courier"]
-,["wardchoice","ward"]
-,["musicchoice","music"]
-,["cursorchoice","cursor_pack"]
-,["radcreepchoice","radiantcreeps"]
-,["direcreepchoice","direcreeps"]
-,["radtowerchoice","radianttowers"]
-,["diretowerchoice","diretowers"]
-,["versuscreenchoice","versus_screen"]
-,["emoticonchoice","emoticon_tool"]]
+param:=[["terrainchoice"		,"terrain"]
+	   ,["hudchoice"			,"hud_skin"]
+	   ,["loadingscreenchoice"	,"loading_screen"]
+	   ,["courierchoice"		,"courier"]
+	   ,["wardchoice"			,"ward"]
+	   ,["musicchoice"			,"music"]
+	   ,["cursorchoice"			,"cursor_pack"]
+	   ,["radcreepchoice"		,"radiantcreeps"]
+	   ,["direcreepchoice"		,"direcreeps"]
+	   ,["radtowerchoice"		,"radianttowers"]
+	   ,["diretowerchoice"		,"diretowers"]
+	   ,["versuscreenchoice"	,"versus_screen"]
+	   ,["emoticonchoice"		,"emoticon_tool"]
+	   ,["streakeffectchoice"	,"streak_effect"]]
 IPS:=A_TickCount
 
 ;declare a 2d array
@@ -1965,7 +1998,7 @@ for intsaver, in param
 					}
 				}
 			}
-			if instr(multiplestyleparam,param[intsaver,1]) ; if it is a multiple style subject identical to its listview control
+			if instr(multiplestylesfamily,param[intsaver,1]) ; if it is a multiple style subject identical to its listview control
 			{
 				if (subject="courier") or (subject="ward")
 				{
@@ -2089,6 +2122,44 @@ loop % LV_GetCount()
 				StringReplace,filecontent,filecontent,%tmpstring%"`r`n%A_Tab%%A_Tab%{,%defid%"`r`n%A_Tab%%A_Tab%{
 				StringReplace,filecontent,filecontent,%replacefrom%,%replaceto%
 				StringReplace,masterfilecontent,masterfilecontent,%misccontent%,%filecontent%,1
+				
+				filecontent:=visualsdetector(filecontent)
+				ipos:=InStr(filecontent,"`r`n					""type""		""announcer""")
+				ipos:=InStr(filecontent,"`r`n				{",,ipos-StrLen(filecontent))
+				ipos1:=InStr(filecontent,"`r`n				}",,ipos)
+				filecontent:=SubStr(filecontent,ipos,ipos1-ipos)
+				
+				extractfile:=StrReplace(searchstringdetector(filecontent,"""modifier"""),"/","\") . "_c"
+				SplitPath,extractfile,extractname,defaultloc
+				defaultname:= "game_sounds_vo_announcer" ((matcher=="mega_kills")?"_killing_spree":"") ".vsndevts_c"
+				gosub,extractfileruncmd ; extract this files via cmd
+
+				extractfile:="scripts\talker\" StrReplace(StrReplace(searchstringdetector(filecontent,"""asset"""),"/","\"),"npc_dota_hero_","response_rules_") . ".txt"
+				defaultloc=%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\talker
+				if !FileExist(defaultloc "\")
+					FileCreateDir,%defaultloc%
+				runwait,"%variablehllib%" -p "%dota2dir%\game\dota\pak01_dir.vpk" -d "%defaultloc%" -e "root\%extractfile%",,Hide UseErrorLevel
+				ResponseRulesFile:=A_ScriptDir "\Plugins\VPKCreator\pak01_dir\" extractfile
+				if FileExist(ResponseRulesFile)
+				{
+					FileRead,filecontent,%ResponseRulesFile%
+					ipos1:=InStr(filecontent,"`r`n",,,3)
+					ipos2:=InStr(filecontent,"`r`n",,,4)
+					tmpstring:=SubStr(filecontent,ipos1,ipos2-ipos1)
+					ipos1:=InStr(tmpstring,"""")+1
+					ipos2:=InStr(tmpstring,"""",,,2)
+					criterion:=SubStr(tmpstring,ipos1,ipos2-ipos1)
+					filecontent:=StrReplace(filecontent,tmpstring)
+					filecontent:=StrReplace(filecontent,criterion)
+					filecontent:=StrReplace(filecontent,"  "," ")
+					ipos2:=InStr(filecontent,"_Custom")
+					ipos1:=InStr(filecontent," ",,ipos2-StrLen(filecontent))+1
+					criterion:=SubStr(filecontent,ipos1,ipos2-ipos1)
+					filecontent:=RegExReplace(filecontent,"(?<=[^/])" criterion,"announcer" ((matcher=="mega_kills")?"_killing_spree":""))
+					FileDelete,%ResponseRulesFile%
+					FileAppend,%filecontent%,% A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\talker\response_rules_announcer" ((matcher=="mega_kills")?"_killing_spree":"") ".txt" 
+				}
+
 				; measures the number of items injected per second
 				Gui,MainGUI:Show,NoActivate,% floor(1000/(A_TickCount-IPS)) " Items per Second"
 				IPS:=A_TickCount
@@ -2223,15 +2294,15 @@ if A_DefaultListView<>multikillchoice
 GuiControl,Text,searchnofound,Injecting MultiKill-Banner
 if LV_GetNext(,"Checked")>0
 {
-			LV_GetText(tmpstring,LV_GetNext(,"Checked"),3)
-			tmpfind=misc
-			filecontent:=miscdetector("prefab",tmpfind,tmpstring) ;filecontent:=miscdetector("prefab",tmpfind,tmpstring,filestring) ; detects the contents of a miscellaneous item... In expression "prefab" means item_slot
-			StringReplace,misccontent,filecontent,`r`n%A_Tab%%A_Tab%%A_Tab%"item_slot"%A_Tab%%A_Tab%"multikill_banner"`r`n,`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%%A_Tab%"item_slot"%A_Tab%%A_Tab%"multikill_banner"`r`n
-			StringReplace,masterfilecontent,masterfilecontent,%filecontent%,%misccontent%,1
-			; measures the number of items injected per second
-			Gui,MainGUI:Show,NoActivate,% floor(1000/(A_TickCount-IPS)) " Items per Second"
-			IPS:=A_TickCount
-			;
+	LV_GetText(tmpstring,LV_GetNext(,"Checked"),3)
+	tmpfind=misc
+	filecontent:=miscdetector("prefab",tmpfind,tmpstring) ;filecontent:=miscdetector("prefab",tmpfind,tmpstring,filestring) ; detects the contents of a miscellaneous item... In expression "prefab" means item_slot
+	StringReplace,misccontent,filecontent,`r`n%A_Tab%%A_Tab%%A_Tab%"item_slot"%A_Tab%%A_Tab%"multikill_banner"`r`n,`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%%A_Tab%"item_slot"%A_Tab%%A_Tab%"multikill_banner"`r`n
+	StringReplace,masterfilecontent,masterfilecontent,%filecontent%,%misccontent%,1
+	; measures the number of items injected per second
+	Gui,MainGUI:Show,NoActivate,% floor(1000/(A_TickCount-IPS)) " Items per Second"
+	IPS:=A_TickCount
+	;
 }
 if A_DefaultListView<>emblemchoice
 {
@@ -2240,15 +2311,15 @@ if A_DefaultListView<>emblemchoice
 GuiControl,Text,searchnofound,Injecting emblem
 if LV_GetNext(,"Checked")>0
 {
-			LV_GetText(tmpstring,LV_GetNext(,"Checked"),3)
-			tmpfind=emblem
-			filecontent:=miscdetector("prefab",tmpfind,tmpstring) ;filecontent:=miscdetector("prefab",tmpfind,tmpstring,filestring) ; detects the contents of a miscellaneous item... In expression "prefab" means item_slot
-			StringReplace,misccontent,filecontent,`r`n%A_Tab%%A_Tab%%A_Tab%"prefab"%A_Tab%%A_Tab%"emblem",`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%%A_Tab%"prefab"%A_Tab%%A_Tab%"emblem"
-			StringReplace,masterfilecontent,masterfilecontent,%filecontent%,%misccontent%,1
-			; measures the number of items injected per second
-			Gui,MainGUI:Show,NoActivate,% floor(1000/(A_TickCount-IPS)) " Items per Second"
-			IPS:=A_TickCount
-			;
+	LV_GetText(tmpstring,LV_GetNext(,"Checked"),3)
+	tmpfind=emblem
+	filecontent:=miscdetector("prefab",tmpfind,tmpstring) ;filecontent:=miscdetector("prefab",tmpfind,tmpstring,filestring) ; detects the contents of a miscellaneous item... In expression "prefab" means item_slot
+	StringReplace,misccontent,filecontent,`r`n%A_Tab%%A_Tab%%A_Tab%"prefab"%A_Tab%%A_Tab%"emblem",`r`n%A_Tab%%A_Tab%%A_Tab%"baseitem"%A_Tab%%A_Tab%"1"`r`n%A_Tab%%A_Tab%%A_Tab%"prefab"%A_Tab%%A_Tab%"emblem"
+	StringReplace,masterfilecontent,masterfilecontent,%filecontent%,%misccontent%,1
+	; measures the number of items injected per second
+	Gui,MainGUI:Show,NoActivate,% floor(1000/(A_TickCount-IPS)) " Items per Second"
+	IPS:=A_TickCount
+	;
 }
 if peton=1
 {
@@ -2576,6 +2647,13 @@ loop,%modelcount%
 return
 
 extractfileruncmd:
+/*
+Requires:
+extractfile
+extractname
+defaultloc
+defaultname
+*/
 DetectHiddenWindows,On
 if ((SubStr(extractname,-1)!="_c") or (SubStr(defaultname,-1)!="_c"))
 	msgbox fatal! a model file has no compiled parameter on it:`nextractfile=%extractfile%`nextractname=%extractname%`ndefaultloc=%defaultloc%`ndefaultname=%defaultname%`n`nYOU ARE OBLIGED TO REPORT THIS TO AJO Manalansan Immediately!
@@ -2795,11 +2873,8 @@ filestring:=GlobalArray["items_game.txt"]
 filelength:=StrLen(GlobalArray["items_game.txt"])
 sfinder=`r`n%A_Tab%%A_Tab%}`r`n%A_Tab%%A_Tab%" ;"
 GuiControl,+cBlue,searchnofound
-lvparam=terrainchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,announcerview,tauntview,weatherchoice,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
-loop,parse,lvparam,`,
-{
+loop,parse,misclvparam,|
 	GuiControl, MainGUI:-Redraw, %A_LoopField%
-}
 GuiControl,Text,searchnofound,Detecting changes on the latest "items_game.txt" file
 ;firstmessage=`n;;;;This Section is the indicator if "items_game.txt" is changed`,PLEASE DONT EDIT ANYTHING ON THIS SECTION!!!;;;;`n`n
 ;lastmessage=`n;;;;End of AJOM Indicator;;;;`n`n
@@ -2811,103 +2886,8 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 		if (substr(filestring,1,strlen(GlobalArray["items_game.txt"]))=GlobalArray["items_game.txt"])
 		{
 			filestring:=StrReplace(filestring,GlobalArray["items_game.txt"])
-			; IniRead,tempo,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Announcers,AnnouncersCount,%A_Space%
-			;GuiControl,Text,searchnofound,Preloading Reference File
 			
-			;VarRead(,StrReplace(tempo,GlobalArray["items_game.txt"])) ; remember the contents of the variable and store to "static Var" that is inspected by varread
-			;if A_DefaultListView<>announcerview
-			;{
-			;	Gui, MainGUI:ListView,announcerview
-			;}
-			;tempo:=VarRead("AnnouncersCount")
-			;loop %tempo%
-			;{
-			;	; IniRead,hitemname,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Announcers,AnnouncerName%A_Index%
-			;	hitemname:=VarRead("AnnouncerName" A_Index)
-			;	GuiControl,Text,searchnofound,Fast Preloading %hitemname%
-			;	; IniRead,hitemslot,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Announcers,AnnouncerSlot%A_Index%
-			;	; IniRead,hitemrarity,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Announcers,AnnouncerRarity%A_Index%
-			;	; IniRead,hitemid,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Announcers,AnnouncerID%A_Index%
-			;	hitemslot:=VarRead("AnnouncerSlot" A_Index)
-			;	hitemrarity:=VarRead("AnnouncerRarity" A_Index)
-			;	hitemid:=VarRead("AnnouncerID" A_Index)
-			;	LV_Add(,hitemname,hitemslot,hitemrarity,hitemid)
-			;}
-			;LV_ModifyCol(2,"Sort")
-			;
-			;; IniRead,tempo,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Taunts,TauntsCount
-			;if A_DefaultListView<>tauntview
-			;{
-			;	Gui, MainGUI:ListView,tauntview
-			;}
-			;tempo:=VarRead("TauntsCount")
-			;loop %tempo%
-			;{
-			;	; IniRead,hitemname,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Taunts,TauntName%A_Index%
-			;	hitemname:=VarRead("TauntName" A_Index)
-			;	GuiControl,Text,searchnofound,Fast Preloading %hitemname%
-			;	; IniRead,hitemrarity,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Taunts,TauntRarity%A_Index%
-			;	; IniRead,hitemid,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Taunts,TauntID%A_Index%
-			;	; IniRead,hherouser,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,Taunts,TauntUser%A_Index%
-			;	hitemrarity:=VarRead("TauntRarity" A_Index)
-			;	hitemid:=VarRead("TauntID" A_Index)
-			;	hherouser:=VarRead("TauntUser" A_Index)
-			;	LV_Add(,hitemname,hitemrarity,hitemid,hherouser)
-			;}
-			;LV_ModifyCol(4,"Sort")
-			;
-			;param:=[["loadingscreenchoice","loading_screen"],["musicchoice","music"],["cursorchoice","cursor_pack"],["emblemchoice","emblem"],["weatherchoice","weather"],["multikillchoice","multikill_banner"],["versuscreenchoice","versus_screen"],["emoticonchoice","emoticon_tool"]]
-			;for intsaver, in param
-			;{
-			;	subject:=param[intsaver,2]
-			;	if A_DefaultListView<>% param[intsaver,1]
-			;	{
-			;		Gui, MainGUI:ListView,% param[intsaver,1]
-			;	}
-			;	; IniRead,tempo,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%Count
-			;	tempo:=VarRead(subject "Count")
-			;	loop %tempo%
-			;	{
-			;		; IniRead,hitemname,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%Name%A_Index%
-			;		hitemname:=VarRead(subject "Name" A_Index)
-			;		GuiControl,Text,searchnofound,Fast Preloading %subject%: %hitemname%
-			;		; IniRead,hitemrarity,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%Rarity%A_Index%
-			;		; IniRead,hitemid,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%ID%A_Index%
-			;		hitemrarity:=VarRead(subject "Rarity" A_Index)
-			;		hitemid:=VarRead(subject "ID" A_Index)
-			;		LV_Add(,hitemname,hitemrarity,hitemid)
-			;	}
-			;}
-			;
-			;param:=[["courierchoice","courier"],["wardchoice","ward"],["hudchoice","hud_skin"],["radcreepchoice","radiantcreeps"],["direcreepchoice","direcreeps"],["radtowerchoice","radianttowers"],["diretowerchoice","diretowers"],["terrainchoice","terrain"]]
-			;for intsaver, in param
-			;{
-			;	subject:=param[intsaver,2]
-			;	if A_DefaultListView<>% param[intsaver,1]
-			;	{
-			;		Gui, MainGUI:ListView,% param[intsaver,1]
-			;	}
-			;	; IniRead,tempo,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%Count
-			;	tempo:=VarRead(subject "Count")
-			;	loop %tempo%
-			;	{
-			;		; IniRead,hitemname,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%Name%A_Index%
-			;		hitemname:=VarRead(subject "Name" A_Index)
-			;		GuiControl,Text,searchnofound,Fast Preloading %subject%: %hitemname%
-			;		; IniRead,hitemrarity,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%Rarity%A_Index%
-			;		; IniRead,hitemid,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%ID%A_Index%
-			;		; IniRead,stylescount,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%StyleCount%A_Index%
-			;		; IniRead,tempo,%A_ScriptDir%\Library\Reference.aldrin_dota2mod,%subject%,%subject%ActivedStyle%A_Index%
-			;		hitemrarity:=VarRead(subject "Rarity" A_Index)
-			;		hitemid:=VarRead(subject "ID" A_Index)
-			;		stylescount:=VarRead(subject "StyleCount" A_Index)
-			;		tempo:=VarRead(subject "ActivedStyle" A_Index)
-			;		LV_Add(,hitemname,hitemrarity,hitemid,stylescount,tempo)
-			;	}
-			;}
-			
-			
-			loop,parse,lvparam,`,
+			loop,parse,misclvparam,|
 			{
 				if A_DefaultListView<>%A_LoopField%
 				{
@@ -3159,7 +3139,13 @@ for intsaver, in param
 }
 VarSetCapacity(filestringdummy,0)
 
-param:=[["loadingscreenchoice","loading_screen"],["musicchoice","music"],["cursorchoice","cursor_pack"],["emblemchoice","emblem"],["versuscreenchoice","versus_screen"],["emoticonchoice","emoticon_tool"]]
+param:=[["loadingscreenchoice"	,"loading_screen"]
+	   ,["musicchoice"			,"music"]
+	   ,["cursorchoice"			,"cursor_pack"]
+	   ,["emblemchoice"			,"emblem"]
+	   ,["versuscreenchoice"	,"versus_screen"]
+	   ,["emoticonchoice"		,"emoticon_tool"]
+	   ,["streakeffectchoice"	,"streak_effect"]]
 for intsaver, in param
 {
 	subject:=param[intsaver,2]
@@ -3315,7 +3301,7 @@ VarSetCapacity(param,0)
 GuiControl,Text,searchnofound,Creating Reference File
 ;FileAppend,% VarWrite( , "GetVar") "`r`n" firstmessage GlobalArray["items_game.txt"] lastmessage,%A_ScriptDir%\Library\Reference.aldrin_dota2mod ;"VarWrite( ,"GetVar")" function returns the text that will be stored in the file choosed by user, the first parameter must be omitted or blank
 filestring:=GlobalArray["items_game.txt"]
-loop,parse,lvparam,`,
+loop,parse,misclvparam,|
 {
 	if A_DefaultListView<>%A_LoopField%
 	{
@@ -3913,8 +3899,7 @@ reloadmisc(invfile) {
 	GuiControlGet,maperrorshow,,errorshow
 	if VarRead("@DataBaseVersion!")=2
 	{
-		param=terrainchoice,weatherchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,tauntview,announcerview,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
-		Loop,parse,param,`,
+		Loop,parse,misclvparam,|
 		{
 			if A_DefaultListView<>%A_LoopField%
 			{
@@ -4026,8 +4011,7 @@ reloadmisc(invfile) {
 				Break
 			}
 		}
-		param=terrainchoice,weatherchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,tauntview,announcerview,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
-		Loop,parse,param,`,
+		Loop,parse,misclvparam,|
 		{
 			if A_DefaultListView<>%A_LoopField%
 			{
@@ -4140,8 +4124,7 @@ reloadmisc(invfile) {
 				Break
 			}
 		}
-		param=terrainchoice,weatherchoice,hudchoice,courierchoice,wardchoice,loadingscreenchoice,tauntview,announcerview,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
-		Loop,parse,param,`,
+		Loop,parse,misclvparam,|
 		{
 			if A_DefaultListView<>%A_LoopField%
 			{
@@ -4241,15 +4224,11 @@ reloadmisc(invfile) {
 }
 
 savemisc:
-multiplestyleparam=courierchoice,wardchoice,hudchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,terrainchoice
-multiplesourceparam=tauntview,announcerview
-param=weatherchoice,multikillchoice,emblemchoice,musicchoice,cursorchoice,loadingscreenchoice,versuscreenchoice,emoticonchoice,%multiplestyleparam%,%multiplesourceparam%
-;param=terrainchoice,weatherchoice,hudchoice,loadingscreenchoice,tauntview,announcerview,courierchoice,wardchoice,musicchoice,cursorchoice,multikillchoice,emblemchoice,radcreepchoice,direcreepchoice,radtowerchoice,diretowerchoice,versuscreenchoice,emoticonchoice
 gosub,hideprogress
 count:=0
-if MyObject.FileTypeIndex=1
+if MyObject.FilterIndex=1
 {
-	loop,parse,param,`,
+	loop,parse,misclvparam,|
 	{
 		if A_DefaultListView<>%A_LoopField%
 		{
@@ -4280,7 +4259,7 @@ if MyObject.FileTypeIndex=1
 					VarWrite("misclv" count,saver)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 					;IniWrite, %saver%, %invfile%, Miscellaneous, misclv%count%
 					
-					if instr(multiplestyleparam,saver) ; if a multistyle listview
+					if instr(multiplestylesfamily,saver) ; if a multistyle listview
 					{
 						LV_GetText(tmp,A_Index,5)
 						
@@ -4303,9 +4282,9 @@ if MyObject.FileTypeIndex=1
 	;IniWrite,%peton%, %invfile%, Miscellaneous, pet
 	;IniWrite,%petstyle%, %invfile%, Miscellaneous, mappetstyle
 }
-else if MyObject.FileTypeIndex=2
+else if MyObject.FilterIndex=2
 {	
-	loop,parse,param,`,
+	loop,parse,misclvparam,|
 	{
 		if A_DefaultListView<>%A_LoopField%
 		{
@@ -4335,7 +4314,7 @@ else if MyObject.FileTypeIndex=2
 					
 					VarWrite("misclv" count,saver)	;VarWrite(Key := "", Value := "")
 					
-					if instr(multiplestyleparam,saver) ; if a multistyle listview
+					if instr(multiplestylesfamily,saver) ; if a multistyle listview
 					{
 						LV_GetText(tmp,A_Index,5)
 						
@@ -4354,7 +4333,6 @@ else if MyObject.FileTypeIndex=2
 	VarWrite("pet",peton)	;VarWrite(Key := "", Value := "")
 	VarWrite("mappetstyle",petstyle)	;VarWrite(Key := "", Value := "")
 }
-VarSetCapacity(multiplestyleparam,0),VarSetCapacity(multiplesourceparam,0),VarSetCapacity(param,0)
 return
 
 hdatasave:
@@ -4380,12 +4358,8 @@ Gui, MainGUI:+Disabled
 ;;; SaveFile Returns two index on an object:
 ;;; File			-	the inputted filename
 ;;; FileTypeIndex	-	the chosen Filter(Files of type dropdownlist of the explorer gui)... This will Return the number of row of the selected filetype extension
-MyObject := SaveFile( [0, "Name your Database and Specify where to Save"]    ; [owner, title/prompt]
-             , ""    ; RootDir\Filename
-             , {"`nHandy Injection Database Version 1.5": "*.aldrin_dota2hidb","Handy Injection Database Version 2 (EXPERIMENTAL)": "*.aldrin_dota2hidb"}     ; Filter
-             , ""    ; CustomPlaces
-             , 2)    ; Options ( 2 = FOS_OVERWRITEPROMPT )
-invfile := MyObject.File
+MyObject := FileSelectFile("S16",,"Name your Database and Specify where to Save","|Handy Injection Database Version 1.5 (*.aldrin_dota2hidb)||Handy Injection Database Version 2 (EXPERIMENTAL) (*.aldrin_dota2hidb)")
+invfile := MyObject.FileFullPath
 
 if invfile<>
 {
@@ -4401,7 +4375,7 @@ if invfile<>
 	}
 	
 	VarWrite( ) ; blanks Function Static "Var" variable! Always start Writing in a blank variable, avoiding Rewritings (Faster) 
-	if MyObject.FileTypeIndex=1 ; if database version 1.5
+	if MyObject.FilterIndex=1 ; if database version 1.5
 	{
 		;;;;; the old method
 		adder:=1000/LV_GetCount()
@@ -4436,14 +4410,14 @@ if invfile<>
 		VarWrite("@DataBaseVersion!","1.5")	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 		FileAppend,% VarWrite( , "GetVar"),%invfile%  ;"VarWrite( ,"GetVar")" function returns the text that will be stored in the file choosed by user, the first parameter must be omitted or blank
 	}
-	else if MyObject.FileTypeIndex=2 ; if database version 2
+	else if MyObject.FilterIndex=2 ; if database version 2
 	{
 		LVSData:=ListViewSave(databasemessage)
 		
 		if usemiscon=1
 		{
 			GoSub,savemisc
-			VarWrite("@DataBaseVersion!",MyObject.FileTypeIndex)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
+			VarWrite("@DataBaseVersion!",MyObject.FilterIndex)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 			LVSData.=VarWrite( , "GetVar") ;"VarWrite( ,"GetVar")" function returns the text that will be stored in the file choosed by user, the first parameter must be omitted or blank
 		}
 		FileAppend,% LVSData,% invfile
@@ -7430,7 +7404,12 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-2.7.4
+v2.8.0
+*Added "Streak Effect" Feature at "Miscellaneous" Section > "Single-Source" Sub-Section, Cool!
+*Fixed Environment Announcer and Mega-Kills Announcer not working.
+*Fixed some Text Encoding Problem reported by L0n3lyK1n9.
+
+v2.7.4
 *Fixed Auto-Update not Working.
 *Added "Auto-Check for Latest Handy-Injection Database" Checkbox at "Advanced" Section. With this, DOTA2 MOD Master can check for latest handy-injection database released at URL:
  -https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/LatestHIDB/
@@ -7660,22 +7639,14 @@ if LV_GetCount()=0
 	return
 }
 Gui, MainGUI:-Disabled 
-;FileSelectFile,invfile,S24,,.aldrin_dota2db,*.aldrin_dota2db
 
-;;; SaveFile Returns two index on an object:
-;;; File			-	the inputted filename
-;;; FileTypeIndex	-	the chosen Filter(Files of type dropdownlist of the explorer gui)... This will Return the number of row of the selected filetype extension
-MyObject := SaveFile( [0, "Name your Database and Specify where to Save"]    ; [owner, title/prompt]
-             , ""    ; RootDir\Filename
-             , {"`nGeneral Database Version 1.5": "*.aldrin_dota2db"} ; Filter
-             , ""    ; CustomPlaces
-             , 2)    ; Options ( 2 = FOS_OVERWRITEPROMPT )
-invfile := MyObject.File
+MyObject := FileSelectFile("S16",,"Name your Database and Specify where to Save","|General Database Version 1.5 (*.aldrin_dota2db)|")
+invfile := MyObject.FileFullPath
 
 if invfile<>
 {
 	VarWrite( ) ; blanks Function Static "Var" variable! Always start Writing in a blank variable, avoiding Rewritings (Faster) 
-	;if MyObject.FileTypeIndex=1
+	;if MyObject.FilterIndex=1
 	;{
 		Gui,MainGUI:Show,NA
 		adder:=1000/LV_GetCount()
@@ -9197,174 +9168,68 @@ LV_ClearAll("")	;delete all rows and columns
 	}
 }
 
-DirExist(DirName)
-{
-    loop Files, % DirName, D
-        return A_LoopFileAttrib
-}
-StrPutVar(string, ByRef var, encoding)
-{
-    ; Ensure capacity.
-    VarSetCapacity( var, StrPut(string, encoding)
-        ; StrPut returns char count, but VarSetCapacity needs bytes.
-        * ((encoding="utf-16"||encoding="cp1200") ? 2 : 1) )
-    ; Copy or convert the string.
-    return StrPut(string, &var, encoding)
-} ; https://www.autohotkey.com/docs/commands/StrPut.htm#Examples
+FileSelectFile( Options:="", RootDir:="", Title:="", Filter:="" ) {   ;   v0.72 by SKAN on D39R/D39U
+Local                                                                 ;     @ tiny.cc/fileselectfile
 
-/*
-    Displays a standard dialog that allows the user to save a file.
-    Parameters:
-        Owner / Title:
-            The identifier of the window that owns this dialog. This value can be zero.
-            An Array with the identifier of the owner window and the title. If the title is an empty string, it is set to the default.
-        FileName:
-            The path to the file or directory selected by default. If you specify a directory, it must end with a backslash.
-        Filter:
-            Specify a file filter. You must specify an object, each key represents the description and the value the file types.
-            To specify the filter selected by default, add the "`n" character to the value.
-        CustomPlaces:
-            Specify an Array with the custom directories that will be displayed in the left pane. Missing directories will be omitted.
-            To specify the location in the list, specify an Array with the directory and its location (0 = Lower, 1 = Upper).
-        Options:
-            Determines the behavior of the dialog. This parameter must be one or more of the following values.
-                0x00000002  (FOS_OVERWRITEPROMPT) = When saving a file, prompt before overwriting an existing file of the same name.
-                0x00000004  (FOS_STRICTFILETYPES) = Only allow the user to choose a file that has one of the file name extensions specified through Filter.
-                0x00040000 (FOS_HIDEPINNEDPLACES) = Hide items shown by default in the view's navigation pane.
-                0x10000000  (FOS_FORCESHOWHIDDEN) = Include hidden and system items.
-                0x02000000  (FOS_DONTADDTORECENT) = Do not add the item being opened or saved to the recent documents list (SHAddToRecentDocs).
-            You can check all available values at https://msdn.microsoft.com/en-us/library/windows/desktop/dn457282(v=vs.85).aspx.
-    Return:
-        Returns 0 if the user canceled the dialog, otherwise returns the path of the selected file.
-*/
-SaveFile(Owner, FileName := "", Filter := "", CustomPlaces := "", Options := 0x6)
-{
-    ; IFileSaveDialog interface
-    ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb775688(v=vs.85).aspx
-    local IFileSaveDialog := ComObjCreate("{C0B4E2F3-BA21-4773-8DBA-335EC946EB8B}", "{84BCCD23-5FDE-4CDB-AEA4-AF64B83D78AB}")
-        ,           Title := IsObject(Owner) ? Owner[2] . "" : ""
-        ,           Flags := Options     ; FILEOPENDIALOGOPTIONS enumeration (https://msdn.microsoft.com/en-us/library/windows/desktop/dn457282(v=vs.85).aspx)
-        ,      IShellItem := PIDL := 0   ; PIDL recibe la dirección de memoria a la estructura ITEMIDLIST que debe ser liberada con la función CoTaskMemFree
-        ,             Obj := {}, foo := bar := ""
-        ,       Directory := FileName
-    Owner := IsObject(Owner) ? Owner[1] : (WinExist("ahk_id" . Owner) ? Owner : 0)
-    Filter := IsObject(Filter) ? Filter : {"All files": "*.*"}
+  Option := StrSplit(Options, "|", A_Space)                           ;            Options parameter
+  AltWnd := Round(Option[4]),  xFlags := Round(Option[3]),  DefExt := Trim(Option[2], ". ")
+  Main := Option[1],  o := SubStr(Main, 1, 1),  f := Round( SubStr(Main, (o="S" || o="M" ? 2 : 1)) )
 
+  nFlags := ( (OFN_ENABLEXPLORER   :=0x80000)      | (f&1  ? (OFN_FILEMUSTEXIST     :=0x001000) : 0)
+  | (f&2    ? (OFN_PATHMUSTEXIST   :=0x00800) : 0) | (f&8  ? (OFN_CREATEPROMPT      :=0x002000) : 0)
+  | (f&16   ? (OFN_OVERWRITEPROMPT :=0x00002) : 0) | (f&32 ? (OFN_NODEREFERENCELINKS:=0x100000) : 0)
+  | (o="M"  ? (OFN_ALLOWMULTISELECT:=0x00200) : 0) | xFlags )
 
-    if ( FileName != "" )
-    {
-        if ( InStr(FileName, "\") )
-        {
-            if !( FileName ~= "\\$" )    ; si «FileName» termina con "\" se trata de una carpeta
-            {
-                local File := ""
-                SplitPath FileName, File, Directory
-                ; IFileDialog::SetFileName
-                ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb775974(v=vs.85).aspx
-                StrPutVar(File, FileW, "UTF-16")
-                DllCall(NumGet(NumGet(IFileSaveDialog+0)+15*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", &FileW)
-            }
-            
-            while ( InStr(Directory,"\") && !DirExist(Directory) )                   ; si el directorio no existe buscamos directorios superiores
-                Directory := SubStr(Directory, 1, InStr(Directory, "\",, -1) - 1)    ; recupera el directorio superior
-            if ( DirExist(Directory) )
-            {
-                StrPutVar(Directory, DirectoryW, "UTF-16")
-                DllCall("Shell32.dll\SHParseDisplayName", "UPtr", &DirectoryW, "Ptr", 0, "UPtrP", PIDL, "UInt", 0, "UInt", 0)
-                DllCall("Shell32.dll\SHCreateShellItem", "Ptr", 0, "Ptr", 0, "UPtr", PIDL, "UPtrP", IShellItem)
-                ObjRawSet(Obj, IShellItem, PIDL)
-                ; IFileDialog::SetFolder method
-                ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb761828(v=vs.85).aspx
-                DllCall(NumGet(NumGet(IFileSaveDialog+0)+12*A_PtrSize), "Ptr", IFileSaveDialog, "UPtr", IShellItem)
-            }
-        }
-        else
-        {
-            StrPutVar(FileName, FileNameW, "UTF-16")
-            DllCall(NumGet(NumGet(IFileSaveDialog+0)+15*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", &FileNameW)
-        }
-    }
+  q := ( (nFlags & (OFN_OVERWRITEPROMPT := 0x00002)) && !(nFlags & (OFN_CREATEPROMPT := 0x002000)) )
+  GetFileName := ( o="S" || q ) ?  "comdlg32.dll\GetSaveFileName"  :  "comdlg32.dll\GetOpenFileName"
 
+  RootDir  .= InStr(FileExist(RootDir), "D", 1) ? "\" : ""            ;            RootDir parameter
+  SplitPath, RootDir, FileName, InitialDir
+  FileName := (InitialDir="::" ? "" : FileName)   ; ignore CLSID
+  nMaxFile := VarSetCapacity(File, o="M" ? 65536:1024, 0), StrPut(FileName, &File)
+                                                                                   
+  Title := StrLen(Title) ? Title : "Select File - " . A_ScriptName    ;              Title parameter
+                                                                                  
+  Filter := ( ( df:=(Asc( f := Filter)=124) ) ? LTrim(f,"|") : f )    ;             Filter parameter
+  n := InStr(Filter, "||",, 0)
+  StrReplace( StrReplace( SubStr((f := Filter), 1, n), "||", "|" ), "|", "|", nFilterIndex )
 
-    ; COMDLG_FILTERSPEC structure
-    ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb773221(v=vs.85).aspx
-    local Description := "", FileTypes := "", FileTypeIndex := 1
-    ObjSetCapacity(Obj, "COMDLG_FILTERSPEC", 2*Filter.Count() * A_PtrSize)
-    for Description, FileTypes in Filter
-    {
-        FileTypeIndex := InStr(FileTypes,"`n") ? A_Index : FileTypeIndex
-        StrPutVar(Trim(Description), desc_%A_Index%, "UTF-16")
-        StrPutVar(Trim(StrReplace(FileTypes,"`n")), ft_%A_Index%, "UTF-16")
-        NumPut(&desc_%A_Index%, ObjGetAddress(Obj,"COMDLG_FILTERSPEC") + A_PtrSize * 2*(A_Index-1))        ; COMDLG_FILTERSPEC.pszName
-        NumPut(&ft_%A_Index%, ObjGetAddress(Obj,"COMDLG_FILTERSPEC") + A_PtrSize * (2*(A_Index-1)+1))    ; COMDLG_FILTERSPEC.pszSpec
-    }
+  Loop, Parse, % ( Filter ? Filter : "All files (*.*)|Text Documents (*.txt)" ), |,  % " " . f := ""
+  If ( (n := InStr( (l := A_LoopField), "(",, 0))
+    && (v := StrReplace( Trim(SubStr(l, n), "( )"), " ")) )
+        f .= Format(df ? "{1:}|{2:}|" : "{1:}({2:})|{2:}|", SubStr(l, 1, n-1), v)
 
-    ; IFileDialog::SetFileTypes method
-    ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb775980(v=vs.85).aspx
-    DllCall(NumGet(NumGet(IFileSaveDialog+0)+4*A_PtrSize), "UPtr", IFileSaveDialog, "UInt", Filter.Count(), "UPtr", ObjGetAddress(Obj,"COMDLG_FILTERSPEC"))
+  Filter := (f . "|"),  x := (A_IsUnicode ? 2 : 1),  Null := 0
+  While ( f := InStr(Filter, "|",, 0) )            
+    NumPut(Null, Filter, (f*x)-x, "Char")         
 
-    ; IFileDialog::SetFileTypeIndex method
-    ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb775978(v=vs.85).aspx
-    DllCall(NumGet(NumGet(IFileSaveDialog+0)+5*A_PtrSize), "UPtr", IFileSaveDialog, "UInt", FileTypeIndex)
+  DetectHiddenWindows, % ("On", DHW := A_DetectHiddenWindows)         ; Setting owner for the dialog
+  SetWinDelay, % (0, SWD := A_WinDelay)
+  SplashImage, 8:, x0 y0 w0 h0 B Hide,,, OwnDialogTest
+  WinWait, OwnDialogTest ahk_class AutoHotkey2,, 10
+  hOwner := DllCall("GetWindow", "Ptr",WinExist(), "Int",GW_OWNER:=4 ,"Ptr")
+  SplashImage, 8:Off
+  hOwner := (hOwner!=A_ScriptHwnd) ? hOwner : WinExist("ahk_id" . AltWnd)
+  SetWinDelay, %SWD%
+  DetectHiddenWindows, %DHW%
 
+  P8 := (A_PtrSize=8),    VarSetCapacity(OFN, P8 ? 168 : 96, 0)       ; Creating OPENFILENAME Struct
+  NumPut(P8 ? 136 : 76, OFN, "Int")
+  NumPut(hOwner,       OFN, P8 ? 08 : 04, "Ptr"),     NumPut(&Filter,      OFN, P8 ? 24 : 12, "Ptr")
+  NumPut(nFilterIndex, OFN, P8 ? 44 : 24, "Int"),     NumPut(&File,        OFN, P8 ? 48 : 28, "Ptr")
+  NumPut(nMaxFile,     OFN, P8 ? 56 : 32, "Int"),     NumPut(&InitialDir,  OFN, P8 ? 80 : 44, "Ptr")
+  NumPut(&Title,       OFN, P8 ? 88 : 48, "Ptr"),     NumPut(nFlags,       OFN, P8 ? 96 : 52, "Int")
+  NumPut((StrLen(DefExt) ? &DefExt : 0), OFN, P8 ? 104 : 60, "Int")
 
-    if ( IsObject(CustomPlaces := IsObject(CustomPlaces) || CustomPlaces == "" ? CustomPlaces : [CustomPlaces]) )
-    {
-        for foo, Directory in CustomPlaces    ; foo = index
-        {
-            foo := IsObject(Directory) ? Directory[2] : 0    ; FDAP enumeration (https://msdn.microsoft.com/en-us/library/windows/desktop/bb762502(v=vs.85).aspx)
-            if ( DirExist(Directory := IsObject(Directory) ? Directory[1] : Directory) )
-            {
-                StrPutVar(Directory, DirectoryW, "UTF-16")
-                DllCall("Shell32.dll\SHParseDisplayName", "UPtr", &DirectoryW, "Ptr", 0, "UPtrP", PIDL, "UInt", 0, "UInt", 0)
-                DllCall("Shell32.dll\SHCreateShellItem", "Ptr", 0, "Ptr", 0, "UPtr", PIDL, "UPtrP", IShellItem)
-                ObjRawSet(Obj, IShellItem, PIDL)
-                ; IFileDialog::AddPlace method
-                ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb775946(v=vs.85).aspx
-                DllCall(NumGet(NumGet(IFileSaveDialog+0)+21*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", IShellItem, "UInt", foo)
-            }
-        }
-    }
+  f := (hOwner ? DllCall("SetForegroundWindow", "Ptr",hOwner) : 0)    ;         Calling the function
+  If !DllCall(GetFileName, "Ptr",&OFN)
+    Return ("",  ErrorLevel := 1)
 
+  OutputVar := "",  f := &File                                        ;      Extracting file(s) list
+  While ( Line := StrGet(f) )
+    OutputVar .= Line . "`n",  f += ( (StrLen(Line)+1) * x )
 
-    ; IFileDialog::SetTitle method
-    ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb761834(v=vs.85).aspx
-    StrPutVar(Title, TitleW, "UTF-16")
-    DllCall(NumGet(NumGet(IFileSaveDialog+0)+17*A_PtrSize), "UPtr", IFileSaveDialog, "UPtr", Title == "" ? 0 : &TitleW)
-
-    ; IFileDialog::SetOptions method
-    ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb761832(v=vs.85).aspx
-    DllCall(NumGet(NumGet(IFileSaveDialog+0)+9*A_PtrSize), "UPtr", IFileSaveDialog, "UInt", Flags)
-
-
-    ; IModalWindow::Show method
-    ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb761688(v=vs.85).aspx
-    local Result := FALSE
-    if ( !DllCall(NumGet(NumGet(IFileSaveDialog+0)+3*A_PtrSize), "UPtr", IFileSaveDialog, "Ptr", Owner, "UInt") )
-    {
-        ; IFileDialog::GetFileTypeIndex method
-        ; https://msdn.microsoft.com/es-es/bb775958
-        DllCall(NumGet(NumGet(IFileSaveDialog+0)+6*A_PtrSize), "UPtr", IFileSaveDialog, "UIntP", FileTypeIndex)
-
-        ; IFileDialog::GetResult method
-        ; https://msdn.microsoft.com/en-us/library/windows/desktop/bb775964(v=vs.85).aspx
-        if ( !DllCall(NumGet(NumGet(IFileSaveDialog+0)+20*A_PtrSize), "UPtr", IFileSaveDialog, "UPtrP", IShellItem) )
-        {
-            VarSetCapacity(Result, 32767 * 2, 0)
-            DllCall("Shell32.dll\SHGetIDListFromObject", "UPtr", IShellItem, "UPtrP", PIDL)
-            DllCall("Shell32.dll\SHGetPathFromIDListEx", "UPtr", PIDL, "Str", Result, "UInt", 2000, "UInt", 0)
-            Result := StrGet(&Result, "UTF-16")
-            ObjRawSet(Obj, IShellItem, PIDL)
-        }
-    }
-
-
-    for foo, bar in Obj      ; foo = IShellItem interface (ptr)  |  bar = PIDL structure (ptr)
-        if foo is integer    ; IShellItem?
-            ObjRelease(foo), DllCall("Ole32.dll\CoTaskMemFree", "UPtr", bar)
-    ObjRelease(IFileSaveDialog)
-
-    return (Result!=FALSE) ? {File:Result,FileTypeIndex:FileTypeIndex} : FALSE
+Return ({FileFullPath:Rtrim(OutputVar, "`n"),FilterIndex:NumGet(OFN, P8 ? 44 : 24, "UInt")},  ErrorLevel := 0)
 }
 
 ; ----------------------------------------------------------------------------------------------------------------------
@@ -10579,6 +10444,7 @@ cameradistancehack(patch4bytehex:="")
 	Gui,MainGUI:Default
 	GuiControlGet,dota2dir,,dota2dir
 	file:= dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll"
+	FileCopy,%file%,%A_ScriptDir%\Library\client.bak,1
 	binfile := FileOpen(file,"rw")
 	if (binfile=0)
 		return
@@ -10741,7 +10607,7 @@ if !IsObject(xv1d2_wv1d2_param)
 	xv1d2_wv1d2_param:=["injectto"]
 	
 if !IsObject(xv1d2_wv1d2_h_param)
-	xv1d2_wv1d2_h_param:=["showitems","announcerview","reportshow","terrainchoice","weatherchoice","multikillchoice","emblemchoice","musicchoice","cursorchoice","loadingscreenchoice","courierchoice","wardchoice","hudchoice","radcreepchoice","direcreepchoice","radtowerchoice","diretowerchoice","versuscreenchoice","emoticonchoice","allitemlist"]
+	xv1d2_wv1d2_h_param:=["showitems","announcerview","reportshow","terrainchoice","weatherchoice","multikillchoice","streakeffectchoice","emblemchoice","musicchoice","cursorchoice","loadingscreenchoice","courierchoice","wardchoice","hudchoice","radcreepchoice","direcreepchoice","radtowerchoice","diretowerchoice","versuscreenchoice","emoticonchoice","allitemlist"]
 	
 if !IsObject(wv1d2_h_param)
 	wv1d2_h_param:=["herochoice","tauntview","errorshow","singlesourcechoicegui","multiplestyleschoicegui","itembuildlist"]
@@ -11228,3 +11094,13 @@ divide number of items into multiple custom processes
 timedverinteg function di madetect variables sa timer
 
 */
+
+StrPutVar(string, ByRef var, encoding)
+{
+    ; Ensure capacity.
+    VarSetCapacity( var, StrPut(string, encoding)
+        ; StrPut returns char count, but VarSetCapacity needs bytes.
+        * ((encoding="utf-16"||encoding="cp1200") ? 2 : 1) )
+    ; Copy or convert the string.
+    return StrPut(string, &var, encoding)
+} ; https://www.autohotkey.com/docs/commands/StrPut.htm#Examples
