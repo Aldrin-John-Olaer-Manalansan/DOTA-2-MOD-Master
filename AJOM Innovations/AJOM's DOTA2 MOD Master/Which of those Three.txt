@@ -1,0 +1,26 @@
+(x64)
+-this is the application that should be used by 64-bit architecture computers
+-this is not compatible on 32-bit architectures
+-has the best compatibility for 64-bit users
+
+
+(x86)
+-this is the application that should be used by 32-bit architecture computers
+-this can still be used by 64-bit architecture computers since they support (x86) compatibility... But dont expect that the performance of this application will be better, Thats why I recommend using x64 type of this application
+-has the best compatibility for 32-bit users
+-the only compability for windows XP users
+
+
+(x86-ANSI)
+-if both of those application preceed with "ERROR PARSING STRINGS" when opening your DOTA2 after injecting your item sets, Use this alternative application
+-has the best compatibility for 32-bit users
+-compatible for 64-bit users
+-this is just an alternative type of application,  so if the x64 or x32 works perfectly, you dont need to use this type of application
+-Commonly used on WINDOWS 10(x64 or x86) due to compatibility
+
+
+
+
+Additional Helpful Informations:
+-XP and below is considered as 32-bit Architecture
+-ANSI is just optional

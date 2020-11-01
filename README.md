@@ -98,11 +98,14 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+<<<<<<< HEAD
 v2.9.0
 - Fixed Some Hero Cosmetic Item Listviews not showing Colors according to their Rarity.
 - Added Kill Effect,Death Effect,Map Effect,Courier Effect,Head Effect,Teleport Effect,Blink Effect at Miscellaneous>Single Source.
 - Improved Material(.vmat) File Extraction.
 
+=======
+>>>>>>> 226badda64aa0ffaecdbdbf701e41cf2523701f0
 v2.8.0
 - Added "Streak Effect" Feature at "Miscellaneous" Section > "Single-Source" Sub-Section, Cool!
 - Fixed Environment Announcer and Mega-Kills Announcer not working.
