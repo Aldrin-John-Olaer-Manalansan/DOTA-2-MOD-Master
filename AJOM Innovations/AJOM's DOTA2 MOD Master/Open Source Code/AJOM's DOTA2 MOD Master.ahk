@@ -60,7 +60,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.9.1
+version=2.9.2
 
 if disableautoupdate<>1
 	Gosub,versionchecker
@@ -7380,10 +7380,11 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-v2.9.1
+v2.9.2
 *Fixed Some Hero Cosmetic Item Listviews not showing Colors according to their Rarity.
 *Added Kill Effect,Death Effect,Map Effect,Courier Effect,Head Effect,Teleport Effect,Blink Effect at Miscellaneous>Single Source.
 *Improved Material(.vmat) File Extraction.
+*Improved Camera Distance Detection.
 
 v2.8.0
 *Added "Streak Effect" Feature at "Miscellaneous" Section > "Single-Source" Sub-Section, Cool!
@@ -10455,8 +10456,8 @@ cameradistancehack(patch4bytehex:="")
 	binfile := FileOpen(file,"rw")
 	if (binfile=0)
 		return
-	oldoffset := gethexoffset(file,"725f70726f70736d617864697374") ; "r_propsmaxdist"
-	binfile.Pos := oldoffset
+	stringoffset := gethexoffset(file,"725f70726f70736d617864697374") ; "r_propsmaxdist"
+	binfile.Pos := stringoffset
 	loop
 	{
 		binfile.Pos--
@@ -10465,31 +10466,50 @@ cameradistancehack(patch4bytehex:="")
 		else binfile.Pos--
 	}
 	oldoffset := binfile.Pos
-
 	loop
 	{
 		binfile.Pos--
 		if (binfile.ReadUChar()=0) ; a null terminator
-		{
-			if (A_Index > 1) and (patch4bytehex >= 0) and (patch4bytehex <= 0xFFFFFFFF)
-			{
-				offset := binfile.Pos
-				binfile.Pos := oldoffset
-				binlength:=binfile.Length-oldoffset
-				binfile.RawRead(bindata,binlength)
-				oldoffset := offset+strlen(patch4bytehex)
-				binfile.Pos := oldoffset
-				binfile.RawWrite(bindata,binlength)
-				binfile.Length:=oldoffset+binlength
-				binfile.Pos := offset
-				binfile.Write(patch4bytehex)
-				binfile.Pos := offset
-			}
 			break
-		}
 		else binfile.Pos--
 	}
-	return binfile.Read(4)
+	StringLength:=oldoffset-binfile.Pos
+	cameradistance:=binfile.Read(StringLength)
+	if cameradistance is not Number
+	{
+		binfile.Pos := stringoffset + 14
+		loop
+		{
+			if (binfile.ReadUChar()!=0) ; not a null terminator
+				break
+		}
+		offset:=binfile.Pos-1
+		loop
+		{
+			if (binfile.ReadUChar()=0) ; a null terminator
+				break
+		}
+		oldoffset:=binfile.Pos-1
+		binfile.Pos:=offset
+		StringLength:=oldoffset-binfile.Pos
+		cameradistance:=binfile.Read(StringLength)
+	}
+	binfile.Pos-=StringLength
+	if (patch4bytehex >= 0) and (patch4bytehex <= 0xFFFFFFFF)
+	{
+		offset := binfile.Pos
+		binfile.Pos := oldoffset
+		binlength:=binfile.Length-oldoffset
+		binfile.RawRead(bindata,binlength)
+		oldoffset := offset+strlen(patch4bytehex)
+		binfile.Pos := oldoffset
+		binfile.RawWrite(bindata,binlength)
+		binfile.Length:=oldoffset+binlength
+		binfile.Pos := offset
+		binfile.Write(patch4bytehex)
+		binfile.Pos := offset
+	}
+	return cameradistance
 }
 
 gethexoffset(file,hex)
