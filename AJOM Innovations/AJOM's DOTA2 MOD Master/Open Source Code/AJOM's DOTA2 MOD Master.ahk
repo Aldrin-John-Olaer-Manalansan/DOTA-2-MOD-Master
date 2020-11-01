@@ -60,10 +60,10 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.9.0
+version=2.9.1
 
 if disableautoupdate<>1
-	versionchecker(version)
+	Gosub,versionchecker
 
 Menu, Tray, Add, &Exit, k_MenuExit
 Menu, Tray, NoStandard
@@ -7380,7 +7380,7 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-v2.9.0
+v2.9.1
 *Fixed Some Hero Cosmetic Item Listviews not showing Colors according to their Rarity.
 *Added Kill Effect,Death Effect,Map Effect,Courier Effect,Head Effect,Teleport Effect,Blink Effect at Miscellaneous>Single Source.
 *Improved Material(.vmat) File Extraction.
@@ -10150,8 +10150,7 @@ Would you like to Preload this Database File?
 	ToolTip
 return
 
-versionchecker(version)
-{
+versionchecker:
 	if A_IsCompiled
 	{
 		ToolTip,DOTA2 MOD Master:`nChecking for New Version,0,0
@@ -10185,28 +10184,27 @@ You can download the new version of this tool at:
 		}
 		;FileDelete,%A_ScriptDir%\Plugins\Unzip\Version.ini
 	}
-	return
+return
 
 updateversion:
-ToolTip,DOTA2 MOD Master:`nDownloading New Version's Files,0,0
-if DownloadFileURL([[downloadlink,A_ScriptDir "\Plugins\Unzip\master.zip","DOTA2 MOD Master v" webversion]],3)[1]
-	return
-updatewassuccessful=1
+	ToolTip,DOTA2 MOD Master:`nDownloading New Version's Files,0,0
+	if DownloadFileURL([[downloadlink,A_ScriptDir "\Plugins\Unzip\master.zip","DOTA2 MOD Master v" webversion]],3)[1]
+		return
+	updatewassuccessful=1
 updatefiles:
-ifexist,%A_ScriptDir%\Plugins\Unzip\master.zip
-{
-	msgbox,262148,Update/Migration COMPLETE!,Latest Version of DOTA2 MOD Master has been successfully Installed, would you like to reload this program for this version to take effect?
-	IfMsgBox Yes
+	ifexist,%A_ScriptDir%\Plugins\Unzip\master.zip
 	{
-		gosub,updatemigrator
-		if ErrorLevel=ERROR
-			goto,updatefiles
-		ExitApp
+		msgbox,262148,Update/Migration COMPLETE!,Latest Version of DOTA2 MOD Master has been successfully Installed, would you like to reload this program for this version to take effect?
+		IfMsgBox Yes
+		{
+			gosub,updatemigrator
+			if ErrorLevel=ERROR
+				goto,updatefiles
+			ExitApp
+		}
+		SetTimer,updateversion,Off
 	}
-	SetTimer,updateversion,Off
-}
 return
-}
 
 updatemigrator:
 tmpr := DllCall("GetCurrentProcessId")
@@ -10359,7 +10357,8 @@ DownloadFileURL(UrlToFile,attempcount:=1, Overwrite := True, UseProgressBar := T
       }
 	  
     ;Create the progressbar and the timer
-      Progress,% "A M1 H120 W" A_ScreenWidth/2,,Downloading...,Fetching`,Please Wait.
+
+      showprogressgui:=True
       SetTimer, __UpdateProgressBar, 500
 	  
 	  for index, in UrlToFile
@@ -10387,6 +10386,13 @@ DownloadFileURL(UrlToFile,attempcount:=1, Overwrite := True, UseProgressBar := T
     
     ;The label that updates the progressbar
       __UpdateProgressBar:
+      		if !FileExist(UrlToFile[index,2])
+      			return
+			if showprogressgui
+			{
+      			Progress,% "A M1 H120 W" A_ScreenWidth/2,,Downloading...,Fetching`,Please Wait.
+      			showprogressgui:=False
+      		}
 			if (saveindex!=index)
 			{
 				if savefilesize[saveindex] is Number

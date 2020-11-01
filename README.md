@@ -98,7 +98,7 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
-v2.9.0
+v2.9.1
 - Fixed Some Hero Cosmetic Item Listviews not showing Colors according to their Rarity.
 - Added Kill Effect,Death Effect,Map Effect,Courier Effect,Head Effect,Teleport Effect,Blink Effect at Miscellaneous>Single Source.
 - Improved Material(.vmat) File Extraction.
