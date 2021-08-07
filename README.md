@@ -98,6 +98,9 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+v2.9.3
+- Optimized the Shutnik Method:Creating VPK Stage. We will not experience being stuck here for a long time.
+
 v2.9.2
 - Fixed Some Hero Cosmetic Item Listviews not showing Colors according to their Rarity.
 - Added Kill Effect,Death Effect,Map Effect,Courier Effect,Head Effect,Teleport Effect,Blink Effect at Miscellaneous>Single Source.

@@ -60,7 +60,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.9.2
+version=2.9.3
 
 if disableautoupdate<>1
 	Gosub,versionchecker
@@ -1066,7 +1066,7 @@ FileContent=
 	"Items"
 	{
 )
-param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Other_Items"
+param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Luxury"
 Loop,Parse,param,`,
 {
 	parseindex:=A_Index
@@ -1214,10 +1214,12 @@ if !FileExist(tmpr) or (A_GuiControl="resetitembuild")
 		return
 }
 FileRead,FileContent,%tmpr%
-param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Other_Items"
+param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Luxury"
 loop,parse,param,`,
 {
 	parseindex:=A_Index
+	if !IsObject(ItemBuilds[parseindex])
+		ItemBuilds[parseindex]:=[]
 	pos1:=InStr(FileContent,"""#DOTA_Item_Build_" A_LoopField """",False)
 	pos2:=InStr(FileContent,"}",False,pos1)
 	ItemContent:=SubStr(FileContent,pos1,pos2-pos1)
@@ -1256,6 +1258,7 @@ For tmp,ItemName in ItemBuilds[itemclasschoice]
 GoSub,lvautosize
 LV_ModifyCol(2,"Integer"),LV_ModifyCol(4,"Integer")
 Gui,MainGUI:ListView,allitemlist
+LV_Modify(0,"-Check") ; uncheck all
 count:=ItemBuilds[itemclasschoice].Count()
 loop % LV_GetCount()
 {
@@ -1268,8 +1271,6 @@ loop % LV_GetCount()
 			LV_Modify(parseindex,"+Check")
 			break
 		}
-		else if (A_Index=count)
-			LV_Modify(parseindex,"-Check")
 	}
 }
 Gui,MainGUI:ListView,itembuildlist
@@ -1690,7 +1691,7 @@ else ifnotexist,%giloc%
 	return
 }
 gosub,hideprogress
-GuiControl,Text,searchnofound,Shutnik Method: patching gameinfo.gi
+GuiControl,Text,searchnofound,Merging Files
 if !instr(fileexist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\items\"),"D")
 {
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items
@@ -1710,8 +1711,8 @@ else ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.tx
 }
 FileAppend,%portstring%,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.txt
 gosub,externalfiles
+GuiControl,Text,searchnofound,Shutnik Method: patching gameinfo.gi
 gosub,gipatcher
-GuiControl,Text,searchnofound,Shutnik Method: Creating pak01_dir.vpk
 if InStr(giloc,"/dota/")>0
 {
 	stringgetpos,length,giloc,/dota/
@@ -1722,18 +1723,27 @@ else
 }
 stringmid,modloc,giloc,1,%length%
 
+GuiControl,Text,searchnofound,Waiting for all Cosmetic Extraction to Finish.
 tempo:=A_DetectHiddenWindows 
 DetectHiddenWindows,On
 ;finish all extractions first
-;for index,cPID in extractpid
+;for index,cPID in extractPID
 ;{
+;	GuiControl,Text,searchnofound,Waiting for all Cosmetic Extraction to Finish: PID%cPID%
 ;	WinWaitClose,% "ahk_pid " cPID " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
 ;}
-loop,parse,extractpid,`,
+WinGet,tmpr,List,ahk_exe cmd.exe
+Loop %tmpr%
 {
-	WinWaitClose,% "ahk_pid " A_LoopField " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+	WinGet,tmpr%A_Index%,PID,% "ahk_id " tmpr%A_Index%
+	if InStr(extractPID,tmpr%A_Index%,True)
+	{
+		GuiControl,Text,searchnofound,% "Waiting for all Cosmetic Extraction to Finish. PID=" tmpr%A_Index%
+		WinWaitClose,% "ahk_pid " tmpr%A_Index% " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+	}
+	VarSetCapacity(tmpr%A_Index%,0) ; free memory
 }
-VarSetCapacity(extractpid,0)
+VarSetCapacity(extractPID,0)
 ;
 ; tell the skinextract thread to terminate itself after finishing all its queue
 IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram
@@ -2642,7 +2652,7 @@ loop ; retry running the cmd until it succeed
 		
 		if (cmdmaxinstances>1)
 		{
-			cmdcountoverflow:=InStr(extractpid,",",,,cmdmaxinstances-1) ; detects when number of registered cmd pid's in the pid list is above the maximum number of simutaneous running cmd's
+			cmdcountoverflow:=InStr(extractPID,",",,,cmdmaxinstances-1) ; detects when number of registered cmd pid's in the pid list is above the maximum number of simutaneous running cmd's
 			if cmdcountoverflow
 			{
 				;DetectHiddenWindows,On
@@ -2660,32 +2670,32 @@ loop ; retry running the cmd until it succeed
 ;after successfull run, save pid to extract process list
 if !lowprocessor
 {
-	;if !IsObject(extractpid)
-	;	extractpid:=[]
-	;extractpid.Push(tmpr)
-	if extractpid=
-		extractpid:=tmpr
-	else extractpid.="," tmpr
+	;if !IsObject(extractPID)
+	;	extractPID:=[]
+	;extractPID.Push(tmpr)
+	if extractPID=
+		extractPID:= tmpr
+	else extractPID.="," tmpr
 	
 	if cmdmaxinstances is not Number
 		GuiControlGet,cmdmaxinstances,,cmdmaxinstances
 	
 	if cmdcountoverflow and (cmdmaxinstances!=0) ; number of commas is cmdmax-1 ; check number of running threads exceeds the cmdmaxinstances ; having "0" value means unlimited number of threads
 	{
-		loop,parse,extractpid,`,
+		loop,parse,extractPID,`,
 		{
 			;WinWait,ahk_pid %A_LoopField% ahk_exe cmd.exe ahk_class ConsoleWindowClass,,0
 			if !WinExist("ahk_pid " A_LoopField " ahk_exe cmd.exe ahk_class ConsoleWindowClass") ;wait indefinitely until it closes
-				extractpid:=RegExReplace(extractpid,"(\b" A_LoopField "\b,)|(,\b" A_LoopField "\b$)|(^\b" A_LoopField "\b$)|(\b" A_LoopField "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
+				extractPID:=RegExReplace(extractPID,"(\b" A_LoopField "\b,)|(,\b" A_LoopField "\b$)|(^\b" A_LoopField "\b$)|(\b" A_LoopField "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
 		}
-		if InStr(extractpid,",",,,cmdmaxinstances-1) ; rechecing cmdoverflow ; number of commas is cmdmax-1 ; check number of running threads still exceeds the cmdmaxinstances
+		if InStr(extractPID,",",,,cmdmaxinstances-1) ; rechecing cmdoverflow ; number of commas is cmdmax-1 ; check number of running threads still exceeds the cmdmaxinstances
 		{
-			if instr(extractpid,",",1)
-				tmpr:=substr(extractpid,1,instr(extractpid,",",1)-1) ; get the first pid at the extractpid list
-			else tmpr:=extractpid
+			if instr(extractPID,",",1)
+				tmpr:=substr(extractPID,1,instr(extractPID,",",1)-1) ; get the first pid at the extractPID list
+			else tmpr:=extractPID
 			WinWaitClose,% "ahk_pid " tmpr " ahk_exe cmd.exe ahk_class ConsoleWindowClass",,60 ; wait for 60 seconds, this is better than waiting indefinitely ;wait indefinitely until it closes
-			;remove the first pid at extractpid list
-			extractpid:=RegExReplace(extractpid,"(\b" tmpr "\b,)|(,\b" tmpr "\b$)|(^\b" tmpr "\b$)|(\b" tmpr "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
+			;remove the first pid at extractPID list
+			extractPID:=RegExReplace(extractPID,"(\b" tmpr "\b,)|(,\b" tmpr "\b$)|(^\b" tmpr "\b$)|(\b" tmpr "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
 		}
 		;DetectHiddenWindows,Off
 	}
@@ -3819,15 +3829,25 @@ movepak:
 tempo:=A_DetectHiddenWindows 
 DetectHiddenWindows,On
 ;finish all extractions first
-;for index,cPID in extractpid
+;for index,cPID in extractPID
 ;{
 ;	WinWaitClose,% "ahk_pid " cPID " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
 ;}
-loop,parse,extractpid,`,
+WinGet,tmpr,List,ahk_exe cmd.exe
+if (tmpr > 0) ; a cmd.exe exists
 {
-	WinWaitClose,% "ahk_pid " A_LoopField " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+	Loop %tmpr%
+	{
+		WinGet,tmpr%A_Index%,PID,% "ahk_id " tmpr%A_Index%
+		if InStr(extractPID,tmpr%A_Index%,True)
+		{
+			GuiControl,Text,searchnofound,% "Waiting for all Cosmetic Extraction to Finish. PID=" tmpr%A_Index%
+			WinWaitClose,% "ahk_pid " tmpr%A_Index% " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+		}
+		VarSetCapacity(tmpr%A_Index%,0) ; free memory
+	}
 }
-VarSetCapacity(extractpid,0)
+VarSetCapacity(extractPID,0)
 ;
 
 ;command the thread of skinextract to terminate itself after finishing all its queue operations
@@ -6447,7 +6467,7 @@ loop
 			index:=A_Index
 			pos:=instr(stdout,""``r``n		{"",,,index)+1
 			pos1:=instr(stdout,""``r``n		}"",,pos)
-			clipboard:=content:=SubStr(stdout,pos,pos1-pos)
+			content:=SubStr(stdout,pos,pos1-pos)
 
 			pos:=instr(content,""m_name"")
 			pos:=instr(content,"""""""",True,pos)+1
@@ -7356,7 +7376,16 @@ Gui, aboutgui:+ownerMainGUI
 Gui,MainGUI:+Disabled
 Gui, aboutgui:+Resize +MinSize
 Gui, aboutgui:Add, Tab2,x0 y0 h450 w500 vtababout, About|Limitations|What's New|Fact|Tutorials|Credits
-Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext35,Version %version%`n`nAJOM's Dota 2 MOD Master is a "code analyzing tool" which targets present "ID" and copies its contents`, thus replacing the other target "ID's" contents simultaneously. Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough`,this tool is best and can sacrifice less effort on your time.`n`nOne of the best reasons why I(Aldrin John Olaer Manalansan) created this tool is that:`n->Imagine every released "patch" of DOTA2`, they add new codes inside "items_game.txt" so that they can register its "use". Also`,you might not notice`, they change some existed "ID's Contents" into something new`, without you ever knowing.`n->Generates a "Modified Clone" of "items_game.txt" from the "Library" Folder where all the desired code are injected.
+Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext35,
+(
+Version %version%
+
+AJOM's Dota 2 MOD Master is a "code analyzing tool" which targets present "ID" and copies its contents, thus replacing the other target "ID's" contents simultaneously. Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough, this tool is best and can sacrifice less effort on your time.
+
+One of the best reasons why I(Aldrin John Olaer Manalansan) created this tool is that:
+->Imagine every released "patch" of DOTA2, they add new codes inside "items_game.txt" so that they can register its "use". Also,you might not notice, they change some existed "ID's Contents" into something new, without you ever knowing.
+->Generates a "Modified Clone" of "items_game.txt" from the "Library" Folder where all the desired code are injected.
+)
 Gui, aboutgui:Tab,2
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,
 (
@@ -7380,6 +7409,10 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.9.3
+*Optimized the Shutnik Method:Creating VPK Stage. We will not experience being stuck here for a long time.
+* FUTURE PLANS for v3.0.0. I will rewrite the whole program! Because this tool is like a memory to me. As time passes by, I start to improve, learn some new things, and realize ways that would be better implemented than what the tool currently have. In other words, this tool is a messy one since I started coding it when I was just a beginner on programming.
+
 v2.9.2
 *Fixed Some Hero Cosmetic Item Listviews not showing Colors according to their Rarity.
 *Added Kill Effect,Death Effect,Map Effect,Courier Effect,Head Effect,Teleport Effect,Blink Effect at Miscellaneous>Single Source.
@@ -10519,12 +10552,16 @@ gethexoffset(file,hex)
 		FileDelete,%sfkdir%\dump_offset.txt
 	run,"%A_Comspec%" /c ""%sfkdir%\sfk.exe" hexfind "%file%" -firsthit -quiet -bin /%hex%/ > "%sfkdir%\dump_offset.txt"",,hide,cmdpid
 
+	save1:=A_TitleMatchMode
+	save2:=A_TitleMatchModeSpeed
 	DetectHiddenWindows,On
 	SetTitleMatchMode, 2
 	SetTitleMatchMode, Slow
 	Process,Exist,%cmdpid%
 	If ErrorLevel
 		Process,WaitClose,%cmdpid%
+	SetTitleMatchMode, %save1%
+	SetTitleMatchMode, %save2%
 	DetectHiddenWindows,Off
 	
 	FileRead,report,%sfkdir%\dump_offset.txt
@@ -11109,6 +11146,20 @@ return
 */
 
 /*
+TODO:
+- Remove Multiple Style, but Merge Multiple Style and Single Source List
+- Dynamic Single Source Detection using this algorithm
+	- search for "player_loadout_slots" keyword and get its contents
+	- iterate the content's list of item slots and pick them all
+	- filter known Multiple Source and Pet
+	- Add the remaining list to Single Source
+- All Single Source list will be treated as multiple style
+- Single Source Injection Algorithm
+	- Pick the Picked Single Source Item Slot Content
+	- Search for an Existing "prefab" "<thisslot>" with a "baseitem" "1"
+		- If not found, then add a "baseitem" "1" parameter on its content
+		- If found, Replace the Default item slot content into this chosen item slot content
+
 
 add teleport effect
 add blink effect
