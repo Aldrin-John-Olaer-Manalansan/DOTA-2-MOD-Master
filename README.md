@@ -98,6 +98,10 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
+v2.9.4
+- Another Optimization against an infinite loop bug that was caused when identifying if a certain cosmetic file extractor is finished.
+- Added ErrorLogging for Cosmetic File Extractors.
+
 v2.9.3
 - Optimized the Shutnik Method:Creating VPK Stage. We will not experience being stuck here for a long time.
 

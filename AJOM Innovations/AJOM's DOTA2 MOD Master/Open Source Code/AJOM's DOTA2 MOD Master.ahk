@@ -60,7 +60,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.9.3
+version=2.9.4
 
 if disableautoupdate<>1
 	Gosub,versionchecker
@@ -1732,14 +1732,16 @@ DetectHiddenWindows,On
 ;	GuiControl,Text,searchnofound,Waiting for all Cosmetic Extraction to Finish: PID%cPID%
 ;	WinWaitClose,% "ahk_pid " cPID " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
 ;}
-WinGet,tmpr,List,ahk_exe cmd.exe
+WinGet,tmpr,List,ahk_exe cmd.exe ahk_class ConsoleWindowClass
 Loop %tmpr%
 {
-	WinGet,tmpr%A_Index%,PID,% "ahk_id " tmpr%A_Index%
-	if InStr(extractPID,tmpr%A_Index%,True)
+	WinGet,tmpr,PID,% "ahk_id " tmpr%A_Index%
+	if (tmpr = "") ; unidentifiable PID extractor
+		maperrorshow .= "Cannot Identify PID of extractor UID: " tmpr%A_Index% "`n`n"
+	else if InStr(extractPID,tmpr,True)
 	{
-		GuiControl,Text,searchnofound,% "Waiting for all Cosmetic Extraction to Finish. PID=" tmpr%A_Index%
-		WinWaitClose,% "ahk_pid " tmpr%A_Index% " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+		GuiControl,Text,searchnofound,% "Waiting for all Cosmetic Extraction to Finish. UID=" tmpr%A_Index% " PID=" tmpr
+		WinWaitClose,% "ahk_id " tmpr%A_Index% " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
 	}
 	VarSetCapacity(tmpr%A_Index%,0) ; free memory
 }
@@ -2670,12 +2672,16 @@ loop ; retry running the cmd until it succeed
 ;after successfull run, save pid to extract process list
 if !lowprocessor
 {
-	;if !IsObject(extractPID)
-	;	extractPID:=[]
-	;extractPID.Push(tmpr)
-	if extractPID=
-		extractPID:= tmpr
-	else extractPID.="," tmpr
+	if (tmpr != "") ; not blank... Blank pid sometimes happens if a system verb, document, or shortcut is launched rather than a direct executable file
+	{
+		;if !IsObject(extractPID)
+		;	extractPID:=[]
+		;extractPID.Push(tmpr)
+		if extractPID=
+			extractPID:= tmpr
+		else extractPID.="," tmpr
+	}
+	else maperrorshow .= "Cannot Identify PID of extractor`nFrom: " extractfile "`nTo: " defaultloc "\" defaultname "`n`n"
 	
 	if cmdmaxinstances is not Number
 		GuiControlGet,cmdmaxinstances,,cmdmaxinstances
@@ -3833,19 +3839,18 @@ DetectHiddenWindows,On
 ;{
 ;	WinWaitClose,% "ahk_pid " cPID " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
 ;}
-WinGet,tmpr,List,ahk_exe cmd.exe
-if (tmpr > 0) ; a cmd.exe exists
+WinGet,tmpr,List,ahk_exe cmd.exe ahk_class ConsoleWindowClass
+Loop %tmpr%
 {
-	Loop %tmpr%
+	WinGet,tmpr,PID,% "ahk_id " tmpr%A_Index%
+	if (tmpr = "") ; unidentifiable PID extractor
+		maperrorshow .= "Cannot Identify PID of extractor UID: " tmpr%A_Index% "`n`n"
+	else if InStr(extractPID,tmpr,True)
 	{
-		WinGet,tmpr%A_Index%,PID,% "ahk_id " tmpr%A_Index%
-		if InStr(extractPID,tmpr%A_Index%,True)
-		{
-			GuiControl,Text,searchnofound,% "Waiting for all Cosmetic Extraction to Finish. PID=" tmpr%A_Index%
-			WinWaitClose,% "ahk_pid " tmpr%A_Index% " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
-		}
-		VarSetCapacity(tmpr%A_Index%,0) ; free memory
+		GuiControl,Text,searchnofound,% "Waiting for all Cosmetic Extraction to Finish. UID=" tmpr%A_Index% " PID=" tmpr
+		WinWaitClose,% "ahk_id " tmpr%A_Index% " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
 	}
+	VarSetCapacity(tmpr%A_Index%,0) ; free memory
 }
 VarSetCapacity(extractPID,0)
 ;
@@ -3956,12 +3961,12 @@ reloadmisc(invfile) {
 						tmpbar:=newiddetector(miscidname) ;tmpbar:=newiddetector(miscidname,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 						if tmpbar<>
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
 							miscid=%tmpbar%
 						}
 						else
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 						}
 					}
 					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
@@ -4069,14 +4074,14 @@ reloadmisc(invfile) {
 						tmpbar:=newiddetector(miscidname) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 						if tmpbar<>
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
 							miscid=%tmpbar%
 							VarWrite("miscid" intsaver,tmpbar)	;VarWrite(Key := "", Value := "")
 							;IniWrite,%tmpbar%,%invfile%,Miscellaneous,miscid%intsaver%
 						}
 						else
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 							VarWrite("miscidname" intsaver,tmp)	;VarWrite(Key := "", Value := "")
 							;IniWrite,%tmp%,%invfile%,Miscellaneous,miscidname%intsaver%
 						}
@@ -4178,13 +4183,13 @@ reloadmisc(invfile) {
 						tmpbar:=newiddetector(miscidname) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 						if tmpbar<>
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
 							miscid=%tmpbar%
 							IniWrite,%tmpbar%,%invfile%,Miscellaneous,miscid%intsaver%
 						}
 						else
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 							IniWrite,%tmp%,%invfile%,Miscellaneous,miscidname%intsaver%
 						}
 					}
@@ -4630,12 +4635,12 @@ Loop % LV_GetCount()
 	stringcontent1=%filecontent%
 	if stringcontent1=
 	{
-		maperrorshow=%maperrorshow%Cannot Find ID number "string1"!(Resource ID)`n
+		maperrorshow .= "Cannot Find ID number " string1 "!(Resource ID)`n"
 		skip=1
 	}
 	else if InStr(stringcontent1,"prefab")=0
 	{
-		maperrorshow=%maperrorshow%ID number "string1" was found but sadly it is not an "ITEM"!(Resource ID)`n
+		maperrorshow.= "ID number " string1 " was found but sadly it is not an ITEM!(Resource ID)`n'"
 		skip=1
 	}
 	
@@ -4669,12 +4674,12 @@ Loop % LV_GetCount()
 				string2=%tmpbar%
 				if filecontent=
 				{
-					maperrorshow=%maperrorshow%Cannot Find ID number "string2"!(Injected ID)`n
+					maperrorshow .= "Cannot Find ID number " string2 "!(Injected ID)`n"
 					skip=1
 				}
 				else if InStr(filecontent,"prefab")=0
 				{
-					maperrorshow=%maperrorshow%ID number "string2" was found but sadly it is not an "ITEM"!(Injected ID)`n
+					maperrorshow .= "ID number " string2 " was found but sadly it is not an ITEM!(Injected ID)`n"
 					skip=1
 				}
 				if skip=1
@@ -5014,7 +5019,7 @@ hdatareload(hdatadirview) {
 			if tmp<>%A_LoopField%
 			{
 				LV_ModifyCol(A_Index,"AutoHdr",A_LoopField)
-				maperrorshow=% maperrorshow "Section: Handy Injection`nSub-Section: Used Items Database`nControl: Listview`nColumn: " A_Index "`nRegistered Header Name: " tmp "`nProblem: DATABASE MIGHT BE CORRUPTED!!! The Database's Column " A_Index " Header Name does not match with the ListView Header Name. The Results on the Listview might show SCRAMBLED Informations on each rows that does not match on their specific Columns.`nStatus: UNKNOWN! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+				maperrorshow .= "Section: Handy Injection`nSub-Section: Used Items Database`nControl: Listview`nColumn: " A_Index "`nRegistered Header Name: " tmp "`nProblem: DATABASE MIGHT BE CORRUPTED!!! The Database's Column " A_Index " Header Name does not match with the ListView Header Name. The Results on the Listview might show SCRAMBLED Informations on each rows that does not match on their specific Columns.`nStatus: UNKNOWN! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 				headercorrupted=1 ; tell the system that the listview header was corrupted
 			}
 		}
@@ -5078,14 +5083,14 @@ hdatareload(hdatadirview) {
 				;IniRead,ItemHeroUser,%hdatadirview%,Edits,ItemHeroUser%A_Index%
 				if tmpbar<>
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 					ItemID=%tmpbar%
 					VarWrite("ItemID" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 					;IniWrite,%tmpbar%,%hdatadirview%,Edits,ItemID%A_Index%
 				}
 				else
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 					continue
 				}
 			}
@@ -5098,14 +5103,14 @@ hdatareload(hdatadirview) {
 				;IniRead,ItemHeroUser,%hdatadirview%,Edits,ItemHeroUser%A_Index%
 				if tmpbar<>
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 					ItemID=%tmpbar%
 					VarWrite("ItemID" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 					;IniWrite,%tmpbar%,%hdatadirview%,Edits,ItemID%A_Index%
 				}
 				else
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
 					VarWrite("ItemIDName" A_Index,itemname)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 					;IniWrite,%itemname%,%hdatadirview%,Edits,ItemIDName%A_Index%
 				}
@@ -5163,13 +5168,13 @@ hdatareload(hdatadirview) {
 				IniRead,ItemHeroUser,%hdatadirview%,Edits,ItemHeroUser%A_Index%
 				if tmpbar<>
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 					ItemID=%tmpbar%
 					IniWrite,%tmpbar%,%hdatadirview%,Edits,ItemID%A_Index%
 				}
 				else
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 					continue
 				}
 			}
@@ -5181,13 +5186,13 @@ hdatareload(hdatadirview) {
 				IniRead,ItemHeroUser,%hdatadirview%,Edits,ItemHeroUser%A_Index%
 				if tmpbar<>
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 					ItemID=%tmpbar%
 					IniWrite,%tmpbar%,%hdatadirview%,Edits,ItemID%A_Index%
 				}
 				else
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
 					IniWrite,%itemname%,%hdatadirview%,Edits,ItemIDName%A_Index%
 				}
 			}
@@ -5248,12 +5253,12 @@ loop % LV_GetCount()
 		tmpbar:=newiddetector(DataArray[ItemIDName%A_Index%]) ;tmpbar:=newiddetector(DataArray[ItemIDName%A_Index%],filestring) ; tmpstring:=item name , filestring:=items_game.txt
 		if tmpbar<>
 		{
-			maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+			maperrorshow .= "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 			NewItemID=%tmpbar%
 		}
 		else
 		{
-			maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+			maperrorshow .= "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 			continue
 		}
 	}
@@ -5263,12 +5268,12 @@ loop % LV_GetCount()
 		tmpbar:=newiddetector(DataArray[ItemIDName%A_Index%]) ;tmpbar:=newiddetector(DataArray[ItemIDName%A_Index%],filestring) ; tmpstring:=item name , filestring:=items_game.txt
 		if tmpbar<>
 		{
-			maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+			maperrorshow .= "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 			NewItemID=%tmpbar%
 		}
 		else
 		{
-			maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
+			maperrorshow .= "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
 		}
 	}
 	if NewItemID= ; there is no problem on the cosmetic item
@@ -5329,12 +5334,12 @@ VerifyListviewIntegrity()
 			tmpbar:=newiddetector(ItemIDName) ;tmpbar:=newiddetector(ItemIDName,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+				maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 				NewItemID=%tmpbar%
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+				maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 				continue
 			}
 		}
@@ -5344,12 +5349,12 @@ VerifyListviewIntegrity()
 			tmpbar:=newiddetector(ItemIDName) ;tmpbar:=newiddetector(ItemIDName,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+				maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 				NewItemID=%tmpbar%
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
+				maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
 			}
 		}
 		if NewItemID= ; there is no problem on the cosmetic item
@@ -5968,14 +5973,14 @@ if VarRead("@DataBaseVersion!")=1.5
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: The ID Injected does not exist! on items_game.txt, but the Registered Item Name was Found/Existed.`nSolution: analyzing the contents of the Item Name found at items_game.txt, FOUND ID " tmpbar "`nStatus: Solved! DOTA2 MOD Master changed the ID Injected into " tmpbar ", No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: The ID Injected does not exist! on items_game.txt, but the Registered Item Name was Found/Existed.`nSolution: analyzing the contents of the Item Name found at items_game.txt, FOUND ID " tmpbar "`nStatus: Solved! DOTA2 MOD Master changed the ID Injected into " tmpbar ", No need for Further User Action.`n`n"
 				IDInjected=%tmpbar%
 				VarWrite("IDInjected" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 				;IniWrite,%tmpbar%,%datadirview%,Edits,IDInjected%A_Index%
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nInjected ID: "IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nActived Style: " ActiveStyle "`nChecked: " ResourceIDEnabled "`nProblem: ID Injected nor the Injected Registered Item Name does not Exist!`nStatus: UNSOLVED! The General Information about the ID Injected is corrupted, and will not be included on the listview.`nSolution: Use all the information above, track down and configure the injected ID properly.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nInjected ID: "IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nActived Style: " ActiveStyle "`nChecked: " ResourceIDEnabled "`nProblem: ID Injected nor the Injected Registered Item Name does not Exist!`nStatus: UNSOLVED! The General Information about the ID Injected is corrupted, and will not be included on the listview.`nSolution: Use all the information above, track down and configure the injected ID properly.`n`n"
 				continue
 			}
 		}
@@ -5986,7 +5991,7 @@ if VarRead("@DataBaseVersion!")=1.5
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: Registered Item Name does not pair with the Injected ID!`nSolution: changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: Registered Item Name does not pair with the Injected ID!`nSolution: changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
 				IDInjected=%tmpbar%
 				VarWrite("IDInjected" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 				;IniWrite,%tmpbar%,%datadirview%,Edits,IDInjected%A_Index%
@@ -5994,7 +5999,7 @@ if VarRead("@DataBaseVersion!")=1.5
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: ID has a different name and does not match with the Registered Item Name. It was " itemname "`nSolution: Changing the Registered Item name into" itemname "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: ID has a different name and does not match with the Registered Item Name. It was " itemname "`nSolution: Changing the Registered Item name into" itemname "`nStatus: Solved: No need for Further User Action.`n`n"
 				VarWrite("IDInjectedName" A_Index,itemname)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 			}
 		}
@@ -6008,7 +6013,7 @@ if VarRead("@DataBaseVersion!")=1.5
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: Registered Item Name does not pair at the Resource ID.`nSolution: Changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: Registered Item Name does not pair at the Resource ID.`nSolution: Changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
 				ResourceID=%tmpbar%
 				VarWrite("ResourceID" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 				;IniWrite,%tmpbar%,%datadirview%,Edits,ResourceID%A_Index%
@@ -6016,7 +6021,7 @@ if VarRead("@DataBaseVersion!")=1.5
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: ID has a different name at items_game.txt and was not Registered Item Name. It was " itemname "`nSolution: Changing Registered Item Name into " itemname "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: ID has a different name at items_game.txt and was not Registered Item Name. It was " itemname "`nSolution: Changing Registered Item Name into " itemname "`nStatus: Solved: No need for Further User Action.`n`n"
 				VarWrite("ResourceIDName" A_Index,itemname)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 			}
 		}
@@ -6105,13 +6110,13 @@ else ; if version 1, old version
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: The ID Injected does not exist! on items_game.txt, but the Registered Item Name was Found/Existed.`nSolution: analyzing the contents of the Item Name found at items_game.txt, FOUND ID " tmpbar "`nStatus: Solved! DOTA2 MOD Master changed the ID Injected into " tmpbar ", No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: The ID Injected does not exist! on items_game.txt, but the Registered Item Name was Found/Existed.`nSolution: analyzing the contents of the Item Name found at items_game.txt, FOUND ID " tmpbar "`nStatus: Solved! DOTA2 MOD Master changed the ID Injected into " tmpbar ", No need for Further User Action.`n`n"
 				IDInjected=%tmpbar%
 				IniWrite,%tmpbar%,%datadirview%,Edits,IDInjected%A_Index%
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nInjected ID: "IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nActived Style: " ActiveStyle "`nChecked: " ResourceIDEnabled "`nProblem: ID Injected nor the Injected Registered Item Name does not Exist!`nStatus: UNSOLVED! The General Information about the ID Injected is corrupted, and will not be included on the listview.`nSolution: Use all the information above, track down and configure the injected ID properly.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nInjected ID: "IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nActived Style: " ActiveStyle "`nChecked: " ResourceIDEnabled "`nProblem: ID Injected nor the Injected Registered Item Name does not Exist!`nStatus: UNSOLVED! The General Information about the ID Injected is corrupted, and will not be included on the listview.`nSolution: Use all the information above, track down and configure the injected ID properly.`n`n"
 				continue
 			}
 		}
@@ -6122,14 +6127,14 @@ else ; if version 1, old version
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: Registered Item Name does not pair with the Injected ID!`nSolution: changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: Registered Item Name does not pair with the Injected ID!`nSolution: changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
 				IDInjected=%tmpbar%
 				IniWrite,%tmpbar%,%datadirview%,Edits,IDInjected%A_Index%
 				itemname:=searchstringdetector(filecontent,"""name""") ; detects the name of the item
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: ID has a different name and does not match with the Registered Item Name. It was " itemname "`nSolution: Changing the Registered Item name into" itemname "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: ID has a different name and does not match with the Registered Item Name. It was " itemname "`nSolution: Changing the Registered Item name into" itemname "`nStatus: Solved: No need for Further User Action.`n`n"
 				IniWrite,%itemname%,%datadirview%,Edits,IDInjectedName%A_Index%
 			}
 		}
@@ -6151,14 +6156,14 @@ else ; if version 1, old version
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: Registered Item Name does not pair at the Resource ID.`nSolution: Changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: Registered Item Name does not pair at the Resource ID.`nSolution: Changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
 				ResourceID=%tmpbar%
 				IniWrite,%tmpbar%,%datadirview%,Edits,ResourceID%A_Index%
 				itemname:=searchstringdetector(filecontent,"""name""") ; detects the name of the item
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: ID has a different name at items_game.txt and was not Registered Item Name. It was " itemname "`nSolution: Changing Registered Item Name into " itemname "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: ID has a different name at items_game.txt and was not Registered Item Name. It was " itemname "`nSolution: Changing Registered Item Name into " itemname "`nStatus: Solved: No need for Further User Action.`n`n"
 			}
 		}
 		tmpname1=%itemname%
@@ -7409,6 +7414,10 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.9.4
+*Another Optimization against an infinite loop bug that was caused when identifying if a certain cosmetic file extractor is finished.
+*Added ErrorLogging for Cosmetic File Extractors.
+
 v2.9.3
 *Optimized the Shutnik Method:Creating VPK Stage. We will not experience being stuck here for a long time.
 * FUTURE PLANS for v3.0.0. I will rewrite the whole program! Because this tool is like a memory to me. As time passes by, I start to improve, learn some new things, and realize ways that would be better implemented than what the tool currently have. In other words, this tool is a messy one since I started coding it when I was just a beginner on programming.
