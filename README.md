@@ -98,12 +98,9 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
-v2.9.5
-- Fixed an infinite loop bug caused by Material file extractor indexing bug
-- Fixed Fast Miscellaneous Resource Loading Bug where miscellaneous resources fails to rescan everytime a new items_game.txt comes out
-
-v2.9.4
-- Another Optimization against an infinite loop bug that was caused when identifying if a certain cosmetic file extractor is finished.
+v2.9.6
+- Improved Countermeasures against infinite loop bug that was caused by File Extractors.
+- Fixed Fast Miscellaneous Resource Loading Bug where miscellaneous resources fails to rescan everytime a new items_game.txt comes out.
 - Added ErrorLogging for Cosmetic File Extractors.
 
 v2.9.3

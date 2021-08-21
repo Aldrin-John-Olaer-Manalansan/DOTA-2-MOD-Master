@@ -60,7 +60,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.9.5
+version=2.9.6
 
 if disableautoupdate<>1
 	Gosub,versionchecker
@@ -1694,38 +1694,26 @@ else ifnotexist,%giloc%
 	return
 }
 gosub,hideprogress
-GuiControl,Text,searchnofound,Merging Files
+GuiControl,Text,searchnofound,Generating Scripts
 if !instr(fileexist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\items\"),"D")
-{
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items
-}
 else ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
-{
 	FileDelete,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
-}
 FileAppend,%masterfilecontent%,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
 if !instr(fileexist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\npc\"),"D")
-{
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\
-}
 else ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.txt
-{
 	FileDelete,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.txt
-}
 FileAppend,%portstring%,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.txt
-gosub,externalfiles
+
 GuiControl,Text,searchnofound,Shutnik Method: patching gameinfo.gi
 gosub,gipatcher
 if InStr(giloc,"/dota/")>0
-{
 	stringgetpos,length,giloc,/dota/
-}
-else
-{
-	stringgetpos,length,giloc,\dota\
-}
+else stringgetpos,length,giloc,\dota\
 stringmid,modloc,giloc,1,%length%
 
+; listener waiter
 GuiControl,Text,searchnofound,Waiting for the Extraction of all Models and Particles to Finish.
 tempo:=A_DetectHiddenWindows 
 DetectHiddenWindows,On
@@ -1772,6 +1760,8 @@ while WinExist("ahk_pid " skinextract)
 }
 DetectHiddenWindows,%tempo%
 ;
+
+gosub,externalfiles
 
 GuiControl,Text,searchnofound,Shutnik Method: Executing Batch File... It will take more time if there are many cosmetic items injected!
 loop
@@ -2648,6 +2638,10 @@ if (skinindex=="Undefined") and (stylechecker>0)
 }
 if (skinindex!="Undefined") and (skinindex!="") and (skinindex>0)
 {
+		; this avoids incosistent skin index values inputted by valve
+	if (stylechecker>0)
+		skinindex:=stylechecker ; equate it towards the current style, since the material indexing defined inside this file is from 0 to n-1
+		;
 	; the skinextract thread listen on this file, set its parameters
 	valvefile=%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%defaultname%
 	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,materialscount,0
@@ -4552,11 +4546,11 @@ repmocount:=repparcount:=0
 ifexist,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 {
 	FileSetAttrib,-R,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
-	FileSetAttrib,-R,%A_ScriptDir%\ReportLog.aldrin_report
+	FileSetAttrib,-R,%A_ScriptDir%\Logs\ReportLog.aldrin_report
 	FileDelete,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
-	FileDelete,%A_ScriptDir%\ReportLog.aldrin_report
+	FileDelete,%A_ScriptDir%\Logs\ReportLog.aldrin_report
 }
-fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
+fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\Logs\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 VarSetCapacity(commanddir,0),VarSetCapacity(commandextract,0),VarSetCapacity(commandrename,0),VarSetCapacity(rptlimit,0)
 
 FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList
@@ -4792,10 +4786,12 @@ tmpr:=Format_Msec(A_TickCount-StartTimer)
 IniWrite,%tmpr%,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,Summary,TotalOperationTime
 IniWrite,%cmdmaxinstances%,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,Settings,ThreadsCount
 
-FileSetAttrib,-R,%A_ScriptDir%\ReportLog.aldrin_report ; unprotect
-FileMove,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,%A_ScriptDir%,1
-fileread,tmp1,%A_ScriptDir%\ReportLog.aldrin_report
-FileSetAttrib,+R,%A_ScriptDir%\ReportLog.aldrin_report ; protect the file from noobs
+FileSetAttrib,-R,%A_ScriptDir%\Logs\ReportLog.aldrin_report ; unprotect
+if !FileExist(A_ScriptDir "\Logs\")
+	FileCreateDir,%A_ScriptDir%\Logs
+FileMove,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,%A_ScriptDir%\Logs,1
+fileread,tmp1,%A_ScriptDir%\Logs\ReportLog.aldrin_report
+FileSetAttrib,+R,%A_ScriptDir%\Logs\ReportLog.aldrin_report ; protect the file from noobs
 
 GuiControl,Text,reportshow,%tmp1%
 if errorshow<>
@@ -5560,7 +5556,7 @@ ifexist,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 	FileSetAttrib,-R,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 	FileDelete,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 }
-fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
+fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\Logs\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 VarSetCapacity(commanddir,0),VarSetCapacity(commandextract,0),VarSetCapacity(commandrename,0),VarSetCapacity(rptlimit,0)
 ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 {
@@ -5739,10 +5735,12 @@ tmpr:=Format_Msec(A_TickCount-StartTimer)
 IniWrite,%tmpr%,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,Summary,TotalOperationTime
 IniWrite,%cmdmaxinstances%,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,Settings,ThreadsCount
 
-FileSetAttrib,-R,%A_ScriptDir%\ReportLog.aldrin_report ; unprotect
-FileMove,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,%A_ScriptDir%,1
-fileread,tmp1,%A_ScriptDir%\ReportLog.aldrin_report
-FileSetAttrib,+R,%A_ScriptDir%\ReportLog.aldrin_report ; protect the setting file from noobs
+FileSetAttrib,-R,%A_ScriptDir%\Logs\ReportLog.aldrin_report ; unprotect
+if !FileExist(A_ScriptDir "\Logs\")
+	FileCreateDir,%A_ScriptDir%\Logs
+FileMove,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,%A_ScriptDir%\Logs,1
+fileread,tmp1,%A_ScriptDir%\Logs\ReportLog.aldrin_report
+FileSetAttrib,+R,%A_ScriptDir%\Logs\ReportLog.aldrin_report ; protect the setting file from noobs
 
 GuiControl,Text,reportshow,%tmp1%
 if errorshow<>
@@ -6407,9 +6405,11 @@ FileDelete,%ProcessingFile%
 
 SetWorkingDir," A_ScriptDir "
 
-if FileExist(A_WorkingDir ""\MaterialReport.aldrin_report"")
-	FileDelete,%A_WorkingDir%\MaterialReport.aldrin_report
-FileAppend,,%A_WorkingDir%\MaterialReport.aldrin_report
+if !FileExist(A_WorkingDir ""\Logs\"")
+	FileCreateDir,%A_WorkingDir%\Logs
+else if FileExist(A_WorkingDir ""\Logs\MaterialReport.aldrin_report"")
+	FileDelete,%A_WorkingDir%\Logs\MaterialReport.aldrin_report
+FileAppend,,%A_WorkingDir%\Logs\MaterialReport.aldrin_report
 
 ;Attach
 DetectHiddenWindows, on
@@ -6513,7 +6513,17 @@ loop
 			pos1:=instr(content,"""""""",True,pos)
 			currentskinindex:=SubStr(content,pos,pos1-pos)
 			if currentskinindex is not integer
-				VarSetCapacity(currentskinindex,0)
+			{
+				VarSetCapacity(currentskinindex,0) ; empty variable to indicate nonexistent material indexing
+				if (index = 1)
+					zero_subtrahend:=0
+			}
+			else ; passing this means the material index was detected
+			{
+				if (index = 1) ;default items index
+					zero_subtrahend:=currentskinindex
+				currentskinindex-=zero_subtrahend ; start from index 0 to maxskinindex-zero_subtrahend
+			}
 
 			pos:=instr(content,""m_materials"")
 			pos:=instr(content,""``r``n			["",True,pos)+6
@@ -6526,6 +6536,8 @@ loop
 				pos1:=InStr(content,"""""""",True,pos-strlen(content))+1
 				pos2:=InStr(content,"""""""",True,pos)
 				material:=strreplace(SubStr(content,pos1,pos2-pos1) ""_c"",""/"",""\"")
+				if debugmode
+					msgbox % currentskinindex "" "" skinindex "" "" index "" "" A_Index ""``n"" material
 				if (currentskinindex=0) or ((currentskinindex=="""") and (index=1))
 				{
 					pos1:=instr(material,""\"",,0)+1
@@ -6538,9 +6550,22 @@ loop
 					itemmaterials[A_Index,1]:=material
 					itemmaterials[A_Index,2]:=SubStr(material,pos1)
 				}
+				if debugmode
+					msgbox % ""here "" defaultmaterials.Count() "" "" itemmaterials.Count() ""``n"" defaultmaterials[A_Index,1] ""``n"" defaultmaterials[A_Index,2] ""``n"" itemmaterials[A_Index,1] ""``n"" itemmaterials[A_Index,2]
 				if (defaultmaterials.Count()=itemmaterials.Count())
 					break
 			}
+		}
+
+		if (defaultmaterials.Count()!=itemmaterials.Count())
+		{
+			gosub,GenerateReport ; returns Watchdog variable containing the report data
+			WatchDog .= ""Default Material Count: "" defaultmaterials.Count() ""``nExtracting Material Count: "" itemmaterials.Count() ""``n""
+			For index, in defaultmaterials
+				WatchDog .= ""Default Material "" index "": "" defaultmaterials[index,1] ""\"" defaultmaterials[index,2] ""``nExtracting Material FullPath "" index "": "" itemmaterials[index,1] ""``nExtracting Material Name "" index "": "" itemmaterials[index,2] ""``n""
+			WatchDog .= ""-------------------------------------""
+			msgbox,48,Material Extractor WatchDog,Failed to detect the Name of the Material Replacement. Please Screenshot or Copy this Report then go to this Website and Post it:``nhttps://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/issues/15``n``n``n%WatchDog%``n``n``nTo Copy all the text of this message box`, left click this message box then press Copy Hotkey( CTRL+C).``n``n The Material Extraction for this target will be cancelled and will move towards the next one.
+			continue
 		}
 
 		WatchDog:=A_TickCount ; reset watchdog, this detects infinite loop
@@ -6555,6 +6580,76 @@ loop
 			}
 			else
 			{
+				gosub,GenerateReport ; returns Watchdog variable containing the report data
+WatchDog .= ""
+(
+Default Material Path: "" defaultmaterials[index,1] ""\"" defaultmaterials[index,2] ""
+Extracted Material FullPath: "" itemmaterials[index,1] ""
+Extracted Material Name: "" itemmaterials[index,2] ""
+-------------------------------------
+`)""
+				msgbox,0,Material Extractor WatchDog,Screenshot or Copy this Report then go to this Website and Post it:``nhttps://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/issues/15``n``n``n%WatchDog%``n``n``nTo Copy all the text of this message box`, left click this message box then press Copy Hotkey( CTRL+C).
+			}
+			continue ; cancel material extraction for this cosmetic item
+		}
+			; end of timelapse watchdog
+		
+		pid:=[]
+		DetectHiddenWindows,On
+		for index, in defaultmaterials
+		{
+			if !instr(FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\""),""D"")
+				FileCreateDir,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1]
+			else FileDelete,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
+			
+			command:=""""""" strreplace(variablehllib,"/","\") """"" -p """"" strreplace(dota2dir,"/","\") "\game\dota\pak01_dir.vpk"""" -d """""" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] """""" -e """"root\"" itemmaterials[index,1] """"""""
+			if debugmode
+				msgbox %command%
+			run,%command%,,Hide UseErrorLevel,material
+			pid[index]:=material
+		}
+		Process,Wait,%material%,2 ; 2 seconds timeout
+		if debugmode
+			msgbox escape 1
+		for index,material in pid
+		{
+			Process,WaitClose,%material%,10 ; 10 seconds timeout
+			
+			if FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2])
+				FileMove,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2],% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2],1
+		}
+		if debugmode
+			msgbox escape 2
+		DetectHiddenWindows,Off
+		if terminateprogram " text "
+			goto,Clean_up
+		for index, in defaultmaterials
+		{
+			if !FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2])
+			{
+				if debugmode
+					msgbox % ""repeating because of``n``n"" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
+				goto,repeater
+			}
+		}
+		FilePath:=StrReplace(valvefile,A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"")
+		for index, in defaultmaterials
+			IniWrite,%FilePath%,%A_WorkingDir%\Logs\MaterialReport.aldrin_report,Materials,% itemmaterials[index,2] ""="" defaultmaterials[index,2]
+	}
+	IniRead,terminateprogram,%ProcessingFile%,Status,terminateprogram,0
+	if terminateprogram " text "
+		goto,Clean_up
+	if debugmode
+		msgbox restarting
+}
+
+Clean_up:
+DllCall(""CloseHandle"", ""uint"", hCon)
+DllCall(""FreeConsole"")
+Process, Close, %cPID%
+exitapp
+
+GenerateReport:
 WatchDog:=""
 (
 -----Material Extractor WatchDog-----
@@ -6570,69 +6665,10 @@ Tool Path: " A_ScriptFullPath "
 CMD Path: "" A_ComSpec ""
 Temp Directory: "" A_Temp ""
 Working Directory: "" A_WorkingDir ""
-Material Path: "" defaultmaterials[index,1] ""\"" defaultmaterials[index,2] ""
--------------------------------------
-`)""
-				msgbox,0,Material Extractor WatchDog,Screenshot or Copy this Report then go to this Website and Post it:``nhttps://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/issues/15``n``n``n%WatchDog%``n``n``nTo Copy all the text of this message box`, left click this message box then press Copy Hotkey( CTRL+C).
-			}
-		}
-		else
-		{
-			pid:=[]
-			DetectHiddenWindows,On
-			for index, in defaultmaterials
-			{
-				if !instr(FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\""),""D"")
-					FileCreateDir,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1]
-				else FileDelete,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
-				
-				command:=""""""" strreplace(variablehllib,"/","\") """"" -p """"" strreplace(dota2dir,"/","\") "\game\dota\pak01_dir.vpk"""" -d """""" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] """""" -e """"root\"" itemmaterials[index,1] """"""""
-				if debugmode
-					msgbox %command%
-				run,%command%,,Hide UseErrorLevel,material
-				pid[index]:=material
-			}
-			Process,Wait,%material%,2 ; 2 seconds timeout
-			if debugmode
-				msgbox escape 1
-			for index,material in pid
-			{
-				Process,WaitClose,%material%,10 ; 10 seconds timeout
-				
-				if FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2])
-					FileMove,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2],% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2],1
-			}
-			if debugmode
-				msgbox escape 2
-			DetectHiddenWindows,Off
-			if terminateprogram " text "
-				goto,Clean_up
-			for index, in defaultmaterials
-			{
-				if !FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2])
-				{
-					if debugmode
-						msgbox % ""repeating because of``n``n"" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
-					goto,repeater
-				}
-			}
-			FilePath:=StrReplace(valvefile,A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"")
-			for index, in defaultmaterials
-				IniWrite,%FilePath%,%A_WorkingDir%\MaterialReport.aldrin_report,Materials,% itemmaterials[index,2] ""="" defaultmaterials[index,2]
-		}
-	}
-	IniRead,terminateprogram,%ProcessingFile%,Status,terminateprogram,0
-	if terminateprogram " text "
-		goto,Clean_up
-	if debugmode
-		msgbox restarting
-}
+Target File: "" valvefile ""
 
-Clean_up:
-DllCall(""CloseHandle"", ""uint"", hCon)
-DllCall(""FreeConsole"")
-Process, Close, %cPID%
-exitapp
+`)""
+return
 
 ~$^+!l::
 if debugmode
@@ -7484,12 +7520,9 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-v2.9.5
-*Fixed an infinite loop bug caused by Material file extractor indexing bug
-*Fixed Fast Miscellaneous Resource Loading Bug where miscellaneous resources fails to rescan everytime a new items_game.txt comes out
-
-v2.9.4
-*Another Optimization against an infinite loop bug that was caused when identifying if a certain cosmetic file extractor is finished.
+v2.9.6
+*Improved Countermeasures against infinite loop bug that was caused by File Extractors.
+*Fixed Fast Miscellaneous Resource Loading Bug where miscellaneous resources fails to rescan everytime a new items_game.txt comes out.
 *Added ErrorLogging for Cosmetic File Extractors.
 
 v2.9.3
@@ -10833,6 +10866,7 @@ externalfiles:
 if useextfile=1
 {
 	Gui,MainGUI:Show,NA,AJOM's Dota 2 MOD Master ; remove that irritating items per second
+	GuiControl,Text,searchnofound,Merging Files
 	if !instr(FileExist(A_ScriptDir "\Generated MOD\"),"D")
 	{
 		FileCreateDir, %A_ScriptDir%\Generated MOD
