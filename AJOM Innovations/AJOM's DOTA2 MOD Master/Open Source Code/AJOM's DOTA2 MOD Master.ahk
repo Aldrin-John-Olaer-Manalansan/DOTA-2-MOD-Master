@@ -60,7 +60,7 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.9.4
+version=2.9.5
 
 if disableautoupdate<>1
 	Gosub,versionchecker
@@ -370,20 +370,24 @@ WM_MOUSEMOVE("resetitembuild",tmpr)
 SetBtnTxtColor(HBTN, "Red")
 Gui, MainGUI:Font
 Gui, MainGUI:Tab,7
-Gui, MainGUI:Add, Text, x1 y60 cred,
-(
-NOTICE:
-There is a possibility that valve will ban your account when you use the features found on this section. USE AT YOUR OWN RISK!
-)
-Gui, MainGUI:Add, Edit, x1 y30 w100 Number gnumberlimiter vdummynl
-Gui, MainGUI:Add, UpDown, x1 y30 w100 0x80 vcameradistance Range1200-9999,0
-WM_MOUSEMOVE("cameradistance","Sets the elevation height of the camera, higher values allows you to see more areas in your screen.`n`nDefault Value: 1200`nRecommended values: 1200-2500")
-Gui, MainGUI:Font,Bold
-Gui, MainGUI:Add, Button, x110 y30 w130 h21 ginjectcameradistance hwndHBTN,Inject Camera Distance
-SetBtnTxtColor(HBTN, "Blue")
-Gui, MainGUI:Add, Button, x245 y30 w50 h21 grestorecameradistance hwndHBTN,Restore
-SetBtnTxtColor(HBTN, "Green")
-Gui, MainGUI:Font
+cameradistance:=cameradistancehack()
+if (cameradistance!="")
+{
+	Gui, MainGUI:Add, Text, x1 y60 cred,
+	(
+	NOTICE:
+	There is a possibility that valve will ban your account when you use the features found on this section. USE AT YOUR OWN RISK!
+	)
+	Gui, MainGUI:Add, Edit, x1 y30 w100 Number gnumberlimiter vdummynl
+	Gui, MainGUI:Add, UpDown, x1 y30 w100 0x80 vcameradistance Range1200-9999,%cameradistance%
+	WM_MOUSEMOVE("cameradistance","Sets the elevation height of the camera, higher values allows you to see more areas in your screen.`n`nDefault Value: 1200`nRecommended 	values: 1200-2500")
+	Gui, MainGUI:Font,Bold
+	Gui, MainGUI:Add, Button, x110 y30 w130 h21 ginjectcameradistance hwndHBTN,Inject Camera Distance
+	SetBtnTxtColor(HBTN, "Blue")
+	Gui, MainGUI:Add, Button, x245 y30 w50 h21 grestorecameradistance hwndHBTN,Restore
+	SetBtnTxtColor(HBTN, "Green")
+	Gui, MainGUI:Font
+}
 Gui, MainGUI:Tab,8
 Gui, MainGUI:Add, CheckBox, checked%autovpk% x9 y70 gautovpkon vautovpkon,Auto-Shutnik Method(Requires "VPKCreator" present on same Directory)(SELF-ACTIVE)
 tmpr=
@@ -522,15 +526,15 @@ Click this Button to Rescan all items_game.txt Related resources.
 *Updates the contents of the Miscellaneous Resources Reference File. This avoids inaccurate reloading of Miscellaneous Resources.
 *Commonly applicable when there is a bug on Miscellaneous Resources like a specific item does not exist on the list.
 )")
-Gui, MainGUI:Add, CheckBox, checked%fastmisc% x125 y170 vfastmisc,Remember Miscellaneous Resources for fast Preload(Not advisable to be checked. if you want to accurately preload all Miscellaneous resources`, leave this option unchecked)
+Gui, MainGUI:Add, CheckBox, checked%fastmisc% x125 y170 vfastmisc,Remember Miscellaneous Resources for fast Load(Not advisable to be checked. if you want to accurately Load all Miscellaneous resources`, leave this option unchecked)
 tmpr=
 (
 If this Option is ~ 
 
-CHECKED : Everytime DOTA2 MOD Master preloads Miscellaneous resources, it automatically remembers all Miscellaneous resources upon the next start by creating a reference file. So that if the real items_game.txt is not changed by updates/patches, Fast Preloading will be done.
+CHECKED : Everytime DOTA2 MOD Master Loads Miscellaneous resources, it automatically remembers all Miscellaneous resources upon the next start by creating a reference file. So that if the real items_game.txt is not changed by updates/patches, Fast Loading will be done.
 
 *Prosequences
--Ultra Fast Preloading every start of DOTA2 MOD Master.
+-Ultra Fast Loading every start of DOTA2 MOD Master.
 -Does not need to Redefine all Miscellaneous Resources every start.
 
 *Consequences
@@ -540,10 +544,10 @@ CHECKED : Everytime DOTA2 MOD Master preloads Miscellaneous resources, it automa
 UNCHECKED : It always scan Miscellaneous Resources at items_game.txt file every start.
 
 *Prosequences
--Preloading Miscellaneous resources is FULLY Accurate since it always scans items_game.txt every start. Making sure that every single Miscellaneous resource will be present on every lists.
+-Loading Miscellaneous resources is FULLY Accurate since it always scans items_game.txt every start. Making sure that every single Miscellaneous resource will be present on every lists.
 
 *Consequences
--Slower Startup since DOTA2 MOD Master needs to Preload "Miscellaneous" Resources first before it is allowed to be used.
+-Slower Startup since DOTA2 MOD Master needs to Load "Miscellaneous" Resources first before it is allowed to be used.
 )
 WM_MOUSEMOVE("fastmisc",tmpr)
 
@@ -581,25 +585,25 @@ Miscellaneous is used by "Handy Injection" and "General" Section which injects e
 
 If this Option is ~ 
 
-CHECKED : Miscellaneous Resources will be preloaded On Startup, allowing the use of Miscellaneous.
+CHECKED : Miscellaneous Resources will be Loaded On Startup, allowing the use of Miscellaneous.
 
 *Prosequences
 -Allows "Handy Injection" and "General" Section to inject selected miscellaneous resources.
--Allows "Handy Injection" and "General" Section's Saved List Database to preload their present Miscellaneous Data's
+-Allows "Handy Injection" and "General" Section's Saved List Database to Load their present Miscellaneous Data's
 -Allows "Handy Injection" and "General" Section to Add Miscellaneous Data's when saving a Database List.
 
 *Consequences
--Requires to Preload all Miscellaneous first on startup which will take time ti finish.
+-Requires to Load all Miscellaneous first on startup which will take time ti finish.
 
 
 UNCHECKED : Miscellaneous Resources will not be loaded on startup.
 
 *Prosequences
--Instant Startup since Miscellaneous will not be Preloaded.
+-Instant Startup since Miscellaneous will not be Loaded.
 
 *Consequences
 -"Handy Injection" and "General" Section will not include Miscellaneous Section on its Operations.
--"Handy Injection" and "General" Section's WILL NOT include Miscellaneous Data's when preloading a database list
+-"Handy Injection" and "General" Section's WILL NOT include Miscellaneous Data's when Loading a database list
 -"Handy Injection" and "General" Section will not include Miscellaneous Data's when creating a Database List.
 )
 WM_MOUSEMOVE("usemiscon",tmpr)
@@ -685,7 +689,7 @@ tmpr=
 (
 Browse a General Database that has an extension of ( .aldrin_dota2db ).
 
-Preloading a database will define all your collections of items.
+Loading a database will define all your collections of items.
 
 
 Take Note : General Database( .aldrin_dota2db ) is different from Handy Injection Database( .aldrin_dota2hidb )
@@ -799,7 +803,7 @@ tmpr=
 (
 Browse a Handy Injection Database that has an extension of ( .aldrin_dota2hidb ).
 
-Preloading a database will define all your collections of items.
+Loading a database will define all your collections of items.
 
 
 Take Note : Handy Injection Database( .aldrin_dota2hidb ) is different from General Database( .aldrin_dota2db )
@@ -846,7 +850,7 @@ WM_MOUSEMOVE("text27","You need to Save all the list you just added and reload t
 SetBtnTxtColor(HBTN, "Green")
 Gui, MainGUI:Font
 Gui, MainGUI:Add, Edit, vchbar x310 y45 w225,
-Gui, MainGUI:Add, Text, x310 y105 w225 vtext28,This section is all about adding custom heroes and be used on future count of heroes present at "Handy Injection" Section`n`nCommon reasons of adding "Custom Heroes":`n-You are testing a custom added hero of yours on DOTA2 and added "item slots" on it.`n`nwhat is inside this section where:`n*Edit Box-type the FULL HERO NAME(npc_dota_hero_***) here. Example:npc_dota_hero_rubick and NOT rubick(without npc_dota_hero_)`n*List(left-side)-this is where the list of custom heroes are listed`n*Add-adds the current typed hero on the list`n*Save and Reload-if you are already finished adding custom heroes and ready to use it.This tool needs to preload its resources first by reloading the script and saving the names of the custom heroes.
+Gui, MainGUI:Add, Text, x310 y105 w225 vtext28,This section is all about adding custom heroes and be used on future count of heroes present at "Handy Injection" Section`n`nCommon reasons of adding "Custom Heroes":`n-You are testing a custom added hero of yours on DOTA2 and added "item slots" on it.`n`nwhat is inside this section where:`n*Edit Box-type the FULL HERO NAME(npc_dota_hero_***) here. Example:npc_dota_hero_rubick and NOT rubick(without npc_dota_hero_)`n*List(left-side)-this is where the list of custom heroes are listed`n*Add-adds the current typed hero on the list`n*Save and Reload-if you are already finished adding custom heroes and ready to use it.This tool needs to Load its resources first by reloading the script and saving the names of the custom heroes.
 Menu, chContextMenu, Add, Delete, chbuttondelete
 IniRead,inchoosetab,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,inchoosetab
 intablist=Single Source|Multiple Styles|Multiple Source|Optional Features
@@ -951,7 +955,6 @@ Gui, MainGUI:Submit, NoHide
 gosub, SelectOuterTab
 
 Tooltip
-GuiControl,,cameradistance,% cameradistancehack()
 Gui, MainGUI:+Disabled
 
 Gui,MainGUI:Show, h500 w550,AJOM's Dota 2 MOD Master
@@ -977,7 +980,7 @@ if datadirview<>
 		{
 			Gui MainGUI:+OwnDialogs
 			SetTimer,ChangeButtonNames,1
-			msgbox,292,Miscellaneous Resources Conflict,The tool currently preloads two database files`, a General Database and a Handy-Injection Database. Miscellaneous can only be used by one database file. Choose which database will use the Miscellaneous Resources.`n`n`nNote: The other unselected one will not preload its Miscellaneous Resources.
+			msgbox,292,Miscellaneous Resources Conflict,The tool currently Loads two database files`, a General Database and a Handy-Injection Database. Miscellaneous can only be used by one database file. Choose which database will use the Miscellaneous Resources.`n`n`nNote: The other unselected one will not Load its Miscellaneous Resources.
 			IfMsgBox, Yes 
 			{
 				tempo=1
@@ -1723,7 +1726,7 @@ else
 }
 stringmid,modloc,giloc,1,%length%
 
-GuiControl,Text,searchnofound,Waiting for all Cosmetic Extraction to Finish.
+GuiControl,Text,searchnofound,Waiting for the Extraction of all Models and Particles to Finish.
 tempo:=A_DetectHiddenWindows 
 DetectHiddenWindows,On
 ;finish all extractions first
@@ -1748,9 +1751,25 @@ Loop %tmpr%
 VarSetCapacity(extractPID,0)
 ;
 ; tell the skinextract thread to terminate itself after finishing all its queue
-IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram
+IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Status,terminateprogram
 tempo:=A_DetectHiddenWindows 
-WinWaitClose,ahk_pid %skinextract%
+tmpr3:=tmpr4:=""
+while WinExist("ahk_pid " skinextract)
+{
+	IniRead,tmpr1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,materialscount,0
+	IniRead,tmpr2,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Processing.ExtractList,Materials,materialscount,0
+	tmpr1 += tmpr2 + 1
+	IniRead,tmpr2,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Processing.ExtractList,Materials,CurrentIndex,1
+	tmpr1 -= tmpr2
+	IniRead,tmpr2,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Processing.ExtractList,Materials,CurrentMaterial,None
+	if (tmpr1!=tmpr3) and (tmpr2!=tmpr4)
+	{
+		GuiControl,Text,searchnofound,Material Extractor PID: %skinextract% , Remaining Targets: %tmpr1% , Target: %tmpr2%
+		tmpr3:=tmpr1
+		tmpr4:=tmpr2
+	}
+	sleep 1000
+}
 DetectHiddenWindows,%tempo%
 ;
 
@@ -2606,14 +2625,24 @@ if (skinindex=="Undefined") and (stylechecker>0)
 	pos:=0
 	while (pos:=InStr(visualcontent,"`r`n					""type""		""model_skin""",False,pos+1))
 	{
+			; asset_modifier detector
 		pos1:=InStr(visualcontent,"{",True,pos-strlen(visualcontent))
 		pos2:=InStr(visualcontent,"}",True,pos)
 		valvefile:=SubStr(visualcontent,pos1,pos2-pos1)
-		pos1:=searchstringdetector(valvefile,"`r`n					""style""")
-		if (pos1=stylestring)
+			;
+		if InStr(valvefile,"`r`n					""style""		""" stylechecker """")
 		{
-			skinindex:=searchstringdetector(valvefile,"`r`n					""skin""")
+			skinindex:=stylechecker
 			break
+		}
+		else
+		{
+			pos1:=searchstringdetector(valvefile,"`r`n					""style""")
+			if (pos1=stylestring) ; no style parameter
+			{
+				skinindex:=searchstringdetector(valvefile,"`r`n					""skin""")
+				break
+			}
 		}
 	}
 }
@@ -2621,13 +2650,13 @@ if (skinindex!="Undefined") and (skinindex!="") and (skinindex>0)
 {
 	; the skinextract thread listen on this file, set its parameters
 	valvefile=%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%defaultname%
-	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,materialscount,0
+	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,materialscount,0
 	materialscount++
-	if !FileExist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list")
-		FileAppend,,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list
-	IniWrite,%valvefile%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,valvefile%materialscount%
-	IniWrite,%skinindex%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,skinindex%materialscount%
-	IniWrite,%materialscount%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,materialscount
+	if !FileExist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList")
+		FileAppend,,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList
+	IniWrite,%valvefile%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,valvefile%materialscount%
+	IniWrite,%skinindex%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,skinindex%materialscount%
+	IniWrite,%materialscount%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,materialscount
 }
 ;
 return
@@ -2836,7 +2865,7 @@ GoSub,default_settings
 FileSetAttrib,-R,%A_ScriptDir%\Settings.aldrin_dota2mod
 if usemiscon=1
 {
-	MsgBox, 36, Reload Required!, Checking Miscellaneous requires this tool to be reloaded in order to preload all miscellaneous resources`, any unsaved data/'s will be lost. Do you want to continue? (Press YES or NO)
+	MsgBox, 36, Reload Required!, Checking Miscellaneous requires this tool to be reloaded in order to Load all miscellaneous resources`, any unsaved data/'s will be lost. Do you want to continue? (Press YES or NO)
 	IfMsgBox Yes
 	{
 		IniWrite,%usemiscon%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,usemisc
@@ -2857,9 +2886,8 @@ else
 FileSetAttrib,+R,%A_ScriptDir%\Settings.aldrin_dota2mod
 return
 
-miscreload:
+miscreload: ; scans the items_game.txt for all possible global items
 Gui, MainGUI:+Disabled
-filestring:=GlobalArray["items_game.txt"]
 filelength:=StrLen(GlobalArray["items_game.txt"])
 sfinder=`r`n%A_Tab%%A_Tab%}`r`n%A_Tab%%A_Tab%" ;"
 GuiControl,+cBlue,searchnofound
@@ -2873,9 +2901,9 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 	if fastmisc=1
 	{
 		FileRead,filestring,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
-		if (substr(filestring,1,strlen(GlobalArray["items_game.txt"]))=GlobalArray["items_game.txt"])
+		if (substr(filestring,1,filelength)=GlobalArray["items_game.txt"]) ; if no new changes are made on the default items_game.txt
 		{
-			filestring:=StrReplace(filestring,GlobalArray["items_game.txt"])
+			filestring:=StrReplace(filestring,GlobalArray["items_game.txt"]) ; remove the items_game.txt at the reference file
 			
 			loop,parse,misclvparam,|
 			{
@@ -2883,7 +2911,7 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 				{
 					Gui, MainGUI:ListView,%A_LoopField%
 				}
-				GuiControl,Text,searchnofound,Preloading Contents of ListView: %A_LoopField%
+				GuiControl,Text,searchnofound,Loading Contents of ListView: %A_LoopField%
 				pos:=InStr(filestring,"`r`n~~~~~~~~~~" A_LoopField "~~~~~~~~~~`r`n")+strlen("`r`n~~~~~~~~~~" A_LoopField "~~~~~~~~~~`r`n")
 				pos1:=InStr(filestring,"`r`n~~~~~~~~~~" A_LoopField "~~~~~~~~~~`r`n",,,2)
 				FileData:=SubStr(filestring,pos,pos1-pos)
@@ -2904,7 +2932,7 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 	; FileAppend,%firstmessage%%compare1%%lastmessage%,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 }
 
-filestringcopy=%filestring%
+filestringcopy:=GlobalArray["items_game.txt"]
 
 ;speedtesting
 ;speedmessage=
@@ -2975,7 +3003,7 @@ Loop
 			;VarWrite("AnnouncerID" misccounter,hitemid)	;VarWrite(Key := "", Value := "")
 		;}
 		LV_Add(,hitemname,hitemslot,hitemrarity,hitemid)
-		GuiControl,Text,searchnofound,Preloading %hitemname%
+		GuiControl,Text,searchnofound,Loading %hitemname%
 	}
 	if ErrorLevel=1 ; hunt this errorlevel
 	{
@@ -3043,7 +3071,7 @@ Loop
 			;VarWrite("TauntUser" misccounter,hherouser)	;VarWrite(Key := "", Value := "")
 		;}
 		LV_Add(,hitemname,hitemrarity,hitemid,hherouser)
-		GuiControl,Text,searchnofound,Preloading %hitemname%
+		GuiControl,Text,searchnofound,Loading %hitemname%
 	}
 	if ErrorLevel=1 ; hunt this errorlevel
 	{
@@ -3121,7 +3149,7 @@ for intsaver, in param
 				;VarWrite(subject "ID" misccounter,hitemid)	;VarWrite(Key := "", Value := "")
 			;}
 			LV_Add(,hitemname,hitemrarity,hitemid)
-			GuiControl,Text,searchnofound,Preloading %subject% Effect: %hitemname%
+			GuiControl,Text,searchnofound,Loading %subject% Effect: %hitemname%
 		}
 		if (trimindex=loopsbeforetrim)
 			filestring:=SubStr(filestring,ipos)
@@ -3197,7 +3225,7 @@ for intsaver, in param
 				;VarWrite(subject "ID" misccounter,hitemid)	;VarWrite(Key := "", Value := "")
 			;}
 			LV_Add(,hitemname,hitemrarity,hitemid)
-			GuiControl,Text,searchnofound,Preloading %subject%: %hitemname%
+			GuiControl,Text,searchnofound,Loading %subject%: %hitemname%
 		}
 		if ErrorLevel=1 ; hunt this errorlevel
 		{
@@ -3279,7 +3307,7 @@ for intsaver, in param
 				;VarWrite(subject "ActivedStyle" misccounter,"0")	;VarWrite(Key := "", Value := "")
 			;}
 			LV_Add(,hitemname,hitemrarity,hitemid,stylescount,"0")
-			GuiControl,Text,searchnofound,Preloading %subject%: %hitemname%
+			GuiControl,Text,searchnofound,Loading %subject%: %hitemname%
 		}
 		if ErrorLevel=1 ; hunt this errorlevel
 		{
@@ -3856,9 +3884,9 @@ VarSetCapacity(extractPID,0)
 ;
 
 ;command the thread of skinextract to terminate itself after finishing all its queue operations
-if !fileexist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list")
-	FileAppend,,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list
-IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram
+if !fileexist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList")
+	FileAppend,,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList
+IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Status,terminateprogram
 
 WinWaitClose, ahk_pid %skinextract% ; wait for the skinextract thread to close
 ;
@@ -3927,7 +3955,7 @@ reloadmisc(invfile) {
 		loop ; everlasting loop until encountering redundancy(errorlevel=1)
 		{
 			miscid:=VarRead("miscid" A_Index)
-			GuiControl,Text,searchnofound, Preloading Miscellaneous ID: %miscid%
+			GuiControl,Text,searchnofound, Loading Miscellaneous ID: %miscid%
 			miscidname:=VarRead("miscidname" A_Index)
 			misclv:=VarRead("misclv" A_Index)
 			;IniRead,miscid%A_Index%,%invfile%,Miscellaneous,miscid%A_Index%
@@ -4042,7 +4070,7 @@ reloadmisc(invfile) {
 			miscidname:=VarRead("miscidname" A_Index)
 			;IniRead,miscid,%invfile%,Miscellaneous,miscid%A_Index%
 			;IniRead,miscidname,%invfile%,Miscellaneous,miscidname%A_Index%
-			GuiControl,Text,searchnofound,% "Preloading Miscellaneous ID: " miscid
+			GuiControl,Text,searchnofound,% "Loading Miscellaneous ID: " miscid
 			misclv:=VarRead("misclv" A_Index)
 			;IniRead,misclv,%invfile%,Miscellaneous,misclv%A_Index%
 			if A_DefaultListView<>% misclv
@@ -4154,7 +4182,7 @@ reloadmisc(invfile) {
 			intsaver:=A_Index
 			IniRead,miscid,%invfile%,Miscellaneous,miscid%intsaver%
 			IniRead,miscidname,%invfile%,Miscellaneous,miscidname%intsaver%
-			GuiControl,Text,searchnofound,% "Preloading Miscellaneous ID: " miscid
+			GuiControl,Text,searchnofound,% "Loading Miscellaneous ID: " miscid
 			IniRead,misclv,%invfile%,Miscellaneous,misclv%intsaver%
 			if A_DefaultListView<>% misclv
 			{
@@ -4234,7 +4262,7 @@ reloadmisc(invfile) {
 	Gui,MainGUI:Submit,NoHide
 	if errorshow<>
 	{
-		msgbox,16,ERROR DETECTED!,Preloading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
+		msgbox,16,ERROR DETECTED!,Loading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
 	}
 	
 	Gui, MainGUI:-Disabled 
@@ -4531,10 +4559,10 @@ ifexist,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 VarSetCapacity(commanddir,0),VarSetCapacity(commandextract,0),VarSetCapacity(commandrename,0),VarSetCapacity(rptlimit,0)
 
+FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList
 gosub,materialsextractor ; create a separate thread that listens to incoming material files required to extract
 skinextract:=materialpid.ProcessID
 VarSetCapacity(materialpid,0)
-FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list
 
 ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 {
@@ -4629,6 +4657,7 @@ Loop % LV_GetCount()
 	contentport=%filecontent%
 	gosub,extractmodel
 	porthero=%herousercheck%
+	visualcontent:=visualsdetector(filecontent) ; this will be used when extracting material files
 	if (stylechecker>0)
 		filecontent:=stylechanger(stylechecker,filecontent) ;stylechanger will change the style of all particle effects and even the model
 	else StringReplace,filecontent,filecontent,`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%"style"%A_Tab%%A_Tab%"0",,1
@@ -4698,9 +4727,8 @@ Loop % LV_GetCount()
 				Gui,MainGUI:Show,NoActivate,% floor(1000/(A_TickCount-IPS)) " Items per Second"
 				IPS:=A_TickCount
 				;
-				
-				tmp=%A_Tab%%A_Tab%%A_Tab%"model_player ;"
-				tmp:=StrReplace(filecontent,tmp,tmp,modelplayercount) ; for default item
+					; material files extractor
+				StrReplace(filecontent,"			""model_player",,modelplayercount) ; for default item
 				loop %modelplayercount%
 				{
 					defaultloc:=modelpathdetector(filecontent,A_Index-1) ;detect the item root directory and change all slash into backslash
@@ -4710,7 +4738,6 @@ Loop % LV_GetCount()
 					if (defaultloc<>"") and (defaultname<>"")
 					{
 						gosub,extractfileruncmd ; extract files via cmd
-						visualcontent:=visualsdetector(stringcontent1)
 						stylestring:="Undefined"
 						gosub,checkskinmaterial ; check if needed to change material files
 						; measures the number of items injected per second
@@ -4719,6 +4746,7 @@ Loop % LV_GetCount()
 						;
 					}
 				}
+					;
 				Break
 			}
 		}
@@ -4971,13 +4999,13 @@ If SubStr(invfile,-16,17)=.aldrin_dota2hidb
 	GuiControlGet,errorshow,,errorshow
 	if errorshow<>
 	{
-		msgbox,16,ERROR DETECTED!,Preloading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
+		msgbox,16,ERROR DETECTED!,Loading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
 	}
 	
 	GuiControl,MainGUI:Text,searchnofound,%defaultshoutout%
 	GuiControl,MainGUI:Show,searchnofound
 	Gui, MainGUI:-Disabled
-	Gui,MainGUI:Show,NoActivate,% (A_TickCount-timeconsumed)/1000 "s Preloading Time"
+	Gui,MainGUI:Show,NoActivate,% (A_TickCount-timeconsumed)/1000 "s Loading Time"
 	SetTimer,restorguititle,-5000,-1
 	
 	
@@ -4993,7 +5021,7 @@ restorguititle: ;;; Restore the Title of the GUI into the default one
 Gui,MainGUI:Show,NA,AJOM's Dota 2 MOD Master
 return
 
-;;; hdatareload function will preload the database of handy injection section listview
+;;; hdatareload function will Load the database of handy injection section listview
 hdatareload(hdatadirview) {
 	Gui, MainGUI:Default
 	Gui, MainGUI:+Disabled 
@@ -6371,8 +6399,11 @@ materialpid:=ExecScript("
 #KeyHistory 0
 #NoTrayIcon
 
+QueueFile := A_Temp ""\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList""
+ProcessingFile := A_Temp ""\AJOM Innovations\DOTA2 MOD Master\Processing.ExtractList""
+
 Hotkey,~$^+!l,,P2131
-FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list
+FileDelete,%ProcessingFile%
 
 SetWorkingDir," A_ScriptDir "
 
@@ -6389,7 +6420,7 @@ hCon:=DllCall(""CreateFile"",""str"",""CONOUT$"",""uint"",0xC0000000,""uint"",7,
 
 loop
 {
-	While !FileExist(A_Temp ""\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list"")
+	While !FileExist(QueueFile)
 	{
 		if terminateprogram " text "
 			goto,Clean_up
@@ -6400,43 +6431,46 @@ loop
 		}
 	}
 	
-	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,materialscount,DNAPWIDAWnsIDmAWwBx
+	IniRead,materialscount,%QueueFile%,Materials,materialscount,DNAPWIDAWnsIDmAWwBx
 	if (materialscount=""DNAPWIDAWnsIDmAWwBx"")
 	{
-		IniRead,terminateprogram,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram,0
+		IniRead,terminateprogram,%QueueFile%,Status,terminateprogram,0
 		if terminateprogram " text "
 			goto,Clean_up
 		else
 			continue
 	}
-	IniRead,valvefile,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,valvefile%materialscount%,DNAPWIDAWnsIDmAWwBx
-	IniRead,skinindex,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,skinindex%materialscount%,DNAPWIDAWnsIDmAWwBx
+	IniRead,valvefile,%QueueFile%,Materials,valvefile%materialscount%,DNAPWIDAWnsIDmAWwBx
+	IniRead,skinindex,%QueueFile%,Materials,skinindex%materialscount%,DNAPWIDAWnsIDmAWwBx
 	if debugmode
 		msgbox entering 1
 	if (valvefile=""DNAPWIDAWnsIDmAWwBx"") or (skinindex=""DNAPWIDAWnsIDmAWwBx"")
 	{
-		IniRead,terminateprogram,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram,0
+		IniRead,terminateprogram,%QueueFile%,Status,terminateprogram,0
 		if terminateprogram " text "
 			goto,Clean_up
 		else
 			continue
 	}
 	
-	FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list
-	FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,1
-	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,Materials,materialscount,0
+	FileDelete,%ProcessingFile%
+	FileMove,%QueueFile%,%ProcessingFile%,1
+	IniRead,materialscount,%ProcessingFile%,Materials,materialscount,0
 	if debugmode
 		msgbox materialscount=%materialscount%
 	loop %materialscount%
 	{
-		IniRead,valvefile,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,Materials,valvefile%A_Index%,DNAPWIDAWnsIDmAWwBx
-		IniRead,skinindex,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,Materials,skinindex%A_Index%,DNAPWIDAWnsIDmAWwBx
+		IniRead,valvefile,%ProcessingFile%,Materials,valvefile%A_Index%,DNAPWIDAWnsIDmAWwBx
+		IniRead,skinindex,%ProcessingFile%,Materials,skinindex%A_Index%,DNAPWIDAWnsIDmAWwBx
 		if (valvefile=""DNAPWIDAWnsIDmAWwBx"") or (skinindex=""DNAPWIDAWnsIDmAWwBx"")
 		{
 			continue
 		}
 		if debugmode
 		msgbox out continue
+
+		IniWrite,% SubStr(valvefile,InStr(valvefile,""\"",True,0)+1),%ProcessingFile%,Materials,CurrentMaterial
+		IniWrite,%A_Index%,%ProcessingFile%,Materials,CurrentIndex
 		
 		timeout:=A_TickCount
 		checkifmodelexist:
@@ -6508,50 +6542,86 @@ loop
 					break
 			}
 		}
+
+		WatchDog:=A_TickCount ; reset watchdog, this detects infinite loop
 		repeater:
-		pid:=[]
-		DetectHiddenWindows,On
-		for index, in defaultmaterials
+		if (A_TickCount-WatchDog >= 60000) ; if one minute has passed and the extraction still did not finished
 		{
-			if !instr(FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\""),""D"")
-				FileCreateDir,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1]
-			else FileDelete,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
-			
-			command:=""""""" strreplace(variablehllib,"/","\") """"" -p """"" strreplace(dota2dir,"/","\") "\game\dota\pak01_dir.vpk"""" -d """""" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] """""" -e """"root\"" itemmaterials[index,1] """"""""
-			if debugmode
-				msgbox %command%
-			run,%command%,,Hide UseErrorLevel,material
-			pid[index]:=material
-		}
-		Process,Wait,%material%,2
-		if debugmode
-			msgbox escape 1
-		for index,material in pid
-		{
-			Process,WaitClose,%material%,10
-			
-			if FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2])
-				FileMove,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2],% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2],1
-		}
-		if debugmode
-			msgbox escape 2
-		DetectHiddenWindows,Off
-		if terminateprogram " text "
-			goto,Clean_up
-		for index, in defaultmaterials
-		{
-			if !FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2])
+			msgbox,21,Material Extractor WatchDog,The Extraction of material items is taking so long for this cosmetic item:``n%valvefile%``n``nIt is better to RETRY the operation multiple times``, but if it DOTA2 MOD Master really is having trouble extracting the Material Files then simply CANCEL extracting the model's material and report this problem to the developer team of this tool.
+			IfMsgBox,Retry
 			{
-				if debugmode
-					msgbox % ""repeating because of``n``n"" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
-				goto,repeater
+				WatchDog:=A_TickCount ; reset watchdog
+				goto, repeater
+			}
+			else
+			{
+WatchDog:=""
+(
+-----Material Extractor WatchDog-----
+Tool Version: " version "
+AHK Version: "" A_AhkVersion ""
+OS Version: "" A_OSVersion ""
+OS Type: "" A_OSType ""
+OS Architecture: "" (A_Is64bitOS?""64-bit"":""32-bit"") ""
+String Formatting: "" (A_IsUnicode?""Unicode"":""ANSI"") ""
+Pointer Size: "" A_PtrSize ""
+Language: "" A_Language ""
+Tool Path: " A_ScriptFullPath "
+CMD Path: "" A_ComSpec ""
+Temp Directory: "" A_Temp ""
+Working Directory: "" A_WorkingDir ""
+Material Path: "" defaultmaterials[index,1] ""\"" defaultmaterials[index,2] ""
+-------------------------------------
+`)""
+				msgbox,0,Material Extractor WatchDog,Screenshot or Copy this Report then go to this Website and Post it:``nhttps://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/issues/15``n``n``n%WatchDog%``n``n``nTo Copy all the text of this message box`, left click this message box then press Copy Hotkey( CTRL+C).
 			}
 		}
-		FilePath:=StrReplace(valvefile,A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"")
-		for index, in defaultmaterials
-			IniWrite,%FilePath%,%A_WorkingDir%\MaterialReport.aldrin_report,Materials,% itemmaterials[index,2] ""="" defaultmaterials[index,2]
+		else
+		{
+			pid:=[]
+			DetectHiddenWindows,On
+			for index, in defaultmaterials
+			{
+				if !instr(FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\""),""D"")
+					FileCreateDir,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1]
+				else FileDelete,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
+				
+				command:=""""""" strreplace(variablehllib,"/","\") """"" -p """"" strreplace(dota2dir,"/","\") "\game\dota\pak01_dir.vpk"""" -d """""" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] """""" -e """"root\"" itemmaterials[index,1] """"""""
+				if debugmode
+					msgbox %command%
+				run,%command%,,Hide UseErrorLevel,material
+				pid[index]:=material
+			}
+			Process,Wait,%material%,2 ; 2 seconds timeout
+			if debugmode
+				msgbox escape 1
+			for index,material in pid
+			{
+				Process,WaitClose,%material%,10 ; 10 seconds timeout
+				
+				if FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2])
+					FileMove,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2],% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2],1
+			}
+			if debugmode
+				msgbox escape 2
+			DetectHiddenWindows,Off
+			if terminateprogram " text "
+				goto,Clean_up
+			for index, in defaultmaterials
+			{
+				if !FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2])
+				{
+					if debugmode
+						msgbox % ""repeating because of``n``n"" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
+					goto,repeater
+				}
+			}
+			FilePath:=StrReplace(valvefile,A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"")
+			for index, in defaultmaterials
+				IniWrite,%FilePath%,%A_WorkingDir%\MaterialReport.aldrin_report,Materials,% itemmaterials[index,2] ""="" defaultmaterials[index,2]
+		}
 	}
-	IniRead,terminateprogram,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,Status,terminateprogram,0
+	IniRead,terminateprogram,%ProcessingFile%,Status,terminateprogram,0
 	if terminateprogram " text "
 		goto,Clean_up
 	if debugmode
@@ -7414,6 +7484,10 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
+v2.9.5
+*Fixed an infinite loop bug caused by Material file extractor indexing bug
+*Fixed Fast Miscellaneous Resource Loading Bug where miscellaneous resources fails to rescan everytime a new items_game.txt comes out
+
 v2.9.4
 *Another Optimization against an infinite loop bug that was caused when identifying if a certain cosmetic file extractor is finished.
 *Added ErrorLogging for Cosmetic File Extractors.
@@ -7473,7 +7547,7 @@ v2.5.1
 
 v2.5.0
 *SPEEDY VERSION. Advisable to migrate on this version.
-*Database Version 1.5 changed the previous v1 database version. This Database version is faster than the previous database version... But still Version 2(experimental) is still unbeatable when it comes to saving/preloading speed.
+*Database Version 1.5 changed the previous v1 database version. This Database version is faster than the previous database version... But still Version 2(experimental) is still unbeatable when it comes to saving/Loading speed.
 *Added "Maximum Threads" at "Advanced Section". This will limit how many simultaneous threads that can be used by DOTA2 MOD Master to extract model,particle effect files.
 *Some bug fixes.
 )
@@ -7488,7 +7562,7 @@ Gui,aboutgui:Add,Edit,x0 y20 h400 w500 vtext37 ReadOnly,
 
 *To Manually Patch gameinfo.gi using the injector, go to "advanced>patch gameinfo.gi". Clicking this button will Activate the MOD(pak01_dir.vpk) found at "%dota2dir%\" Folder.
 
-*It is good that "use miscellaneous on future injection" Feature at "Miscellaneous" Section is "TURNED OFF" if you do not use any feature on that section. Because every start, this Tool will need to preload all miscellaneous assets which will consume much time
+*It is good that "use miscellaneous on future injection" Feature at "Miscellaneous" Section is "TURNED OFF" if you do not use any feature on that section. Because every start, this Tool will need to Load all miscellaneous assets which will consume much time
 
 *"AUTO-SHUTNIK METHOD" is a very important feature of this Tool,it was built for users who dont know how to "Manually MOD DOTA2".
 
@@ -7638,7 +7712,7 @@ If SubStr(invfile,-14,15)=.aldrin_dota2db
 	GuiControl,MainGUI:Show,searchnofound
 	if errorshow<>
 	{
-		msgbox,16,ERROR DETECTED!,Preloading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
+		msgbox,16,ERROR DETECTED!,Loading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
 	}
 	Gui, MainGUI:-Disabled 
 }
@@ -10176,7 +10250,7 @@ You can either:
 Downloaded Handy-Injection Database can be found at:
 %A_ScriptDir%\Database\%HDBDate%.aldrin_dota2hidb
 
-Would you like to Preload this Database File?
+Would you like to Load this Database File?
 )
 						IfMsgBox Yes
 						{
