@@ -98,10 +98,26 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
-v2.9.0
+v2.9.7
+-Improved Material File Extractor.
+-Improved Camera Distance Detection.
+-Added a Feature at Handy Injection Section >>> Used Items SubSection >>> Options: "Extract Particle Effects?"
+	- Using this feature, you can now set wether you want to extract the particle effects of a certain cosmetic item
+	- Example: To disable Rubick's Magus Cyper Arcana's affecting other hero's ability effects, Set "Extract Particle Effects?" = "No".
+
+v2.9.6
+- Improved Countermeasures against infinite loop bug that was caused by File Extractors.
+- Fixed Fast Miscellaneous Resource Loading Bug where miscellaneous resources fails to rescan everytime a new items_game.txt comes out.
+- Added ErrorLogging for Cosmetic File Extractors.
+
+v2.9.3
+- Optimized the Shutnik Method:Creating VPK Stage. We will not experience being stuck here for a long time.
+
+v2.9.2
 - Fixed Some Hero Cosmetic Item Listviews not showing Colors according to their Rarity.
 - Added Kill Effect,Death Effect,Map Effect,Courier Effect,Head Effect,Teleport Effect,Blink Effect at Miscellaneous>Single Source.
 - Improved Material(.vmat) File Extraction.
+- Improved Camera Distance Detection.
 
 v2.8.0
 - Added "Streak Effect" Feature at "Miscellaneous" Section > "Single-Source" Sub-Section, Cool!

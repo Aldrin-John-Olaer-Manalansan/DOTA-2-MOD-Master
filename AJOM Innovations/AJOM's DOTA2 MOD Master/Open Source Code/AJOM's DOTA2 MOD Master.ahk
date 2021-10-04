@@ -60,10 +60,10 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.9.0
+version=2.9.7
 
 if disableautoupdate<>1
-	versionchecker(version)
+	Gosub,versionchecker
 
 Menu, Tray, Add, &Exit, k_MenuExit
 Menu, Tray, NoStandard
@@ -369,21 +369,6 @@ Load the Default item build for the current hero found at "dota 2 beta\game\dota
 WM_MOUSEMOVE("resetitembuild",tmpr)
 SetBtnTxtColor(HBTN, "Red")
 Gui, MainGUI:Font
-Gui, MainGUI:Tab,7
-Gui, MainGUI:Add, Text, x1 y60 cred,
-(
-NOTICE:
-There is a possibility that valve will ban your account when you use the features found on this section. USE AT YOUR OWN RISK!
-)
-Gui, MainGUI:Add, Edit, x1 y30 w100 Number gnumberlimiter vdummynl
-Gui, MainGUI:Add, UpDown, x1 y30 w100 0x80 vcameradistance Range1200-9999,0
-WM_MOUSEMOVE("cameradistance","Sets the elevation height of the camera, higher values allows you to see more areas in your screen.`n`nDefault Value: 1200`nRecommended values: 1200-2500")
-Gui, MainGUI:Font,Bold
-Gui, MainGUI:Add, Button, x110 y30 w130 h21 ginjectcameradistance hwndHBTN,Inject Camera Distance
-SetBtnTxtColor(HBTN, "Blue")
-Gui, MainGUI:Add, Button, x245 y30 w50 h21 grestorecameradistance hwndHBTN,Restore
-SetBtnTxtColor(HBTN, "Green")
-Gui, MainGUI:Font
 Gui, MainGUI:Tab,8
 Gui, MainGUI:Add, CheckBox, checked%autovpk% x9 y70 gautovpkon vautovpkon,Auto-Shutnik Method(Requires "VPKCreator" present on same Directory)(SELF-ACTIVE)
 tmpr=
@@ -522,15 +507,15 @@ Click this Button to Rescan all items_game.txt Related resources.
 *Updates the contents of the Miscellaneous Resources Reference File. This avoids inaccurate reloading of Miscellaneous Resources.
 *Commonly applicable when there is a bug on Miscellaneous Resources like a specific item does not exist on the list.
 )")
-Gui, MainGUI:Add, CheckBox, checked%fastmisc% x125 y170 vfastmisc,Remember Miscellaneous Resources for fast Preload(Not advisable to be checked. if you want to accurately preload all Miscellaneous resources`, leave this option unchecked)
+Gui, MainGUI:Add, CheckBox, checked%fastmisc% x125 y170 vfastmisc,Remember Miscellaneous Resources for fast Load(Not advisable to be checked. if you want to accurately Load all Miscellaneous resources`, leave this option unchecked)
 tmpr=
 (
 If this Option is ~ 
 
-CHECKED : Everytime DOTA2 MOD Master preloads Miscellaneous resources, it automatically remembers all Miscellaneous resources upon the next start by creating a reference file. So that if the real items_game.txt is not changed by updates/patches, Fast Preloading will be done.
+CHECKED : Everytime DOTA2 MOD Master Loads Miscellaneous resources, it automatically remembers all Miscellaneous resources upon the next start by creating a reference file. So that if the real items_game.txt is not changed by updates/patches, Fast Loading will be done.
 
 *Prosequences
--Ultra Fast Preloading every start of DOTA2 MOD Master.
+-Ultra Fast Loading every start of DOTA2 MOD Master.
 -Does not need to Redefine all Miscellaneous Resources every start.
 
 *Consequences
@@ -540,10 +525,10 @@ CHECKED : Everytime DOTA2 MOD Master preloads Miscellaneous resources, it automa
 UNCHECKED : It always scan Miscellaneous Resources at items_game.txt file every start.
 
 *Prosequences
--Preloading Miscellaneous resources is FULLY Accurate since it always scans items_game.txt every start. Making sure that every single Miscellaneous resource will be present on every lists.
+-Loading Miscellaneous resources is FULLY Accurate since it always scans items_game.txt every start. Making sure that every single Miscellaneous resource will be present on every lists.
 
 *Consequences
--Slower Startup since DOTA2 MOD Master needs to Preload "Miscellaneous" Resources first before it is allowed to be used.
+-Slower Startup since DOTA2 MOD Master needs to Load "Miscellaneous" Resources first before it is allowed to be used.
 )
 WM_MOUSEMOVE("fastmisc",tmpr)
 
@@ -560,6 +545,25 @@ Gui, MainGUI:Add, text,x4 y230,ERROR Log
 Gui, MainGUI:Add, Edit, verrorshow x4 y245 w266 h206 +ReadOnly,
 Gui, MainGUI:Add, text,x276 y230 vtext32,Report Log
 Gui, MainGUI:Add, Edit, vreportshow x276 y245 w266 h206 +ReadOnly,
+Gui, MainGUI:Tab,7
+cameradistance:=CameraDistance("Check")
+if cameradistance
+{
+	Gui, MainGUI:Add, Text, x1 y60 cred,
+	(
+	NOTICE:
+	There is a possibility that valve will ban your account when you use the features found on this section. USE AT YOUR OWN RISK!
+	)
+	Gui, MainGUI:Add, Edit, x1 y30 w100 Number gnumberlimiter vdummynl
+	Gui, MainGUI:Add, UpDown, x1 y30 w100 0x80 vcameradistance Range1200-9999,%cameradistance%
+	WM_MOUSEMOVE("cameradistance","Sets the elevation height of the camera, higher values allows you to see more areas in your screen.`n`nDefault Value: 1200`nRecommended 	values: 1200-2500")
+	Gui, MainGUI:Font,Bold
+	Gui, MainGUI:Add, Button, x110 y30 w130 h21 ginjectcameradistance hwndHBTN,Inject Camera Distance
+	SetBtnTxtColor(HBTN, "Blue")
+	Gui, MainGUI:Add, Button, x245 y30 w50 h21 grestorecameradistance hwndHBTN,Restore
+	SetBtnTxtColor(HBTN, "Green")
+	Gui, MainGUI:Font
+}
 Gui, MainGUI:Tab
 Gui, MainGUI:Add, Progress, x4 y452 w540 -smooth vMyProgress Range0-1000,
 GuiControl,MainGUI:Hide,MyProgress
@@ -581,25 +585,25 @@ Miscellaneous is used by "Handy Injection" and "General" Section which injects e
 
 If this Option is ~ 
 
-CHECKED : Miscellaneous Resources will be preloaded On Startup, allowing the use of Miscellaneous.
+CHECKED : Miscellaneous Resources will be Loaded On Startup, allowing the use of Miscellaneous.
 
 *Prosequences
 -Allows "Handy Injection" and "General" Section to inject selected miscellaneous resources.
--Allows "Handy Injection" and "General" Section's Saved List Database to preload their present Miscellaneous Data's
+-Allows "Handy Injection" and "General" Section's Saved List Database to Load their present Miscellaneous Data's
 -Allows "Handy Injection" and "General" Section to Add Miscellaneous Data's when saving a Database List.
 
 *Consequences
--Requires to Preload all Miscellaneous first on startup which will take time ti finish.
+-Requires to Load all Miscellaneous first on startup which will take time ti finish.
 
 
 UNCHECKED : Miscellaneous Resources will not be loaded on startup.
 
 *Prosequences
--Instant Startup since Miscellaneous will not be Preloaded.
+-Instant Startup since Miscellaneous will not be Loaded.
 
 *Consequences
 -"Handy Injection" and "General" Section will not include Miscellaneous Section on its Operations.
--"Handy Injection" and "General" Section's WILL NOT include Miscellaneous Data's when preloading a database list
+-"Handy Injection" and "General" Section's WILL NOT include Miscellaneous Data's when Loading a database list
 -"Handy Injection" and "General" Section will not include Miscellaneous Data's when creating a Database List.
 )
 WM_MOUSEMOVE("usemiscon",tmpr)
@@ -685,7 +689,7 @@ tmpr=
 (
 Browse a General Database that has an extension of ( .aldrin_dota2db ).
 
-Preloading a database will define all your collections of items.
+Loading a database will define all your collections of items.
 
 
 Take Note : General Database( .aldrin_dota2db ) is different from Handy Injection Database( .aldrin_dota2hidb )
@@ -773,7 +777,7 @@ Gui, MainGUI:Add, Button, x116  y475 ghselectinject vtext17 hwndHBTN, Inject all
 SetBtnTxtColor(HBTN, "Blue")
 Gui, MainGUI:Font
 Gui, MainGUI:Tab,2
-Gui, MainGUI:Add, ListView,gitemview vitemview x1 y45 w545 h371 -LV0x10 AltSubmit,Item Name|Item Slot|Rarity|Item ID|Used by|Styles Count|Active Style
+Gui, MainGUI:Add, ListView,gitemview vitemview x1 y45 w545 h371 -LV0x10 AltSubmit,Item Name|Item Slot|Rarity|Item ID|Used by|Styles Count|Active Style|Extract Particle Effects?
 tmpr=
 (
 Right-Click an item to:
@@ -799,7 +803,7 @@ tmpr=
 (
 Browse a Handy Injection Database that has an extension of ( .aldrin_dota2hidb ).
 
-Preloading a database will define all your collections of items.
+Loading a database will define all your collections of items.
 
 
 Take Note : Handy Injection Database( .aldrin_dota2hidb ) is different from General Database( .aldrin_dota2db )
@@ -821,6 +825,7 @@ Gui, MainGUI:Add, Button, x116  y475 ghselectinject vtext20 hwndHBTN, Inject all
 SetBtnTxtColor(HBTN, "Blue")
 Gui, MainGUI:Font
 Menu, MyContextMenu, Add, Delete, hbuttondelete
+Menu, MyContextMenu, Add, Toggle Particle Effects Extraction, hbuttonTPEE
 Menu, MyContextMenu, Add, Change Style, hbuttonstyle
 Menu, MyContextMenu, Add, Decrease Priority, hdecprio
 Menu, MyContextMenu, Add, Increase Priority, hincprio
@@ -846,7 +851,7 @@ WM_MOUSEMOVE("text27","You need to Save all the list you just added and reload t
 SetBtnTxtColor(HBTN, "Green")
 Gui, MainGUI:Font
 Gui, MainGUI:Add, Edit, vchbar x310 y45 w225,
-Gui, MainGUI:Add, Text, x310 y105 w225 vtext28,This section is all about adding custom heroes and be used on future count of heroes present at "Handy Injection" Section`n`nCommon reasons of adding "Custom Heroes":`n-You are testing a custom added hero of yours on DOTA2 and added "item slots" on it.`n`nwhat is inside this section where:`n*Edit Box-type the FULL HERO NAME(npc_dota_hero_***) here. Example:npc_dota_hero_rubick and NOT rubick(without npc_dota_hero_)`n*List(left-side)-this is where the list of custom heroes are listed`n*Add-adds the current typed hero on the list`n*Save and Reload-if you are already finished adding custom heroes and ready to use it.This tool needs to preload its resources first by reloading the script and saving the names of the custom heroes.
+Gui, MainGUI:Add, Text, x310 y105 w225 vtext28,This section is all about adding custom heroes and be used on future count of heroes present at "Handy Injection" Section`n`nCommon reasons of adding "Custom Heroes":`n-You are testing a custom added hero of yours on DOTA2 and added "item slots" on it.`n`nwhat is inside this section where:`n*Edit Box-type the FULL HERO NAME(npc_dota_hero_***) here. Example:npc_dota_hero_rubick and NOT rubick(without npc_dota_hero_)`n*List(left-side)-this is where the list of custom heroes are listed`n*Add-adds the current typed hero on the list`n*Save and Reload-if you are already finished adding custom heroes and ready to use it.This tool needs to Load its resources first by reloading the script and saving the names of the custom heroes.
 Menu, chContextMenu, Add, Delete, chbuttondelete
 IniRead,inchoosetab,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,inchoosetab
 intablist=Single Source|Multiple Styles|Multiple Source|Optional Features
@@ -951,7 +956,6 @@ Gui, MainGUI:Submit, NoHide
 gosub, SelectOuterTab
 
 Tooltip
-GuiControl,,cameradistance,% cameradistancehack()
 Gui, MainGUI:+Disabled
 
 Gui,MainGUI:Show, h500 w550,AJOM's Dota 2 MOD Master
@@ -977,7 +981,7 @@ if datadirview<>
 		{
 			Gui MainGUI:+OwnDialogs
 			SetTimer,ChangeButtonNames,1
-			msgbox,292,Miscellaneous Resources Conflict,The tool currently preloads two database files`, a General Database and a Handy-Injection Database. Miscellaneous can only be used by one database file. Choose which database will use the Miscellaneous Resources.`n`n`nNote: The other unselected one will not preload its Miscellaneous Resources.
+			msgbox,292,Miscellaneous Resources Conflict,The tool currently Loads two database files`, a General Database and a Handy-Injection Database. Miscellaneous can only be used by one database file. Choose which database will use the Miscellaneous Resources.`n`n`nNote: The other unselected one will not Load its Miscellaneous Resources.
 			IfMsgBox, Yes 
 			{
 				tempo=1
@@ -1066,7 +1070,7 @@ FileContent=
 	"Items"
 	{
 )
-param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Other_Items"
+param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Luxury"
 Loop,Parse,param,`,
 {
 	parseindex:=A_Index
@@ -1214,10 +1218,12 @@ if !FileExist(tmpr) or (A_GuiControl="resetitembuild")
 		return
 }
 FileRead,FileContent,%tmpr%
-param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Other_Items"
+param:="Starting_Items,Early_Game,Mid_Items,Late_Items,Luxury"
 loop,parse,param,`,
 {
 	parseindex:=A_Index
+	if !IsObject(ItemBuilds[parseindex])
+		ItemBuilds[parseindex]:=[]
 	pos1:=InStr(FileContent,"""#DOTA_Item_Build_" A_LoopField """",False)
 	pos2:=InStr(FileContent,"}",False,pos1)
 	ItemContent:=SubStr(FileContent,pos1,pos2-pos1)
@@ -1256,6 +1262,7 @@ For tmp,ItemName in ItemBuilds[itemclasschoice]
 GoSub,lvautosize
 LV_ModifyCol(2,"Integer"),LV_ModifyCol(4,"Integer")
 Gui,MainGUI:ListView,allitemlist
+LV_Modify(0,"-Check") ; uncheck all
 count:=ItemBuilds[itemclasschoice].Count()
 loop % LV_GetCount()
 {
@@ -1268,8 +1275,6 @@ loop % LV_GetCount()
 			LV_Modify(parseindex,"+Check")
 			break
 		}
-		else if (A_Index=count)
-			LV_Modify(parseindex,"-Check")
 	}
 }
 Gui,MainGUI:ListView,itembuildlist
@@ -1337,8 +1342,10 @@ return
 
 injectcameradistance:
 Gui, MainGUI:+Disabled
+GuiControlGet,dota2dir,,dota2dir
+FileCopy,% dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll",% A_ScriptDir "\Library\client.bak",1
 GuiControlGet,cameradistance,,%cameradistance%
-cameradistancehack(cameradistance)
+CameraDistance(cameradistance)
 if soundon=1
 	SoundPlay,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Sound\OperationFinished.wav
 else SoundPlay,*48
@@ -1350,6 +1357,7 @@ tmpr:=A_ScriptDir "\Library\client.bak"
 if FileExist(tmpr)
 {
 	Gui, MainGUI:+Disabled
+	GuiControlGet,dota2dir,,dota2dir
 	FileCopy,%tmpr%,% dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll",1
 	if soundon=1
 		SoundPlay,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Sound\OperationFinished.wav
@@ -1690,57 +1698,74 @@ else ifnotexist,%giloc%
 	return
 }
 gosub,hideprogress
-GuiControl,Text,searchnofound,Shutnik Method: patching gameinfo.gi
+GuiControl,Text,searchnofound,Generating Scripts
 if !instr(fileexist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\items\"),"D")
-{
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items
-}
 else ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
-{
 	FileDelete,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
-}
 FileAppend,%masterfilecontent%,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\items\items_game.txt
 if !instr(fileexist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\scripts\npc\"),"D")
-{
 	FileCreateDir,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\
-}
 else ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.txt
-{
 	FileDelete,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.txt
-}
 FileAppend,%portstring%,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.txt
-gosub,externalfiles
+
+GuiControl,Text,searchnofound,Shutnik Method: patching gameinfo.gi
 gosub,gipatcher
-GuiControl,Text,searchnofound,Shutnik Method: Creating pak01_dir.vpk
 if InStr(giloc,"/dota/")>0
-{
 	stringgetpos,length,giloc,/dota/
-}
-else
-{
-	stringgetpos,length,giloc,\dota\
-}
+else stringgetpos,length,giloc,\dota\
 stringmid,modloc,giloc,1,%length%
 
+; listener waiter
+GuiControl,Text,searchnofound,Waiting for the Extraction of all Models and Particles to Finish.
 tempo:=A_DetectHiddenWindows 
 DetectHiddenWindows,On
 ;finish all extractions first
-;for index,cPID in extractpid
+;for index,cPID in extractPID
 ;{
+;	GuiControl,Text,searchnofound,Waiting for all Cosmetic Extraction to Finish: PID%cPID%
 ;	WinWaitClose,% "ahk_pid " cPID " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
 ;}
-loop,parse,extractpid,`,
+WinGet,tmpr,List,ahk_exe cmd.exe ahk_class ConsoleWindowClass
+Loop %tmpr%
 {
-	WinWaitClose,% "ahk_pid " A_LoopField " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+	WinGet,tmpr,PID,% "ahk_id " tmpr%A_Index%
+	if (tmpr = "") ; unidentifiable PID extractor
+		maperrorshow .= "Cannot Identify PID of extractor UID: " tmpr%A_Index% "`n`n"
+	else if InStr(extractPID,tmpr,True)
+	{
+		GuiControl,Text,searchnofound,% "Waiting for all Cosmetic Extraction to Finish. UID=" tmpr%A_Index% " PID=" tmpr
+		WinWaitClose,% "ahk_id " tmpr%A_Index% " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+	}
+	VarSetCapacity(tmpr%A_Index%,0) ; free memory
 }
-VarSetCapacity(extractpid,0)
+VarSetCapacity(extractPID,0)
 ;
 ; tell the skinextract thread to terminate itself after finishing all its queue
-IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram
+IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Status,terminateprogram
 tempo:=A_DetectHiddenWindows 
-WinWaitClose,ahk_pid %skinextract%
+tmpr3:=tmpr4:=""
+while WinExist("ahk_pid " skinextract)
+{
+	IniRead,tmpr1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,materialscount,0
+	IniRead,tmpr2,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Processing.ExtractList,Materials,materialscount,0
+	tmpr1 += tmpr2 + 1
+	IniRead,tmpr2,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Processing.ExtractList,Materials,CurrentIndex,1
+	tmpr1 -= tmpr2
+	IniRead,tmpr2,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Processing.ExtractList,Materials,CurrentMaterial,None
+	if (tmpr1!=tmpr3) and (tmpr2!=tmpr4)
+	{
+		GuiControl,Text,searchnofound,Material Extractor PID: %skinextract% , Remaining Targets: %tmpr1% , Target: %tmpr2%
+		tmpr3:=tmpr1
+		tmpr4:=tmpr2
+	}
+	sleep 1000
+}
 DetectHiddenWindows,%tempo%
 ;
+
+gosub,externalfiles
 
 GuiControl,Text,searchnofound,Shutnik Method: Executing Batch File... It will take more time if there are many cosmetic items injected!
 loop
@@ -2376,7 +2401,7 @@ visualcontent:=itemname:=visualsdetector(filecontent) ; detects the Visual Secti
 StringLen,modeltmplength,itemname
 modelcount:=rptpermit:=0
 StrReplace(itemname,".vmdl""",".vmdl""",modelcount)
-
+	; extra model files
 loop,%modelcount%
 {
 	StringGetPos, ipos1, itemname,.vmdl,L%A_Index%
@@ -2513,6 +2538,9 @@ loop,%modelcount%
 		}
 	}
 }
+	;
+	;extract particle effects
+
 modelcount=0
 tmp=`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%"asset"
 tmp:=StrReplace(itemname,tmp,tmp,modelcount)
@@ -2583,6 +2611,7 @@ loop,%modelcount%
 		}
 	}
 }
+	;
 return
 
 checkskinmaterial:
@@ -2594,28 +2623,42 @@ if (skinindex=="Undefined") and (stylechecker>0)
 	pos:=0
 	while (pos:=InStr(visualcontent,"`r`n					""type""		""model_skin""",False,pos+1))
 	{
+			; asset_modifier detector
 		pos1:=InStr(visualcontent,"{",True,pos-strlen(visualcontent))
 		pos2:=InStr(visualcontent,"}",True,pos)
 		valvefile:=SubStr(visualcontent,pos1,pos2-pos1)
-		pos1:=searchstringdetector(valvefile,"`r`n					""style""")
-		if (pos1=stylestring)
+			;
+		if InStr(valvefile,"`r`n					""style""		""" stylechecker """")
 		{
-			skinindex:=searchstringdetector(valvefile,"`r`n					""skin""")
+			skinindex:=stylechecker
 			break
+		}
+		else
+		{
+			pos1:=searchstringdetector(valvefile,"`r`n					""style""")
+			if (pos1=stylestring) ; no style parameter
+			{
+				skinindex:=searchstringdetector(valvefile,"`r`n					""skin""")
+				break
+			}
 		}
 	}
 }
 if (skinindex!="Undefined") and (skinindex!="") and (skinindex>0)
 {
+		; this avoids incosistent skin index values inputted by valve
+	if (stylechecker>0)
+		skinindex:=stylechecker ; equate it towards the current style, since the material indexing defined inside this file is from 0 to n-1
+		;
 	; the skinextract thread listen on this file, set its parameters
 	valvefile=%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\%defaultloc%\%defaultname%
-	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,materialscount,0
+	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,materialscount,0
 	materialscount++
-	if !FileExist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list")
-		FileAppend,,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list
-	IniWrite,%valvefile%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,valvefile%materialscount%
-	IniWrite,%skinindex%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,skinindex%materialscount%
-	IniWrite,%materialscount%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,materialscount
+	if !FileExist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList")
+		FileAppend,,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList
+	IniWrite,%valvefile%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,valvefile%materialscount%
+	IniWrite,%skinindex%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,skinindex%materialscount%
+	IniWrite,%materialscount%,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Materials,materialscount
 }
 ;
 return
@@ -2642,7 +2685,7 @@ loop ; retry running the cmd until it succeed
 		
 		if (cmdmaxinstances>1)
 		{
-			cmdcountoverflow:=InStr(extractpid,",",,,cmdmaxinstances-1) ; detects when number of registered cmd pid's in the pid list is above the maximum number of simutaneous running cmd's
+			cmdcountoverflow:=InStr(extractPID,",",,,cmdmaxinstances-1) ; detects when number of registered cmd pid's in the pid list is above the maximum number of simutaneous running cmd's
 			if cmdcountoverflow
 			{
 				;DetectHiddenWindows,On
@@ -2660,32 +2703,36 @@ loop ; retry running the cmd until it succeed
 ;after successfull run, save pid to extract process list
 if !lowprocessor
 {
-	;if !IsObject(extractpid)
-	;	extractpid:=[]
-	;extractpid.Push(tmpr)
-	if extractpid=
-		extractpid:=tmpr
-	else extractpid.="," tmpr
+	if (tmpr != "") ; not blank... Blank pid sometimes happens if a system verb, document, or shortcut is launched rather than a direct executable file
+	{
+		;if !IsObject(extractPID)
+		;	extractPID:=[]
+		;extractPID.Push(tmpr)
+		if extractPID=
+			extractPID:= tmpr
+		else extractPID.="," tmpr
+	}
+	else maperrorshow .= "Cannot Identify PID of extractor`nFrom: " extractfile "`nTo: " defaultloc "\" defaultname "`n`n"
 	
 	if cmdmaxinstances is not Number
 		GuiControlGet,cmdmaxinstances,,cmdmaxinstances
 	
 	if cmdcountoverflow and (cmdmaxinstances!=0) ; number of commas is cmdmax-1 ; check number of running threads exceeds the cmdmaxinstances ; having "0" value means unlimited number of threads
 	{
-		loop,parse,extractpid,`,
+		loop,parse,extractPID,`,
 		{
 			;WinWait,ahk_pid %A_LoopField% ahk_exe cmd.exe ahk_class ConsoleWindowClass,,0
 			if !WinExist("ahk_pid " A_LoopField " ahk_exe cmd.exe ahk_class ConsoleWindowClass") ;wait indefinitely until it closes
-				extractpid:=RegExReplace(extractpid,"(\b" A_LoopField "\b,)|(,\b" A_LoopField "\b$)|(^\b" A_LoopField "\b$)|(\b" A_LoopField "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
+				extractPID:=RegExReplace(extractPID,"(\b" A_LoopField "\b,)|(,\b" A_LoopField "\b$)|(^\b" A_LoopField "\b$)|(\b" A_LoopField "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
 		}
-		if InStr(extractpid,",",,,cmdmaxinstances-1) ; rechecing cmdoverflow ; number of commas is cmdmax-1 ; check number of running threads still exceeds the cmdmaxinstances
+		if InStr(extractPID,",",,,cmdmaxinstances-1) ; rechecing cmdoverflow ; number of commas is cmdmax-1 ; check number of running threads still exceeds the cmdmaxinstances
 		{
-			if instr(extractpid,",",1)
-				tmpr:=substr(extractpid,1,instr(extractpid,",",1)-1) ; get the first pid at the extractpid list
-			else tmpr:=extractpid
+			if instr(extractPID,",",1)
+				tmpr:=substr(extractPID,1,instr(extractPID,",",1)-1) ; get the first pid at the extractPID list
+			else tmpr:=extractPID
 			WinWaitClose,% "ahk_pid " tmpr " ahk_exe cmd.exe ahk_class ConsoleWindowClass",,60 ; wait for 60 seconds, this is better than waiting indefinitely ;wait indefinitely until it closes
-			;remove the first pid at extractpid list
-			extractpid:=RegExReplace(extractpid,"(\b" tmpr "\b,)|(,\b" tmpr "\b$)|(^\b" tmpr "\b$)|(\b" tmpr "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
+			;remove the first pid at extractPID list
+			extractPID:=RegExReplace(extractPID,"(\b" tmpr "\b,)|(,\b" tmpr "\b$)|(^\b" tmpr "\b$)|(\b" tmpr "\b)") ; regexreplaces "pid," or "pid" if it is found at the end of the string
 		}
 		;DetectHiddenWindows,Off
 	}
@@ -2820,7 +2867,7 @@ GoSub,default_settings
 FileSetAttrib,-R,%A_ScriptDir%\Settings.aldrin_dota2mod
 if usemiscon=1
 {
-	MsgBox, 36, Reload Required!, Checking Miscellaneous requires this tool to be reloaded in order to preload all miscellaneous resources`, any unsaved data/'s will be lost. Do you want to continue? (Press YES or NO)
+	MsgBox, 36, Reload Required!, Checking Miscellaneous requires this tool to be reloaded in order to Load all miscellaneous resources`, any unsaved data/'s will be lost. Do you want to continue? (Press YES or NO)
 	IfMsgBox Yes
 	{
 		IniWrite,%usemiscon%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,usemisc
@@ -2841,9 +2888,8 @@ else
 FileSetAttrib,+R,%A_ScriptDir%\Settings.aldrin_dota2mod
 return
 
-miscreload:
+miscreload: ; scans the items_game.txt for all possible global items
 Gui, MainGUI:+Disabled
-filestring:=GlobalArray["items_game.txt"]
 filelength:=StrLen(GlobalArray["items_game.txt"])
 sfinder=`r`n%A_Tab%%A_Tab%}`r`n%A_Tab%%A_Tab%" ;"
 GuiControl,+cBlue,searchnofound
@@ -2857,9 +2903,9 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 	if fastmisc=1
 	{
 		FileRead,filestring,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
-		if (substr(filestring,1,strlen(GlobalArray["items_game.txt"]))=GlobalArray["items_game.txt"])
+		if (substr(filestring,1,filelength)=GlobalArray["items_game.txt"]) ; if no new changes are made on the default items_game.txt
 		{
-			filestring:=StrReplace(filestring,GlobalArray["items_game.txt"])
+			filestring:=StrReplace(filestring,GlobalArray["items_game.txt"]) ; remove the items_game.txt at the reference file
 			
 			loop,parse,misclvparam,|
 			{
@@ -2867,7 +2913,7 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 				{
 					Gui, MainGUI:ListView,%A_LoopField%
 				}
-				GuiControl,Text,searchnofound,Preloading Contents of ListView: %A_LoopField%
+				GuiControl,Text,searchnofound,Loading Contents of ListView: %A_LoopField%
 				pos:=InStr(filestring,"`r`n~~~~~~~~~~" A_LoopField "~~~~~~~~~~`r`n")+strlen("`r`n~~~~~~~~~~" A_LoopField "~~~~~~~~~~`r`n")
 				pos1:=InStr(filestring,"`r`n~~~~~~~~~~" A_LoopField "~~~~~~~~~~`r`n",,,2)
 				FileData:=SubStr(filestring,pos,pos1-pos)
@@ -2888,7 +2934,7 @@ ifexist,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 	; FileAppend,%firstmessage%%compare1%%lastmessage%,%A_ScriptDir%\Library\Reference.aldrin_dota2mod
 }
 
-filestringcopy=%filestring%
+filestringcopy:=GlobalArray["items_game.txt"]
 
 ;speedtesting
 ;speedmessage=
@@ -2959,7 +3005,7 @@ Loop
 			;VarWrite("AnnouncerID" misccounter,hitemid)	;VarWrite(Key := "", Value := "")
 		;}
 		LV_Add(,hitemname,hitemslot,hitemrarity,hitemid)
-		GuiControl,Text,searchnofound,Preloading %hitemname%
+		GuiControl,Text,searchnofound,Loading %hitemname%
 	}
 	if ErrorLevel=1 ; hunt this errorlevel
 	{
@@ -3027,7 +3073,7 @@ Loop
 			;VarWrite("TauntUser" misccounter,hherouser)	;VarWrite(Key := "", Value := "")
 		;}
 		LV_Add(,hitemname,hitemrarity,hitemid,hherouser)
-		GuiControl,Text,searchnofound,Preloading %hitemname%
+		GuiControl,Text,searchnofound,Loading %hitemname%
 	}
 	if ErrorLevel=1 ; hunt this errorlevel
 	{
@@ -3105,7 +3151,7 @@ for intsaver, in param
 				;VarWrite(subject "ID" misccounter,hitemid)	;VarWrite(Key := "", Value := "")
 			;}
 			LV_Add(,hitemname,hitemrarity,hitemid)
-			GuiControl,Text,searchnofound,Preloading %subject% Effect: %hitemname%
+			GuiControl,Text,searchnofound,Loading %subject% Effect: %hitemname%
 		}
 		if (trimindex=loopsbeforetrim)
 			filestring:=SubStr(filestring,ipos)
@@ -3181,7 +3227,7 @@ for intsaver, in param
 				;VarWrite(subject "ID" misccounter,hitemid)	;VarWrite(Key := "", Value := "")
 			;}
 			LV_Add(,hitemname,hitemrarity,hitemid)
-			GuiControl,Text,searchnofound,Preloading %subject%: %hitemname%
+			GuiControl,Text,searchnofound,Loading %subject%: %hitemname%
 		}
 		if ErrorLevel=1 ; hunt this errorlevel
 		{
@@ -3263,7 +3309,7 @@ for intsaver, in param
 				;VarWrite(subject "ActivedStyle" misccounter,"0")	;VarWrite(Key := "", Value := "")
 			;}
 			LV_Add(,hitemname,hitemrarity,hitemid,stylescount,"0")
-			GuiControl,Text,searchnofound,Preloading %subject%: %hitemname%
+			GuiControl,Text,searchnofound,Loading %subject%: %hitemname%
 		}
 		if ErrorLevel=1 ; hunt this errorlevel
 		{
@@ -3799,19 +3845,23 @@ return
 hbuttonstyle:
 Gui, MainGUI:Default
 if A_DefaultListView<>itemview
-{
 	Gui, MainGUI:ListView, itemview
-}
 LV_GetText(stylescount,position,6)
 LV_GetText(countcheck,position,7)
 if stylescount>%countcheck%
-{
-	LV_Modify(position,"Select" "Col7",,,,,,,countcheck+1)
-}
-else
-{
-	LV_Modify(position,"Select" "Col7",,,,,,,"0")
-}
+	LV_Modify(position,"Select Col7",countcheck+1)
+else LV_Modify(position,"Select Col7","0")
+checkdetector() ; check any field that exist on the listview "itemview"
+return
+
+hbuttonTPEE:
+Gui, MainGUI:Default
+if A_DefaultListView<>itemview
+	Gui, MainGUI:ListView, itemview
+LV_GetText(tmpr,position,8)
+if (tmpr == "Yes")
+	LV_Modify(position,"Select Col8","No")
+else LV_Modify(position,"Select Col8","Yes")
 checkdetector() ; check any field that exist on the listview "itemview"
 return
 
@@ -3819,21 +3869,30 @@ movepak:
 tempo:=A_DetectHiddenWindows 
 DetectHiddenWindows,On
 ;finish all extractions first
-;for index,cPID in extractpid
+;for index,cPID in extractPID
 ;{
 ;	WinWaitClose,% "ahk_pid " cPID " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
 ;}
-loop,parse,extractpid,`,
+WinGet,tmpr,List,ahk_exe cmd.exe ahk_class ConsoleWindowClass
+Loop %tmpr%
 {
-	WinWaitClose,% "ahk_pid " A_LoopField " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+	WinGet,tmpr,PID,% "ahk_id " tmpr%A_Index%
+	if (tmpr = "") ; unidentifiable PID extractor
+		maperrorshow .= "Cannot Identify PID of extractor UID: " tmpr%A_Index% "`n`n"
+	else if InStr(extractPID,tmpr,True)
+	{
+		GuiControl,Text,searchnofound,% "Waiting for all Cosmetic Extraction to Finish. UID=" tmpr%A_Index% " PID=" tmpr
+		WinWaitClose,% "ahk_id " tmpr%A_Index% " ahk_exe cmd.exe ahk_class ConsoleWindowClass" ;wait indefinitely until it closes
+	}
+	VarSetCapacity(tmpr%A_Index%,0) ; free memory
 }
-VarSetCapacity(extractpid,0)
+VarSetCapacity(extractPID,0)
 ;
 
 ;command the thread of skinextract to terminate itself after finishing all its queue operations
-if !fileexist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list")
-	FileAppend,,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list
-IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram
+if !fileexist(A_Temp "\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList")
+	FileAppend,,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList
+IniWrite,1,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList,Status,terminateprogram
 
 WinWaitClose, ahk_pid %skinextract% ; wait for the skinextract thread to close
 ;
@@ -3902,7 +3961,7 @@ reloadmisc(invfile) {
 		loop ; everlasting loop until encountering redundancy(errorlevel=1)
 		{
 			miscid:=VarRead("miscid" A_Index)
-			GuiControl,Text,searchnofound, Preloading Miscellaneous ID: %miscid%
+			GuiControl,Text,searchnofound, Loading Miscellaneous ID: %miscid%
 			miscidname:=VarRead("miscidname" A_Index)
 			misclv:=VarRead("misclv" A_Index)
 			;IniRead,miscid%A_Index%,%invfile%,Miscellaneous,miscid%A_Index%
@@ -3936,12 +3995,12 @@ reloadmisc(invfile) {
 						tmpbar:=newiddetector(miscidname) ;tmpbar:=newiddetector(miscidname,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 						if tmpbar<>
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
 							miscid=%tmpbar%
 						}
 						else
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 						}
 					}
 					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
@@ -4017,7 +4076,7 @@ reloadmisc(invfile) {
 			miscidname:=VarRead("miscidname" A_Index)
 			;IniRead,miscid,%invfile%,Miscellaneous,miscid%A_Index%
 			;IniRead,miscidname,%invfile%,Miscellaneous,miscidname%A_Index%
-			GuiControl,Text,searchnofound,% "Preloading Miscellaneous ID: " miscid
+			GuiControl,Text,searchnofound,% "Loading Miscellaneous ID: " miscid
 			misclv:=VarRead("misclv" A_Index)
 			;IniRead,misclv,%invfile%,Miscellaneous,misclv%A_Index%
 			if A_DefaultListView<>% misclv
@@ -4049,14 +4108,14 @@ reloadmisc(invfile) {
 						tmpbar:=newiddetector(miscidname) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 						if tmpbar<>
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
 							miscid=%tmpbar%
 							VarWrite("miscid" intsaver,tmpbar)	;VarWrite(Key := "", Value := "")
 							;IniWrite,%tmpbar%,%invfile%,Miscellaneous,miscid%intsaver%
 						}
 						else
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 							VarWrite("miscidname" intsaver,tmp)	;VarWrite(Key := "", Value := "")
 							;IniWrite,%tmp%,%invfile%,Miscellaneous,miscidname%intsaver%
 						}
@@ -4129,7 +4188,7 @@ reloadmisc(invfile) {
 			intsaver:=A_Index
 			IniRead,miscid,%invfile%,Miscellaneous,miscid%intsaver%
 			IniRead,miscidname,%invfile%,Miscellaneous,miscidname%intsaver%
-			GuiControl,Text,searchnofound,% "Preloading Miscellaneous ID: " miscid
+			GuiControl,Text,searchnofound,% "Loading Miscellaneous ID: " miscid
 			IniRead,misclv,%invfile%,Miscellaneous,misclv%intsaver%
 			if A_DefaultListView<>% misclv
 			{
@@ -4158,13 +4217,13 @@ reloadmisc(invfile) {
 						tmpbar:=newiddetector(miscidname) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 						if tmpbar<>
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nName: " miscidname "`nRegistered ID: "  miscid "`nProblem: Name does not pair with the Registered ID!`nSolution: changing the Registered ID into " tmpbar "`nStatus: Solved! No need for Further User Action`n`n"
 							miscid=%tmpbar%
 							IniWrite,%tmpbar%,%invfile%,Miscellaneous,miscid%intsaver%
 						}
 						else
 						{
-							maperrorshow=% maperrorshow "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
+							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 							IniWrite,%tmp%,%invfile%,Miscellaneous,miscidname%intsaver%
 						}
 					}
@@ -4209,7 +4268,7 @@ reloadmisc(invfile) {
 	Gui,MainGUI:Submit,NoHide
 	if errorshow<>
 	{
-		msgbox,16,ERROR DETECTED!,Preloading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
+		msgbox,16,ERROR DETECTED!,Loading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
 	}
 	
 	Gui, MainGUI:-Disabled 
@@ -4377,17 +4436,19 @@ if invfile<>
 		Loop % LV_GetCount()
 		{
 			LV_GetText(tmp,A_Index,4)
-			VarWrite("ItemID" A_Index,tmp)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
+			VarWrite("ItemID" A_Index,tmp)	;VarWrite(Key := "", Value := "")
 			;IniWrite, %tmp%, %invfile%, Edits, ItemID%A_Index%
 			LV_GetText(tmp,A_Index,7)
-			VarWrite("ItemStyle" A_Index,tmp)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
+			VarWrite("ItemStyle" A_Index,tmp)	;VarWrite(Key := "", Value := "")
 			;IniWrite, %tmp%, %invfile%, Edits, ItemStyle%A_Index%
 			LV_GetText(tmp,A_Index,1)
-			VarWrite("ItemIDName" A_Index,tmp)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
+			VarWrite("ItemIDName" A_Index,tmp)	;VarWrite(Key := "", Value := "")
 			;IniWrite, %tmp%, %invfile%, Edits, ItemIDName%A_Index%
 			LV_GetText(tmp,A_Index,5)
-			VarWrite("ItemHeroUser" A_Index,tmp)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
+			VarWrite("ItemHeroUser" A_Index,tmp)	;VarWrite(Key := "", Value := "")
 			;IniWrite, %tmp%, %invfile%, Edits, ItemHeroUser%A_Index%
+			LV_GetText(tmp,A_Index,8)
+			VarWrite("ItemEPE" A_Index,tmp)	;VarWrite(Key := "", Value := "")
 			progress+=adder
 			GuiControl,MainGUI:, MyProgress,%progress%
 		}
@@ -4499,17 +4560,17 @@ repmocount:=repparcount:=0
 ifexist,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 {
 	FileSetAttrib,-R,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
-	FileSetAttrib,-R,%A_ScriptDir%\ReportLog.aldrin_report
+	FileSetAttrib,-R,%A_ScriptDir%\Logs\ReportLog.aldrin_report
 	FileDelete,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
-	FileDelete,%A_ScriptDir%\ReportLog.aldrin_report
+	FileDelete,%A_ScriptDir%\Logs\ReportLog.aldrin_report
 }
-fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
+fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\Logs\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 VarSetCapacity(commanddir,0),VarSetCapacity(commandextract,0),VarSetCapacity(commandrename,0),VarSetCapacity(rptlimit,0)
 
+FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList
 gosub,materialsextractor ; create a separate thread that listens to incoming material files required to extract
 skinextract:=materialpid.ProcessID
 VarSetCapacity(materialpid,0)
-FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list
 
 ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 {
@@ -4604,18 +4665,19 @@ Loop % LV_GetCount()
 	contentport=%filecontent%
 	gosub,extractmodel
 	porthero=%herousercheck%
+	visualcontent:=visualsdetector(filecontent) ; this will be used when extracting material files
 	if (stylechecker>0)
 		filecontent:=stylechanger(stylechecker,filecontent) ;stylechanger will change the style of all particle effects and even the model
 	else StringReplace,filecontent,filecontent,`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%"style"%A_Tab%%A_Tab%"0",,1
 	stringcontent1=%filecontent%
 	if stringcontent1=
 	{
-		maperrorshow=%maperrorshow%Cannot Find ID number "string1"!(Resource ID)`n
+		maperrorshow .= "Cannot Find ID number " string1 "!(Resource ID)`n"
 		skip=1
 	}
 	else if InStr(stringcontent1,"prefab")=0
 	{
-		maperrorshow=%maperrorshow%ID number "string1" was found but sadly it is not an "ITEM"!(Resource ID)`n
+		maperrorshow.= "ID number " string1 " was found but sadly it is not an ITEM!(Resource ID)`n'"
 		skip=1
 	}
 	
@@ -4649,12 +4711,12 @@ Loop % LV_GetCount()
 				string2=%tmpbar%
 				if filecontent=
 				{
-					maperrorshow=%maperrorshow%Cannot Find ID number "string2"!(Injected ID)`n
+					maperrorshow .= "Cannot Find ID number " string2 "!(Injected ID)`n"
 					skip=1
 				}
 				else if InStr(filecontent,"prefab")=0
 				{
-					maperrorshow=%maperrorshow%ID number "string2" was found but sadly it is not an "ITEM"!(Injected ID)`n
+					maperrorshow .= "ID number " string2 " was found but sadly it is not an ITEM!(Injected ID)`n"
 					skip=1
 				}
 				if skip=1
@@ -4673,9 +4735,8 @@ Loop % LV_GetCount()
 				Gui,MainGUI:Show,NoActivate,% floor(1000/(A_TickCount-IPS)) " Items per Second"
 				IPS:=A_TickCount
 				;
-				
-				tmp=%A_Tab%%A_Tab%%A_Tab%"model_player ;"
-				tmp:=StrReplace(filecontent,tmp,tmp,modelplayercount) ; for default item
+					; material files extractor
+				StrReplace(filecontent,"			""model_player",,modelplayercount) ; for default item
 				loop %modelplayercount%
 				{
 					defaultloc:=modelpathdetector(filecontent,A_Index-1) ;detect the item root directory and change all slash into backslash
@@ -4685,7 +4746,6 @@ Loop % LV_GetCount()
 					if (defaultloc<>"") and (defaultname<>"")
 					{
 						gosub,extractfileruncmd ; extract files via cmd
-						visualcontent:=visualsdetector(stringcontent1)
 						stylestring:="Undefined"
 						gosub,checkskinmaterial ; check if needed to change material files
 						; measures the number of items injected per second
@@ -4694,6 +4754,7 @@ Loop % LV_GetCount()
 						;
 					}
 				}
+					;
 				Break
 			}
 		}
@@ -4739,10 +4800,12 @@ tmpr:=Format_Msec(A_TickCount-StartTimer)
 IniWrite,%tmpr%,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,Summary,TotalOperationTime
 IniWrite,%cmdmaxinstances%,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,Settings,ThreadsCount
 
-FileSetAttrib,-R,%A_ScriptDir%\ReportLog.aldrin_report ; unprotect
-FileMove,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,%A_ScriptDir%,1
-fileread,tmp1,%A_ScriptDir%\ReportLog.aldrin_report
-FileSetAttrib,+R,%A_ScriptDir%\ReportLog.aldrin_report ; protect the file from noobs
+FileSetAttrib,-R,%A_ScriptDir%\Logs\ReportLog.aldrin_report ; unprotect
+if !FileExist(A_ScriptDir "\Logs\")
+	FileCreateDir,%A_ScriptDir%\Logs
+FileMove,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,%A_ScriptDir%\Logs,1
+fileread,tmp1,%A_ScriptDir%\Logs\ReportLog.aldrin_report
+FileSetAttrib,+R,%A_ScriptDir%\Logs\ReportLog.aldrin_report ; protect the file from noobs
 
 GuiControl,Text,reportshow,%tmp1%
 if errorshow<>
@@ -4790,7 +4853,7 @@ if A_GuiEvent = RightClick
 	{
 		countcheck=0
 	}
-	LV_Modify(A_EventInfo,"Select" "Col7",,,,,,,countcheck)
+	LV_Modify(A_EventInfo,"Select Col7",countcheck)
 	if A_DefaultListView<>itemview
 	{
 		Gui, MainGUI:ListView, itemview
@@ -4812,7 +4875,7 @@ if A_GuiEvent = RightClick
 					{
 						if del15=%del5%
 						{
-							LV_Modify(A_Index,"Select" "Col7",,,,,,,countcheck)
+							LV_Modify(A_Index,"Select Col7",countcheck)
 						}
 					}
 				}
@@ -4820,14 +4883,14 @@ if A_GuiEvent = RightClick
 		}
 	}
 }
-if InStr(ErrorLevel, "C", true)
+if InStr(ErrorLevel, "C", true) ; I checked the Row
 {
 	Gui, MainGUI:Default
 	if A_DefaultListView<>showitems
 		Gui, MainGUI:ListView, showitems
-	LV_GetText(itemat1,A_EventInfo,2)
+	LV_GetText(itemat1,A_EventInfo,2) ; get the item slot
 	Loop % LV_GetCount()
-	{
+	{ ; check for duplicate item slots that are checked, if there is then uncheck the other fields
 		if A_DefaultListView<>showitems
 			Gui, MainGUI:ListView, showitems
 		if A_Index<>%A_EventInfo%
@@ -4855,10 +4918,11 @@ if InStr(ErrorLevel, "C", true)
 	if A_DefaultListView<>itemview
 		Gui, MainGUI:ListView, itemview
 	LV_Add(,itemat*)
+	LV_Modify(LV_GetCount(),"Col8","Yes")
 	gosub,recolorlistview
 	gosub,lvautosize
 }
-else if InStr(ErrorLevel, "c", true)
+else if InStr(ErrorLevel, "c", true) ; I unchecked the row
 {
 	delsaver=%A_EventInfo%
 	GoSub,autoshowitemsdelete
@@ -4946,13 +5010,13 @@ If SubStr(invfile,-16,17)=.aldrin_dota2hidb
 	GuiControlGet,errorshow,,errorshow
 	if errorshow<>
 	{
-		msgbox,16,ERROR DETECTED!,Preloading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
+		msgbox,16,ERROR DETECTED!,Loading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
 	}
 	
 	GuiControl,MainGUI:Text,searchnofound,%defaultshoutout%
 	GuiControl,MainGUI:Show,searchnofound
 	Gui, MainGUI:-Disabled
-	Gui,MainGUI:Show,NoActivate,% (A_TickCount-timeconsumed)/1000 "s Preloading Time"
+	Gui,MainGUI:Show,NoActivate,% (A_TickCount-timeconsumed)/1000 "s Loading Time"
 	SetTimer,restorguititle,-5000,-1
 	
 	
@@ -4968,7 +5032,7 @@ restorguititle: ;;; Restore the Title of the GUI into the default one
 Gui,MainGUI:Show,NA,AJOM's Dota 2 MOD Master
 return
 
-;;; hdatareload function will preload the database of handy injection section listview
+;;; hdatareload function will Load the database of handy injection section listview
 hdatareload(hdatadirview) {
 	Gui, MainGUI:Default
 	Gui, MainGUI:+Disabled 
@@ -4987,14 +5051,14 @@ hdatareload(hdatadirview) {
 		
 		;;; detects if the listview header was corrupted
 		headercorrupted:=0
-		param=Item Name|Item Slot|Rarity|Item ID|Used by|Styles Count|Active Style
+		param=Item Name|Item Slot|Rarity|Item ID|Used by|Styles Count|Active Style|Extract Particle Effects?
 		loop,parse,param,|
 		{
 			LV_GetText(tmp,0,A_Index)
 			if tmp<>%A_LoopField%
 			{
 				LV_ModifyCol(A_Index,"AutoHdr",A_LoopField)
-				maperrorshow=% maperrorshow "Section: Handy Injection`nSub-Section: Used Items Database`nControl: Listview`nColumn: " A_Index "`nRegistered Header Name: " tmp "`nProblem: DATABASE MIGHT BE CORRUPTED!!! The Database's Column " A_Index " Header Name does not match with the ListView Header Name. The Results on the Listview might show SCRAMBLED Informations on each rows that does not match on their specific Columns.`nStatus: UNKNOWN! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+				maperrorshow .= "Section: Handy Injection`nSub-Section: Used Items Database`nControl: Listview`nColumn: " A_Index "`nRegistered Header Name: " tmp "`nProblem: DATABASE MIGHT BE CORRUPTED!!! The Database's Column " A_Index " Header Name does not match with the ListView Header Name. The Results on the Listview might show SCRAMBLED Informations on each rows that does not match on their specific Columns.`nStatus: UNKNOWN! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 				headercorrupted=1 ; tell the system that the listview header was corrupted
 			}
 		}
@@ -5058,14 +5122,14 @@ hdatareload(hdatadirview) {
 				;IniRead,ItemHeroUser,%hdatadirview%,Edits,ItemHeroUser%A_Index%
 				if tmpbar<>
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 					ItemID=%tmpbar%
 					VarWrite("ItemID" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 					;IniWrite,%tmpbar%,%hdatadirview%,Edits,ItemID%A_Index%
 				}
 				else
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 					continue
 				}
 			}
@@ -5078,14 +5142,14 @@ hdatareload(hdatadirview) {
 				;IniRead,ItemHeroUser,%hdatadirview%,Edits,ItemHeroUser%A_Index%
 				if tmpbar<>
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 					ItemID=%tmpbar%
 					VarWrite("ItemID" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 					;IniWrite,%tmpbar%,%hdatadirview%,Edits,ItemID%A_Index%
 				}
 				else
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
 					VarWrite("ItemIDName" A_Index,itemname)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 					;IniWrite,%itemname%,%hdatadirview%,Edits,ItemIDName%A_Index%
 				}
@@ -5093,7 +5157,10 @@ hdatareload(hdatadirview) {
 			tmpname1:=searchstringdetector(filecontent,"""name"""),tmpname2:=searchstringdetector(filecontent,"""item_slot"""),tmpname3:=searchstringdetector(filecontent,"""item_rarity"""),tmpname4:=searchstringdetector(filecontent,"""used_by_heroes""")
 			StringTrimLeft, tmpname4, tmpname4, 14
 			stylescount:=stylecountdetector(filecontent) ;counts the number of allowed styles of an item
-			LV_Add(, tmpname1, tmpname2,tmpname3,ItemID,tmpname4,stylescount,ItemStyle)
+			ItemEPE:=VarRead("ItemEPE" A_Index)
+			if (ItemEPE!="Yes") and (ItemEPE!="No")
+				ItemEPE:="Yes"
+			LV_Add(, tmpname1, tmpname2,tmpname3,ItemID,tmpname4,stylescount,ItemStyle,ItemEPE)
 			;LV_ModifyCol(5,"Sort")
 			progress+=adder
 			GuiControl,MainGUI:, MyProgress,%progress%
@@ -5143,13 +5210,13 @@ hdatareload(hdatadirview) {
 				IniRead,ItemHeroUser,%hdatadirview%,Edits,ItemHeroUser%A_Index%
 				if tmpbar<>
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 					ItemID=%tmpbar%
 					IniWrite,%tmpbar%,%hdatadirview%,Edits,ItemID%A_Index%
 				}
 				else
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 					continue
 				}
 			}
@@ -5161,20 +5228,23 @@ hdatareload(hdatadirview) {
 				IniRead,ItemHeroUser,%hdatadirview%,Edits,ItemHeroUser%A_Index%
 				if tmpbar<>
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 					ItemID=%tmpbar%
 					IniWrite,%tmpbar%,%hdatadirview%,Edits,ItemID%A_Index%
 				}
 				else
 				{
-					maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
+					maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
 					IniWrite,%itemname%,%hdatadirview%,Edits,ItemIDName%A_Index%
 				}
 			}
 			tmpname1:=searchstringdetector(filecontent,"""name"""),tmpname2:=searchstringdetector(filecontent,"""item_slot"""),tmpname3:=searchstringdetector(filecontent,"""item_rarity"""),tmpname4:=searchstringdetector(filecontent,"""used_by_heroes""")
 			StringTrimLeft, tmpname4, tmpname4, 14
 			stylescount:=stylecountdetector(filecontent) ;counts the number of allowed styles of an item
-			LV_Add(, tmpname1, tmpname2,tmpname3,ItemID,tmpname4,stylescount,ItemStyle)
+			IniRead,ItemEPE,%hdatadirview%,Edits,ItemEPE%A_Index%
+			if (ItemEPE!="Yes") and (ItemEPE!="No")
+				ItemEPE:="Yes"
+			LV_Add(, tmpname1, tmpname2,tmpname3,ItemID,tmpname4,stylescount,ItemStyle,ItemEPE)
 			;LV_ModifyCol(5,"Sort")
 			progress+=adder
 			GuiControl,MainGUI:, MyProgress,%progress%
@@ -5228,12 +5298,12 @@ loop % LV_GetCount()
 		tmpbar:=newiddetector(DataArray[ItemIDName%A_Index%]) ;tmpbar:=newiddetector(DataArray[ItemIDName%A_Index%],filestring) ; tmpstring:=item name , filestring:=items_game.txt
 		if tmpbar<>
 		{
-			maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+			maperrorshow .= "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 			NewItemID=%tmpbar%
 		}
 		else
 		{
-			maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+			maperrorshow .= "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 			continue
 		}
 	}
@@ -5243,12 +5313,12 @@ loop % LV_GetCount()
 		tmpbar:=newiddetector(DataArray[ItemIDName%A_Index%]) ;tmpbar:=newiddetector(DataArray[ItemIDName%A_Index%],filestring) ; tmpstring:=item name , filestring:=items_game.txt
 		if tmpbar<>
 		{
-			maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+			maperrorshow .= "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 			NewItemID=%tmpbar%
 		}
 		else
 		{
-			maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
+			maperrorshow .= "Section: Handy Injection`nHero: " DataArray[ItemHeroUser%A_Index%] "`nRegistered Item Name: " DataArray[ItemIDName%A_Index%] "`nRegistered ID: " DataArray[ItemID%A_Index%] "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
 		}
 	}
 	if NewItemID= ; there is no problem on the cosmetic item
@@ -5301,7 +5371,7 @@ VerifyListviewIntegrity()
 	filestring:=GlobalArray["items_game.txt"]
 	Loop % LV_GetCount()
 	{
-		LV_GetText(ItemIDName,A_Index,1),LV_GetText(ItemSlot,A_Index,2),LV_GetText(ItemRarity,A_Index,3),LV_GetText(ItemID,A_Index,4),LV_GetText(ItemHeroUser,A_Index,5),LV_GetText(ItemCountStyle,A_Index,6),LV_GetText(ItemStyle,A_Index,7)
+		LV_GetText(ItemIDName,A_Index,1),LV_GetText(ItemSlot,A_Index,2),LV_GetText(ItemRarity,A_Index,3),LV_GetText(ItemID,A_Index,4),LV_GetText(ItemHeroUser,A_Index,5),LV_GetText(ItemCountStyle,A_Index,6),LV_GetText(ItemStyle,A_Index,7),LV_GetText(ItemEPE,A_Index,8)
 		NewItemID= ; start the detection for new item ID as blank, so that if later it was changed, the switch detection that the ID was changed will be true
 		filecontent:=itemdetector(ItemID) ;filecontent:=itemdetector(ItemID,filestring)
 		if filecontent=
@@ -5309,12 +5379,12 @@ VerifyListviewIntegrity()
 			tmpbar:=newiddetector(ItemIDName) ;tmpbar:=newiddetector(ItemIDName,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+				maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Registered ID does not exist! But the Registered Name was found.`nSolution: Analyzing the Registered Name information at items_game.txt, FOUND ID " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 				NewItemID=%tmpbar%
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
+				maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered ID: " ItemID "`nRegistered Item Name: " ItemIDName "`nCurrent Style: " ItemStyle "`nProblem: Registered ID nor the Registered Name for the Hero does not Exist! It might not be a valid item that has prefab and a Hero User`nStatus: UNSOLVED! DOTA2 MOD Master did not include this cosmetic item on the list.`nSolution: At ""Hero Items Selection"" Subsection, track down the cosmetic item and recheck that information.`n`n"
 				continue
 			}
 		}
@@ -5324,12 +5394,12 @@ VerifyListviewIntegrity()
 			tmpbar:=newiddetector(ItemIDName) ;tmpbar:=newiddetector(ItemIDName,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
+				maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nCurrent Style: " ItemStyle "`nProblem: Hero Item Name Of the Registered ID from items_game.txt does not pair with the Database's Registered Item Name of the Hero`nSolution: Using the Hero User and the Item Name, Identify the item ID of this item. Found " tmpbar ".`nStatus: Solved! DOTA2 MOD Master Changed the Registered ID into " tmpbar ", No need for Further User Action.`n`n"
 				NewItemID=%tmpbar%
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
+				maperrorshow .= "Section: Handy Injection`nHero: " ItemHeroUser "`nRegistered Item Name: " ItemIDName "`nRegistered ID: " ItemID "`nProblem: Registered ID for the Hero has a different cosmetic name at items_game.txt, it was does not match the Database's Registered Item Name`nSolution: Changing the Registered Name into " itemname ".`nStatus: Solved! No need for Further User Action`n`n"
 			}
 		}
 		if NewItemID= ; there is no problem on the cosmetic item
@@ -5339,9 +5409,9 @@ VerifyListviewIntegrity()
 		tmpname1:=searchstringdetector(filecontent,"""name"""),tmpname2:=searchstringdetector(filecontent,"""item_slot"""),tmpname3:=searchstringdetector(filecontent,"""item_rarity"""),tmpname4:=searchstringdetector(filecontent,"""used_by_heroes""") ; define its field which are informations for the user for the listview
 		StringTrimLeft, tmpname4, tmpname4, 14 ; remove "npc_dota_hero_"(14 characters on the left side)
 		stylescount:=stylecountdetector(filecontent) ;counts the number of allowed styles of an item
-		if (ItemIDName<>tmpname1) or (ItemSlot<>tmpname2) or (ItemRarity<>tmpname3) or (ItemID<>NewItemID) or (tmpname4<>ItemHeroUser) or (stylescount<>ItemCountStyle) ; detects when there was an error on the any informations on the listview
+		if (ItemIDName<>tmpname1) or (ItemSlot<>tmpname2) or (ItemRarity<>tmpname3) or (ItemID<>NewItemID) or (tmpname4<>ItemHeroUser) or (stylescount<>ItemCountStyle) or ((ItemEPE != "Yes") and (ItemEPE != "No")) ; detects when there was an error on the any informations on the listview
 		{
-			LV_Modify(A_Index,, tmpname1, tmpname2,tmpname3,NewItemID,tmpname4,stylescount,ItemStyle) ; update informations on our listview
+			LV_Modify(A_Index,, tmpname1, tmpname2,tmpname3,NewItemID,tmpname4,stylescount,ItemStyle,((ItemEPE!="Yes")&&(ItemEPE!="No"))?"Yes":ItemEPE) ; update informations on our listview
 		}
 		progress+=adder
 		GuiControl,MainGUI:, MyProgress,%progress%
@@ -5507,7 +5577,7 @@ ifexist,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 	FileSetAttrib,-R,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 	FileDelete,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 }
-fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
+fileappend,**This Report can be sent to the Creator of the Injector that can be useful for investigation about your current Injection**`r`nReportLog Location Path:`r`n%A_ScriptDir%\Logs\ReportLog.aldrin_report,%A_ScriptDir%\Plugins\ReportLog.aldrin_report
 VarSetCapacity(commanddir,0),VarSetCapacity(commandextract,0),VarSetCapacity(commandrename,0),VarSetCapacity(rptlimit,0)
 ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\
 {
@@ -5686,10 +5756,12 @@ tmpr:=Format_Msec(A_TickCount-StartTimer)
 IniWrite,%tmpr%,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,Summary,TotalOperationTime
 IniWrite,%cmdmaxinstances%,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,Settings,ThreadsCount
 
-FileSetAttrib,-R,%A_ScriptDir%\ReportLog.aldrin_report ; unprotect
-FileMove,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,%A_ScriptDir%,1
-fileread,tmp1,%A_ScriptDir%\ReportLog.aldrin_report
-FileSetAttrib,+R,%A_ScriptDir%\ReportLog.aldrin_report ; protect the setting file from noobs
+FileSetAttrib,-R,%A_ScriptDir%\Logs\ReportLog.aldrin_report ; unprotect
+if !FileExist(A_ScriptDir "\Logs\")
+	FileCreateDir,%A_ScriptDir%\Logs
+FileMove,%A_ScriptDir%\Plugins\ReportLog.aldrin_report,%A_ScriptDir%\Logs,1
+fileread,tmp1,%A_ScriptDir%\Logs\ReportLog.aldrin_report
+FileSetAttrib,+R,%A_ScriptDir%\Logs\ReportLog.aldrin_report ; protect the setting file from noobs
 
 GuiControl,Text,reportshow,%tmp1%
 if errorshow<>
@@ -5948,14 +6020,14 @@ if VarRead("@DataBaseVersion!")=1.5
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: The ID Injected does not exist! on items_game.txt, but the Registered Item Name was Found/Existed.`nSolution: analyzing the contents of the Item Name found at items_game.txt, FOUND ID " tmpbar "`nStatus: Solved! DOTA2 MOD Master changed the ID Injected into " tmpbar ", No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: The ID Injected does not exist! on items_game.txt, but the Registered Item Name was Found/Existed.`nSolution: analyzing the contents of the Item Name found at items_game.txt, FOUND ID " tmpbar "`nStatus: Solved! DOTA2 MOD Master changed the ID Injected into " tmpbar ", No need for Further User Action.`n`n"
 				IDInjected=%tmpbar%
 				VarWrite("IDInjected" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 				;IniWrite,%tmpbar%,%datadirview%,Edits,IDInjected%A_Index%
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nInjected ID: "IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nActived Style: " ActiveStyle "`nChecked: " ResourceIDEnabled "`nProblem: ID Injected nor the Injected Registered Item Name does not Exist!`nStatus: UNSOLVED! The General Information about the ID Injected is corrupted, and will not be included on the listview.`nSolution: Use all the information above, track down and configure the injected ID properly.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nInjected ID: "IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nActived Style: " ActiveStyle "`nChecked: " ResourceIDEnabled "`nProblem: ID Injected nor the Injected Registered Item Name does not Exist!`nStatus: UNSOLVED! The General Information about the ID Injected is corrupted, and will not be included on the listview.`nSolution: Use all the information above, track down and configure the injected ID properly.`n`n"
 				continue
 			}
 		}
@@ -5966,7 +6038,7 @@ if VarRead("@DataBaseVersion!")=1.5
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: Registered Item Name does not pair with the Injected ID!`nSolution: changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: Registered Item Name does not pair with the Injected ID!`nSolution: changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
 				IDInjected=%tmpbar%
 				VarWrite("IDInjected" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 				;IniWrite,%tmpbar%,%datadirview%,Edits,IDInjected%A_Index%
@@ -5974,7 +6046,7 @@ if VarRead("@DataBaseVersion!")=1.5
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: ID has a different name and does not match with the Registered Item Name. It was " itemname "`nSolution: Changing the Registered Item name into" itemname "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: ID has a different name and does not match with the Registered Item Name. It was " itemname "`nSolution: Changing the Registered Item name into" itemname "`nStatus: Solved: No need for Further User Action.`n`n"
 				VarWrite("IDInjectedName" A_Index,itemname)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 			}
 		}
@@ -5988,7 +6060,7 @@ if VarRead("@DataBaseVersion!")=1.5
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: Registered Item Name does not pair at the Resource ID.`nSolution: Changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: Registered Item Name does not pair at the Resource ID.`nSolution: Changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
 				ResourceID=%tmpbar%
 				VarWrite("ResourceID" A_Index,tmpbar)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 				;IniWrite,%tmpbar%,%datadirview%,Edits,ResourceID%A_Index%
@@ -5996,7 +6068,7 @@ if VarRead("@DataBaseVersion!")=1.5
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: ID has a different name at items_game.txt and was not Registered Item Name. It was " itemname "`nSolution: Changing Registered Item Name into " itemname "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: ID has a different name at items_game.txt and was not Registered Item Name. It was " itemname "`nSolution: Changing Registered Item Name into " itemname "`nStatus: Solved: No need for Further User Action.`n`n"
 				VarWrite("ResourceIDName" A_Index,itemname)	;VarWrite(Key := "", Value := "") ; Saves the Database Version for future version detection
 			}
 		}
@@ -6085,13 +6157,13 @@ else ; if version 1, old version
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: The ID Injected does not exist! on items_game.txt, but the Registered Item Name was Found/Existed.`nSolution: analyzing the contents of the Item Name found at items_game.txt, FOUND ID " tmpbar "`nStatus: Solved! DOTA2 MOD Master changed the ID Injected into " tmpbar ", No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: The ID Injected does not exist! on items_game.txt, but the Registered Item Name was Found/Existed.`nSolution: analyzing the contents of the Item Name found at items_game.txt, FOUND ID " tmpbar "`nStatus: Solved! DOTA2 MOD Master changed the ID Injected into " tmpbar ", No need for Further User Action.`n`n"
 				IDInjected=%tmpbar%
 				IniWrite,%tmpbar%,%datadirview%,Edits,IDInjected%A_Index%
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nInjected ID: "IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nActived Style: " ActiveStyle "`nChecked: " ResourceIDEnabled "`nProblem: ID Injected nor the Injected Registered Item Name does not Exist!`nStatus: UNSOLVED! The General Information about the ID Injected is corrupted, and will not be included on the listview.`nSolution: Use all the information above, track down and configure the injected ID properly.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nInjected ID: "IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nActived Style: " ActiveStyle "`nChecked: " ResourceIDEnabled "`nProblem: ID Injected nor the Injected Registered Item Name does not Exist!`nStatus: UNSOLVED! The General Information about the ID Injected is corrupted, and will not be included on the listview.`nSolution: Use all the information above, track down and configure the injected ID properly.`n`n"
 				continue
 			}
 		}
@@ -6102,14 +6174,14 @@ else ; if version 1, old version
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: Registered Item Name does not pair with the Injected ID!`nSolution: changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: Registered Item Name does not pair with the Injected ID!`nSolution: changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
 				IDInjected=%tmpbar%
 				IniWrite,%tmpbar%,%datadirview%,Edits,IDInjected%A_Index%
 				itemname:=searchstringdetector(filecontent,"""name""") ; detects the name of the item
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: ID has a different name and does not match with the Registered Item Name. It was " itemname "`nSolution: Changing the Registered Item name into" itemname "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nInjected ID: " IDInjected "`nInjected Registered Item Name: " IDInjectedName "`nProblem: ID has a different name and does not match with the Registered Item Name. It was " itemname "`nSolution: Changing the Registered Item name into" itemname "`nStatus: Solved: No need for Further User Action.`n`n"
 				IniWrite,%itemname%,%datadirview%,Edits,IDInjectedName%A_Index%
 			}
 		}
@@ -6131,14 +6203,14 @@ else ; if version 1, old version
 			tmpbar:=newiddetector(tmpstring) ;tmpbar:=newiddetector(tmpstring,filestring) ; tmpstring:=item name , filestring:=items_game.txt
 			if tmpbar<>
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: Registered Item Name does not pair at the Resource ID.`nSolution: Changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: Registered Item Name does not pair at the Resource ID.`nSolution: Changing the ID into " tmpbar "`nStatus: Solved: No need for Further User Action.`n`n"
 				ResourceID=%tmpbar%
 				IniWrite,%tmpbar%,%datadirview%,Edits,ResourceID%A_Index%
 				itemname:=searchstringdetector(filecontent,"""name""") ; detects the name of the item
 			}
 			else
 			{
-				maperrorshow=% maperrorshow "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: ID has a different name at items_game.txt and was not Registered Item Name. It was " itemname "`nSolution: Changing Registered Item Name into " itemname "`nStatus: Solved: No need for Further User Action.`n`n"
+				maperrorshow .= "Section: General`nResource ID: " ResourceID "`nResource Registered Item Name: " ResourceIDName "`nProblem: ID has a different name at items_game.txt and was not Registered Item Name. It was " itemname "`nSolution: Changing Registered Item Name into " itemname "`nStatus: Solved: No need for Further User Action.`n`n"
 			}
 		}
 		tmpname1=%itemname%
@@ -6346,14 +6418,19 @@ materialpid:=ExecScript("
 #KeyHistory 0
 #NoTrayIcon
 
+QueueFile := A_Temp ""\AJOM Innovations\DOTA2 MOD Master\Queue.ExtractList""
+ProcessingFile := A_Temp ""\AJOM Innovations\DOTA2 MOD Master\Processing.ExtractList""
+
 Hotkey,~$^+!l,,P2131
-FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list
+FileDelete,%ProcessingFile%
 
 SetWorkingDir," A_ScriptDir "
 
-if FileExist(A_WorkingDir ""\MaterialReport.aldrin_report"")
-	FileDelete,%A_WorkingDir%\MaterialReport.aldrin_report
-FileAppend,,%A_WorkingDir%\MaterialReport.aldrin_report
+if !FileExist(A_WorkingDir ""\Logs\"")
+	FileCreateDir,%A_WorkingDir%\Logs
+else if FileExist(A_WorkingDir ""\Logs\MaterialReport.aldrin_report"")
+	FileDelete,%A_WorkingDir%\Logs\MaterialReport.aldrin_report
+FileAppend,,%A_WorkingDir%\Logs\MaterialReport.aldrin_report
 
 ;Attach
 DetectHiddenWindows, on
@@ -6364,8 +6441,14 @@ hCon:=DllCall(""CreateFile"",""str"",""CONOUT$"",""uint"",0xC0000000,""uint"",7,
 
 loop
 {
-	While !FileExist(A_Temp ""\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list"")
+	if debugmode
+		msgbox checking
+
+	While !FileExist(QueueFile)
 	{
+		if debugmode
+			msgbox stuck here 1
+
 		if terminateprogram " text "
 			goto,Clean_up
 		else
@@ -6375,52 +6458,61 @@ loop
 		}
 	}
 	
-	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,materialscount,DNAPWIDAWnsIDmAWwBx
-	if (materialscount=""DNAPWIDAWnsIDmAWwBx"")
+	IniRead,materialscount,%QueueFile%,Materials,materialscount,DNAPWIDAWnsIDmAWwBx
+	if (materialscount=""DNAPWIDAWnsIDmAWwBx"") ; materialscount is an error
 	{
-		IniRead,terminateprogram,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram,0
+		IniRead,terminateprogram,%QueueFile%,Status,terminateprogram,0
 		if terminateprogram " text "
 			goto,Clean_up
-		else
-			continue
+		else continue
 	}
-	IniRead,valvefile,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,valvefile%materialscount%,DNAPWIDAWnsIDmAWwBx
-	IniRead,skinindex,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Materials,skinindex%materialscount%,DNAPWIDAWnsIDmAWwBx
-	if debugmode
-		msgbox entering 1
-	if (valvefile=""DNAPWIDAWnsIDmAWwBx"") or (skinindex=""DNAPWIDAWnsIDmAWwBx"")
-	{
-		IniRead,terminateprogram,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,Status,terminateprogram,0
-		if terminateprogram " text "
-			goto,Clean_up
-		else
-			continue
-	}
+	; IniRead,valvefile,%QueueFile%,Materials,valvefile%materialscount%,DNAPWIDAWnsIDmAWwBx
+	; IniRead,skinindex,%QueueFile%,Materials,skinindex%materialscount%,DNAPWIDAWnsIDmAWwBx
+	; if debugmode
+	; 	msgbox entering 1
+	; if (valvefile=""DNAPWIDAWnsIDmAWwBx"") or (skinindex=""DNAPWIDAWnsIDmAWwBx"")
+	; {
+	; 	IniRead,terminateprogram,%QueueFile%,Status,terminateprogram,0
+	; 	if terminateprogram " text "
+	; 		goto,Clean_up
+	; 	else
+	; 		continue
+	; }
 	
-	FileDelete,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list
-	FileMove,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist.aldrin_dota2list,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,1
-	IniRead,materialscount,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,Materials,materialscount,0
+	FileDelete,%ProcessingFile%
+	FileMove,%QueueFile%,%ProcessingFile%,1
+	IniRead,materialscount,%ProcessingFile%,Materials,materialscount,0
 	if debugmode
 		msgbox materialscount=%materialscount%
 	loop %materialscount%
 	{
-		IniRead,valvefile,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,Materials,valvefile%A_Index%,DNAPWIDAWnsIDmAWwBx
-		IniRead,skinindex,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,Materials,skinindex%A_Index%,DNAPWIDAWnsIDmAWwBx
+		IniRead,valvefile,%ProcessingFile%,Materials,valvefile%A_Index%,DNAPWIDAWnsIDmAWwBx
+		IniRead,skinindex,%ProcessingFile%,Materials,skinindex%A_Index%,DNAPWIDAWnsIDmAWwBx
 		if (valvefile=""DNAPWIDAWnsIDmAWwBx"") or (skinindex=""DNAPWIDAWnsIDmAWwBx"")
-		{
 			continue
-		}
+
 		if debugmode
-		msgbox out continue
+			msgbox out continue
+
+		IniWrite,% SubStr(valvefile,InStr(valvefile,""\"",True,0)+1),%ProcessingFile%,Materials,CurrentMaterial
+		IniWrite,%A_Index%,%ProcessingFile%,Materials,CurrentIndex
 		
-		timeout:=A_TickCount
+		FileWatchDog:=A_TickCount ; reset watchdog, this detects infinite loop
 		checkifmodelexist:
 		if !FileExist(valvefile)
 		{
-			if (A_TickCount-timeout=10000) ; if after 10 seconds, the file still does not exist, recognize it as failure and go back to the start of the loop
-				break
-			else if terminateprogram " text "
-				goto,Clean_up
+			if (A_TickCount-FileWatchDog>=10000) ; if after 10 seconds, the file still does not exist, recognize it as failure and go back to the start of the loop
+			{
+				msgbox,21,Material Extractor WatchDog,The Cosmetic Item being examined does not exist:``n%valvefile%``n``nIt is better to RETRY the operation multiple times``, but if it DOTA2 MOD Master really is having trouble extracting the Material Files then simply CANCEL extracting the model's material and report this problem to the developer team of this tool.
+				IfMsgBox,Retry
+				{
+					FileWatchDog:=A_TickCount ; reset watchdog
+					goto,checkifmodelexist
+				}
+				else continue ; skip this material
+			}
+			;else if terminateprogram " text "
+			;	goto,Clean_up
 			else
 			{
 				sleep 0 ; give it time to sleep as low as possible to avoid occupying large memory and cpu
@@ -6442,19 +6534,31 @@ loop
 		
 		defaultmaterials:=[],itemmaterials:=[]
 		strreplace(stdout,""m_materials"",,count)
+		if (count = 0) ; no material element found
+			continue
 		loop %count%
 		{
 			index:=A_Index
 			pos:=instr(stdout,""``r``n		{"",,,index)+1
 			pos1:=instr(stdout,""``r``n		}"",,pos)
-			clipboard:=content:=SubStr(stdout,pos,pos1-pos)
+			content:=SubStr(stdout,pos,pos1-pos)
 
 			pos:=instr(content,""m_name"")
 			pos:=instr(content,"""""""",True,pos)+1
 			pos1:=instr(content,"""""""",True,pos)
 			currentskinindex:=SubStr(content,pos,pos1-pos)
 			if currentskinindex is not integer
-				VarSetCapacity(currentskinindex,0)
+			{
+				VarSetCapacity(currentskinindex,0) ; empty variable to indicate nonexistent material indexing
+				if (index = 1)
+					zero_subtrahend:=0
+			}
+			else ; passing this means the material index was detected
+			{
+				if (index = 1) ;default items index
+					zero_subtrahend:=currentskinindex
+				currentskinindex-=zero_subtrahend ; start from index 0 to maxskinindex-zero_subtrahend
+			}
 
 			pos:=instr(content,""m_materials"")
 			pos:=instr(content,""``r``n			["",True,pos)+6
@@ -6467,6 +6571,8 @@ loop
 				pos1:=InStr(content,"""""""",True,pos-strlen(content))+1
 				pos2:=InStr(content,"""""""",True,pos)
 				material:=strreplace(SubStr(content,pos1,pos2-pos1) ""_c"",""/"",""\"")
+				if debugmode
+					msgbox % currentskinindex "" "" skinindex "" "" index "" "" A_Index ""``n"" material
 				if (currentskinindex=0) or ((currentskinindex=="""") and (index=1))
 				{
 					pos1:=instr(material,""\"",,0)+1
@@ -6479,37 +6585,90 @@ loop
 					itemmaterials[A_Index,1]:=material
 					itemmaterials[A_Index,2]:=SubStr(material,pos1)
 				}
+				if debugmode
+					msgbox % ""here "" defaultmaterials.Count() "" "" itemmaterials.Count() ""``n"" defaultmaterials[A_Index,1] ""``n"" defaultmaterials[A_Index,2] ""``n"" itemmaterials[A_Index,1] ""``n"" itemmaterials[A_Index,2]
 				if (defaultmaterials.Count()=itemmaterials.Count())
 					break
 			}
 		}
+
+		if (defaultmaterials.Count()!=itemmaterials.Count())
+		{
+			gosub,GenerateReport ; returns Watchdog variable containing the report data
+			WatchDog .= ""Default Material Count: "" defaultmaterials.Count() ""``nExtracting Material Count: "" itemmaterials.Count() ""``n""
+			For index, in defaultmaterials
+				WatchDog .= ""Default Material "" index "": "" defaultmaterials[index,1] ""\"" defaultmaterials[index,2] ""``nExtracting Material FullPath "" index "": "" itemmaterials[index,1] ""``nExtracting Material Name "" index "": "" itemmaterials[index,2] ""``n""
+			WatchDog .= ""-------------------------------------""
+			msgbox,48,Material Extractor WatchDog,Failed to detect the Name of the Material Replacement. Please Screenshot or Copy this Report then go to this Website and Post it:``nhttps://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/issues/15``n``n``n%WatchDog%``n``n``nTo Copy all the text of this message box`, left click this message box then press Copy Hotkey( CTRL+C).``n``n The Material Extraction for this target will be cancelled and will move towards the next one.
+			continue
+		}
+		else if (defaultmaterials.Count() = 0) or (itemmaterials.Count() = 0) ; no material elements on both examined arrays
+			continue
+
+		WatchDog:=A_TickCount ; reset watchdog, this detects infinite loop
 		repeater:
+		if (A_TickCount-WatchDog >= 60000) ; if one minute has passed and the extraction still did not finished
+		{
+			msgbox,21,Material Extractor WatchDog,The Extraction of material items is taking so long for this cosmetic item:``n%valvefile%``n``nIt is better to RETRY the operation multiple times``, but if it DOTA2 MOD Master really is having trouble extracting the Material Files then simply CANCEL extracting the model's material and report this problem to the developer team of this tool.
+			IfMsgBox,Retry
+			{
+				WatchDog:=A_TickCount ; reset watchdog
+				goto, repeater
+			}
+			else
+			{
+				gosub,GenerateReport ; returns Watchdog variable containing the report data
+WatchDog .= ""
+(
+Default Material Path: "" defaultmaterials[index,1] ""\"" defaultmaterials[index,2] ""
+Extracted Material FullPath: "" itemmaterials[index,1] ""
+Extracted Material Name: "" itemmaterials[index,2] ""
+-------------------------------------
+`)""
+				msgbox,0,Material Extractor WatchDog,Screenshot or Copy this Report then go to this Website and Post it:``nhttps://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/issues/15``n``n``n%WatchDog%``n``n``nTo Copy all the text of this message box`, left click this message box then press Copy Hotkey( CTRL+C).
+			}
+			continue ; cancel material extraction for this cosmetic item
+		}
+			; end of timelapse watchdog
+		
 		pid:=[]
 		DetectHiddenWindows,On
+		material:="""" ; clear pid
 		for index, in defaultmaterials
 		{
+			if (defaultmaterials[index,2]=itemmaterials[index,2])
+			{
+				if debugmode
+					msgbox % ""removing index:"" index ""``n"" defaultmaterials[index,1] ""``n``n"" defaultmaterials[index,2] ""``n``n"" itemmaterials[index,1] ""``n``n"" itemmaterials[index,2]
+				defaultmaterials.RemoveAt(index)
+				itemmaterials.RemoveAt(index)
+				if debugmode
+					msgbox % ""New Count = "" defaultmaterials.Count() "" "" itemmaterials.Count()
+				continue
+			}
+
 			if !instr(FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\""),""D"")
 				FileCreateDir,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1]
 			else FileDelete,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2]
 			
 			command:=""""""" strreplace(variablehllib,"/","\") """"" -p """"" strreplace(dota2dir,"/","\") "\game\dota\pak01_dir.vpk"""" -d """""" A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] """""" -e """"root\"" itemmaterials[index,1] """"""""
 			if debugmode
+			{
+				msgbox % ""parameters:``n"" defaultmaterials[index,1] ""``n``n"" defaultmaterials[index,2] ""``n``n"" itemmaterials[index,1] ""``n``n"" itemmaterials[index,2]
 				msgbox %command%
+			}
 			run,%command%,,Hide UseErrorLevel,material
-			pid[index]:=material
+			pid.Push(material)
 		}
-		Process,Wait,%material%,2
-		if debugmode
-			msgbox escape 1
+		if (material != """") ; pid is not undefined
+			Process,Wait,%material%,2 ; 2 seconds timeout
 		for index,material in pid
 		{
-			Process,WaitClose,%material%,10
+			Process,WaitClose,%material%,10 ; 10 seconds timeout
 			
 			if FileExist(A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2])
 				FileMove,% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" itemmaterials[index,2],% A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"" defaultmaterials[index,1] ""\"" defaultmaterials[index,2],1
 		}
-		if debugmode
-			msgbox escape 2
 		DetectHiddenWindows,Off
 		if terminateprogram " text "
 			goto,Clean_up
@@ -6524,9 +6683,9 @@ loop
 		}
 		FilePath:=StrReplace(valvefile,A_WorkingDir ""\Plugins\VPKCreator\pak01_dir\"")
 		for index, in defaultmaterials
-			IniWrite,%FilePath%,%A_WorkingDir%\MaterialReport.aldrin_report,Materials,% itemmaterials[index,2] ""="" defaultmaterials[index,2]
+			IniWrite,%FilePath%,%A_WorkingDir%\Logs\MaterialReport.aldrin_report,Materials,% itemmaterials[index,2] ""="" defaultmaterials[index,2]
 	}
-	IniRead,terminateprogram,%A_Temp%\AJOM Innovations\DOTA2 MOD Master\extractlist1.aldrin_dota2list,Status,terminateprogram,0
+	IniRead,terminateprogram,%ProcessingFile%,Status,terminateprogram,0
 	if terminateprogram " text "
 		goto,Clean_up
 	if debugmode
@@ -6538,6 +6697,27 @@ DllCall(""CloseHandle"", ""uint"", hCon)
 DllCall(""FreeConsole"")
 Process, Close, %cPID%
 exitapp
+
+GenerateReport:
+WatchDog:=""
+(
+-----Material Extractor WatchDog-----
+Tool Version: " version "
+AHK Version: "" A_AhkVersion ""
+OS Version: "" A_OSVersion ""
+OS Type: "" A_OSType ""
+OS Architecture: "" (A_Is64bitOS?""64-bit"":""32-bit"") ""
+String Formatting: "" (A_IsUnicode?""Unicode"":""ANSI"") ""
+Pointer Size: "" A_PtrSize ""
+Language: "" A_Language ""
+Tool Path: " A_ScriptFullPath "
+CMD Path: "" A_ComSpec ""
+Temp Directory: "" A_Temp ""
+Working Directory: "" A_WorkingDir ""
+Target File: "" valvefile ""
+
+`)""
+return
 
 ~$^+!l::
 if debugmode
@@ -7342,11 +7522,11 @@ else if A_GuiEvent = RightClick
 	LV_GetText(countcheck,A_EventInfo,6)
 	if stylescount>%countcheck%
 	{
-		LV_Modify(A_EventInfo,"Select" "Col6",,,,,,countcheck+1)
+		LV_Modify(A_EventInfo,"Select Col6",countcheck+1)
 	}
 	else
 	{
-		LV_Modify(A_EventInfo,"Select" "Col6",,,,,,"0")
+		LV_Modify(A_EventInfo,"Select Col6","0")
 	}
 }
 return
@@ -7356,7 +7536,16 @@ Gui, aboutgui:+ownerMainGUI
 Gui,MainGUI:+Disabled
 Gui, aboutgui:+Resize +MinSize
 Gui, aboutgui:Add, Tab2,x0 y0 h450 w500 vtababout, About|Limitations|What's New|Fact|Tutorials|Credits
-Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext35,Version %version%`n`nAJOM's Dota 2 MOD Master is a "code analyzing tool" which targets present "ID" and copies its contents`, thus replacing the other target "ID's" contents simultaneously. Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough`,this tool is best and can sacrifice less effort on your time.`n`nOne of the best reasons why I(Aldrin John Olaer Manalansan) created this tool is that:`n->Imagine every released "patch" of DOTA2`, they add new codes inside "items_game.txt" so that they can register its "use". Also`,you might not notice`, they change some existed "ID's Contents" into something new`, without you ever knowing.`n->Generates a "Modified Clone" of "items_game.txt" from the "Library" Folder where all the desired code are injected.
+Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext35,
+(
+Version %version%
+
+AJOM's Dota 2 MOD Master is a "code analyzing tool" which targets present "ID" and copies its contents, thus replacing the other target "ID's" contents simultaneously. Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough, this tool is best and can sacrifice less effort on your time.
+
+One of the best reasons why I(Aldrin John Olaer Manalansan) created this tool is that:
+->Imagine every released "patch" of DOTA2, they add new codes inside "items_game.txt" so that they can register its "use". Also,you might not notice, they change some existed "ID's Contents" into something new, without you ever knowing.
+->Generates a "Modified Clone" of "items_game.txt" from the "Library" Folder where all the desired code are injected.
+)
 Gui, aboutgui:Tab,2
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,
 (
@@ -7380,59 +7569,27 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-v2.9.0
+v2.9.7
+*Improved Material File Extractor.
+*Improved Camera Distance Detection.
+*Added a Feature at Handy Injection Section >>> Used Items SubSection >>> Options: "Extract Particle Effects?"
+	- Using this feature, you can now set wether you want to extract the particle effects of a certain cosmetic item
+	- Example: To disable Rubick's Magus Cyper Arcana's affecting other hero's ability effects, Set "Extract Particle Effects?" = "No".
+
+v2.9.6
+*Improved Countermeasures against infinite loop bug that was caused by File Extractors.
+*Fixed Fast Miscellaneous Resource Loading Bug where miscellaneous resources fails to rescan everytime a new items_game.txt comes out.
+*Added ErrorLogging for Cosmetic File Extractors.
+
+v2.9.3
+*Optimized the Shutnik Method:Creating VPK Stage. We will not experience being stuck here for a long time.
+* FUTURE PLANS for v3.0.0. I will rewrite the whole program! Because this tool is like a memory to me. As time passes by, I start to improve, learn some new things, and realize ways that would be better implemented than what the tool currently have. In other words, this tool is a messy one since I started coding it when I was just a beginner on programming.
+
+v2.9.2
 *Fixed Some Hero Cosmetic Item Listviews not showing Colors according to their Rarity.
 *Added Kill Effect,Death Effect,Map Effect,Courier Effect,Head Effect,Teleport Effect,Blink Effect at Miscellaneous>Single Source.
 *Improved Material(.vmat) File Extraction.
-
-v2.8.0
-*Added "Streak Effect" Feature at "Miscellaneous" Section > "Single-Source" Sub-Section, Cool!
-*Fixed Environment Announcer and Mega-Kills Announcer not working.
-*Fixed some Text Encoding Problem reported by L0n3lyK1n9.
-
-v2.7.4
-*Fixed Auto-Update not Working.
-*Added "Auto-Check for Latest Handy-Injection Database" Checkbox at "Advanced" Section. With this, DOTA2 MOD Master can check for latest handy-injection database released at URL:
- -https://github.com/Aldrin-John-Olaer-Manalansan/DOTA-2-MOD-Master/releases/download/LatestHIDB/
-  -You can manually check for Latest Handy-Injection Database by visiting this URL on your web browser.
-
-v2.6.3
-*Fixed a Bug Report from L0n3lyK1n9 where Using the ANSI Version of this tool, Weird Characters shows up when Saving a Database file.
 *Improved Camera Distance Detection.
-
-v2.6.0
-*Added "Item Builds" Section. You can now create your custom hero item build guide.
-*Added "Hacks" Section. All possible exploits that can be done to DOTA2 can be found in this section.
-	-Camera Distance Hack
-
-v2.5.7
-*Effectively improved folder creation.
-
-v2.5.6
-*Unallowed the Tool to wait indefinitely for external plugins to launch, this fixes the bug where the script was stuck on certain operations and cannot proceed anymore.
-
-v2.5.5
-*Fixed a bug where Aldrin_Mods Folder was not created, and it is being assesed as a file by this tool.
-
-v2.5.4
-*Fixed a Bug where all .vmdl files are not flagged as "compiled", resulting all units to have statued animation.
-*Fixed a Bug when the tool wants you to determe "dota 2 beta location", it does not fetch the selected location
-
-v2.5.3
-*Fixed a Bug that Library files sometimes does not extract. and get fetched.
-
-v2.5.2
-*Improved Dotnet Detection
-
-v2.5.1
-*Fixed a bug where a Command Prompt(cmd) sometimes pops up.
-*Recallibrated "Maximum Threads", last time it wait for all "n" number of threads to close, now it makes sure that only "n" number of threads run always
-
-v2.5.0
-*SPEEDY VERSION. Advisable to migrate on this version.
-*Database Version 1.5 changed the previous v1 database version. This Database version is faster than the previous database version... But still Version 2(experimental) is still unbeatable when it comes to saving/preloading speed.
-*Added "Maximum Threads" at "Advanced Section". This will limit how many simultaneous threads that can be used by DOTA2 MOD Master to extract model,particle effect files.
-*Some bug fixes.
 )
 Gui, aboutgui:Tab,4
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 vtext37 ReadOnly,
@@ -7445,7 +7602,7 @@ Gui,aboutgui:Add,Edit,x0 y20 h400 w500 vtext37 ReadOnly,
 
 *To Manually Patch gameinfo.gi using the injector, go to "advanced>patch gameinfo.gi". Clicking this button will Activate the MOD(pak01_dir.vpk) found at "%dota2dir%\" Folder.
 
-*It is good that "use miscellaneous on future injection" Feature at "Miscellaneous" Section is "TURNED OFF" if you do not use any feature on that section. Because every start, this Tool will need to preload all miscellaneous assets which will consume much time
+*It is good that "use miscellaneous on future injection" Feature at "Miscellaneous" Section is "TURNED OFF" if you do not use any feature on that section. Because every start, this Tool will need to Load all miscellaneous assets which will consume much time
 
 *"AUTO-SHUTNIK METHOD" is a very important feature of this Tool,it was built for users who dont know how to "Manually MOD DOTA2".
 
@@ -7487,7 +7644,6 @@ Gui,aboutgui:Add, Link,vtext54,*<a href="https://github.com/SteamDatabase/ValveR
 Gui,aboutgui:Add, Link,vtext55,*<a href="http://nemesis.thewavelength.net/index.php?p=35">Nem's HLLib</a>
 Gui,aboutgui:Add, Link,vtext56,*<a href="http://gnuwin32.sourceforge.net/packages/unzip.htm">Unzip by Info-Zip</a>
 Gui,aboutgui:Add, Link,vtext57,*<a href="https://dota2modss.blogspot.com/2016/05/how-to-install-mods-dota-2-reborn-with.html">VPKCreator by Steam</a>
-Gui,aboutgui:Add, Link,vtext60,*<a href="http://stahlworks.com/dev/swiss-file-knife.html">Swiss File Knife by StahlWorks Technologies</a>
 Gui, aboutgui:Tab
 Gui, aboutgui:Add, Button, vtext43 x230 y420, OK
 Gui,aboutgui:Show,h450 w500,About AJOM's Dota 2 MOD Master
@@ -7595,7 +7751,7 @@ If SubStr(invfile,-14,15)=.aldrin_dota2db
 	GuiControl,MainGUI:Show,searchnofound
 	if errorshow<>
 	{
-		msgbox,16,ERROR DETECTED!,Preloading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
+		msgbox,16,ERROR DETECTED!,Loading Database Complete! But There are ERRORS Detected and the Injector Distinguished them All. Check the "Advance" Section to view the ERROR Report and How the Injector Dealt them.
 	}
 	Gui, MainGUI:-Disabled 
 }
@@ -10133,7 +10289,7 @@ You can either:
 Downloaded Handy-Injection Database can be found at:
 %A_ScriptDir%\Database\%HDBDate%.aldrin_dota2hidb
 
-Would you like to Preload this Database File?
+Would you like to Load this Database File?
 )
 						IfMsgBox Yes
 						{
@@ -10150,8 +10306,7 @@ Would you like to Preload this Database File?
 	ToolTip
 return
 
-versionchecker(version)
-{
+versionchecker:
 	if A_IsCompiled
 	{
 		ToolTip,DOTA2 MOD Master:`nChecking for New Version,0,0
@@ -10185,28 +10340,27 @@ You can download the new version of this tool at:
 		}
 		;FileDelete,%A_ScriptDir%\Plugins\Unzip\Version.ini
 	}
-	return
+return
 
 updateversion:
-ToolTip,DOTA2 MOD Master:`nDownloading New Version's Files,0,0
-if DownloadFileURL([[downloadlink,A_ScriptDir "\Plugins\Unzip\master.zip","DOTA2 MOD Master v" webversion]],3)[1]
-	return
-updatewassuccessful=1
+	ToolTip,DOTA2 MOD Master:`nDownloading New Version's Files,0,0
+	if DownloadFileURL([[downloadlink,A_ScriptDir "\Plugins\Unzip\master.zip","DOTA2 MOD Master v" webversion]],3)[1]
+		return
+	updatewassuccessful=1
 updatefiles:
-ifexist,%A_ScriptDir%\Plugins\Unzip\master.zip
-{
-	msgbox,262148,Update/Migration COMPLETE!,Latest Version of DOTA2 MOD Master has been successfully Installed, would you like to reload this program for this version to take effect?
-	IfMsgBox Yes
+	ifexist,%A_ScriptDir%\Plugins\Unzip\master.zip
 	{
-		gosub,updatemigrator
-		if ErrorLevel=ERROR
-			goto,updatefiles
-		ExitApp
+		msgbox,262148,Update/Migration COMPLETE!,Latest Version of DOTA2 MOD Master has been successfully Installed, would you like to reload this program for this version to take effect?
+		IfMsgBox Yes
+		{
+			gosub,updatemigrator
+			if ErrorLevel=ERROR
+				goto,updatefiles
+			ExitApp
+		}
+		SetTimer,updateversion,Off
 	}
-	SetTimer,updateversion,Off
-}
 return
-}
 
 updatemigrator:
 tmpr := DllCall("GetCurrentProcessId")
@@ -10359,7 +10513,8 @@ DownloadFileURL(UrlToFile,attempcount:=1, Overwrite := True, UseProgressBar := T
       }
 	  
     ;Create the progressbar and the timer
-      Progress,% "A M1 H120 W" A_ScreenWidth/2,,Downloading...,Fetching`,Please Wait.
+
+      showprogressgui:=True
       SetTimer, __UpdateProgressBar, 500
 	  
 	  for index, in UrlToFile
@@ -10387,6 +10542,13 @@ DownloadFileURL(UrlToFile,attempcount:=1, Overwrite := True, UseProgressBar := T
     
     ;The label that updates the progressbar
       __UpdateProgressBar:
+      		if !FileExist(UrlToFile[index,2])
+      			return
+			if showprogressgui
+			{
+      			Progress,% "A M1 H120 W" A_ScreenWidth/2,,Downloading...,Fetching`,Please Wait.
+      			showprogressgui:=False
+      		}
 			if (saveindex!=index)
 			{
 				if savefilesize[saveindex] is Number
@@ -10440,76 +10602,219 @@ EmptyMem(PID=""){ ; removes junk memories making the injector run lightly
     DllCall("CloseHandle", "Int", h)
 }
 
-cameradistancehack(patch4bytehex:="")
+CameraDistance(StrNewCameraDistance)
 {
-	Gui,MainGUI:Default
-	GuiControlGet,dota2dir,,dota2dir
-	file:= dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll"
-	FileCopy,%file%,%A_ScriptDir%\Library\client.bak,1
-	binfile := FileOpen(file,"rw")
-	if (binfile=0)
-		return
-	oldoffset := gethexoffset(file,"725f70726f70736d617864697374") ; "r_propsmaxdist"
-	binfile.Pos := oldoffset
-	loop
-	{
-		binfile.Pos--
-		if (binfile.ReadUChar()!=0) ; a null terminator
-			break
-		else binfile.Pos--
-	}
-	oldoffset := binfile.Pos
+	GuiControlGet,dota2dir,MainGUI:,dota2dir
+	File := FileOpen(dota2dir "\game\dota\bin\win" (A_Is64bitOS?"64":"32") "\client.dll", "rw")             ; Open file
 
-	loop
+	pHaystack := MapFile(File, HaystackBytes:=0)   ; Create file mapping
+	
+	If ! FoundPtr := InBin(pHaystack, HaystackBytes, "r_propsmaxdist", Encoding := "utf-16")
+		 FoundPtr := InBin(pHaystack, HaystackBytes, "r_propsmaxdist", Encoding := "cp0")
+	
+	If FoundPtr
 	{
-		binfile.Pos--
-		if (binfile.ReadUChar()=0) ; a null terminator
+		LeftScanPos := RightScanPos := FoundPtr-pHaystack
+		LeftScanPos -= 4 ; we scan 4 bytes string so this is the initial at the left hand side
+		RightScanPos += 14 ; 14 = strlen("r_propsmaxdist")
+		Loop 64 ; if we exceeded this byte offset, we will stop the patching operation for safety measurement purposes
 		{
-			if (A_Index > 1) and (patch4bytehex >= 0) and (patch4bytehex <= 0xFFFFFFFF)
+			LeftScanPos--
+			File.Pos := LeftScanPos
+			CurrentDistance := File.Read(4)
+			if (StrLen(CurrentDistance) = 4)
 			{
-				offset := binfile.Pos
-				binfile.Pos := oldoffset
-				binlength:=binfile.Length-oldoffset
-				binfile.RawRead(bindata,binlength)
-				oldoffset := offset+strlen(patch4bytehex)
-				binfile.Pos := oldoffset
-				binfile.RawWrite(bindata,binlength)
-				binfile.Length:=oldoffset+binlength
-				binfile.Pos := offset
-				binfile.Write(patch4bytehex)
-				binfile.Pos := offset
+				if CurrentDistance is digit
+				{
+					BoundaryASCII := File.ReadUChar()
+					if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
+
+					{
+						File.Pos -= 6
+						BoundaryASCII := File.ReadUChar()
+						if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
+						{
+							if !(StrNewCameraDistance = "Check")
+								File.Write(StrNewCameraDistance)
+							pHaystack := MapFile(File)                     ; Clear file mapping
+							File.Close()                                   ; Close file
+							return CurrentDistance ; Success
+						}
+					}
+				}
 			}
-			break
+
+			RightScanPos++
+			File.Pos := RightScanPos
+			CurrentDistance := File.Read(4)
+			if (StrLen(CurrentDistance) = 4)
+			{
+				if CurrentDistance is digit
+				{
+					BoundaryASCII := File.ReadUChar()
+					if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
+					{
+						File.Pos -= 6
+						BoundaryASCII := File.ReadUChar()
+						if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
+						{
+							if !(StrNewCameraDistance = "Check")
+								File.Write(StrNewCameraDistance)
+							pHaystack := MapFile(File)                     ; Clear file mapping
+							File.Close()                                   ; Close file
+							return CurrentDistance ; Success
+						}
+					}
+				}
+			}
 		}
-		else binfile.Pos--
 	}
-	return binfile.Read(4)
+	
+	pHaystack := MapFile(File)                     ; Clear file mapping
+	File.Close()                                   ; Close file
+	return False ; Failed
 }
 
-gethexoffset(file,hex)
-{
-	sfkdir:= A_ScriptDir "\Plugins\Swiss File Knife"
-	if FileExist(sfkdir "\dump_offset.txt")
-		FileDelete,%sfkdir%\dump_offset.txt
-	run,"%A_Comspec%" /c ""%sfkdir%\sfk.exe" hexfind "%file%" -firsthit -quiet -bin /%hex%/ > "%sfkdir%\dump_offset.txt"",,hide,cmdpid
+InBin( pHaystack, HaystackBytes, pNeedle, NeedleBytes:=0, CaseSensitive:=1, StartingPos:=1, Occurence:=1 )  {
+Local                                                      ; InBin v0.60 by SKAN on D456/D459 @ tiny.cc/inbin
+Static InBinMcode  := InBin(0,0,0,0)                                
+Static MemCpyLower := InBinMcode + (A_PtrSize=8 ? 204 : 184)
 
-	DetectHiddenWindows,On
-	SetTitleMatchMode, 2
-	SetTitleMatchMode, Slow
-	Process,Exist,%cmdpid%
-	If ErrorLevel
-		Process,WaitClose,%cmdpid%
-	DetectHiddenWindows,Off
-	
-	FileRead,report,%sfkdir%\dump_offset.txt
-	posin:=instr(report,"hit at offset ")+14
-	if posin<=14
-		return 0
-	posout:=instr(report,"`r`n",,posin)
-	offset:=SubStr(report,posin,posout-posin)
-	FileDelete,%sfkdir%\dump_offset.txt
+  If ( ! VarSetCapacity(InBinMcode) )
+  {
+	 M1 := DllCall("Kernel32.dll\GlobalAlloc", "Int",0, "Ptr",Msz := A_PtrSize=8 ? 268 : 248, "UPtr")
+	 M2 := DllCall("Kernel32.dll\VirtualProtect", "Ptr",M1, "Ptr",Msz, "Int",0x40, "IntP",0)
 
-	return offset
+	 M3 := DllCall("Crypt32.dll\CryptStringToBinary", "Str",A_PtrSize=8
+	 ? "U1ZXQVSLRCRIRItcJFCJ00Qpy4XAvgEAAABBuv////9BD07yhcB+B2dEjVD/6wgBwkGJ0kUpykGD6QFFhdJyQzHSQTnadzxEidBB"
+	 . "ijhAODwBdShEichBigQAZ0ONPAqJ/zgEOXUVQYP5AnMbg8IB6wVEOc909kQ52nRDQQHyRYXSc78xwOs9vwEAAABBg/kBdt8PH0QA"
+	 . "AGYPH4QAAAAAAIn4QYoEAGdFjSQ6RYnkQjgEIXW9g8cBRDnPcuTrs0SJ0EgByEFcX15bwwAARYXAdjoxwEGJwUaKFAlBgPpAdhJB"
+	 . "icNCgDwZW3MIQbsgAAAA6wNFMdtFD7bSRQHaRYjSRogUCoPAAUQ5wHLIww"    :    "VYnlg+wQU1ZXi1UIi00Qi3UUi0UMKfC"
+	 . "JRfQxwIN9GAAPntD32IPg/kCJRfyDfRgAfgmLRRhIiUX46wuLRQwDRRgp8IlF+ItF+InHToX/cjvHRfAAAAAAO330dy+KBDo6AXU"
+	 . "hjQQ3igQCOgQxdRaD/gJzHP9F8OsEOfN094tF8DtFHHQnA338hf9zzDHA6x+7AQAAAIP+AXbfjQQfigQCOgQZddRDOfNy8OvNjQQ"
+	 . "6X15biexdwwAAAFNWV4tEJBCLVCQUi0wkGIXJdiYx9oocMID7QHYNgDwwW3MHvyAAAADrAjH/D7bbAfuIHDJGOc5y3F9eW8MAAAA"
+	 , "Int",A_PtrSize=8 ? 358 : 331, "Int",0x1, "Ptr",M1, "IntP",Msz, "Int",0, "Int",0)
+
+	 Return M1
+  }
+
+  If NeedleBytes is number
+  {
+	   NeedleBytes := Max(-8, Format("{:d}", NeedleBytes))
+
+	   If ( NeedleBytes<0 && NeedleBytes>-9 )
+	   {
+			VarSetCapacity(Bin,8)
+			pNeedle := NumPut(pNeedle, Bin, "UInt64") - 8
+			NeedleBytes := Abs(NeedleBytes)
+	   }
+
+	   Else
+	   If ( NeedleBytes=0 )
+	   {
+			Src := StrReplace(pNeedle,A_Space)
+			Len := StrLen(Src)
+			NeedleBytes := Ceil(Len/2)
+			VarSetCapacity(Bin, NeedleBytes, 0)
+			If ! DllCall("Crypt32.dll\CryptStringToBinary", "Str",Src, "Int",Len, "Int",12
+					 , "Ptr",pNeedle := &Bin, "UIntP",NeedleBytes, "Int",0, "Int",0)
+				 Return (0, ErrorLevel := "Hex to Bin conversion failed.")
+	   }
+  }
+
+  Else
+  If ( InStr(".double.float.uint64.int64.uint.int.ushort.short.uptr.ptr.uchar.char."
+		   , "." . RTrim(NeedleBytes, "*p") . ".") )
+  {
+	   VarSetCapacity(Bin, 8, 0)
+	   NeedleBytes := NumPut(pNeedle, &Bin, NeedleBytes) - &Bin
+	   pNeedle := &Bin
+  }
+  Else
+  {
+	   m := ( NeedleBytes="utf-16" || NeedleBytes="cp1200" ? 2 : 1 )
+	   If ! ( nBytes := StrPut(pNeedle, NeedleBytes) - 1 )
+			  Return (0, ErrorLevel := "String encode failed: '" . NeedleBytes . "'")
+	   VarSetCapacity(sStr, nBytes * m)
+	   nBytes := StrPut(pNeedle, &sStr, nBytes, NeedleBytes)
+	   pNeedle  := &sStr,   NeedleBytes := nBytes * m
+  }
+
+  NeedleBytes := Min(256, NeedleBytes)
+  Occurence := Max(1, Format("{:d}", Occurence))
+, CaseSensitive := !!CaseSensitive
+
+  If ( CaseSensitive=0 && HaystackBytes>0x1000000 )
+	   Return (0, ErrorLevel := "Haystack too large for case-insensitve search. (Limit: 16 MiB)")
+
+  If ( HaystackBytes - NeedleBytes - (StartingPos>0 ? StartingPos-1 : Abs(StartingPos)) < 0 )
+	   Return (0, ErrorLevel := "Haystack is too small to accomodate StartPosition and Needle")
+
+  If ( CaseSensitive = False )
+  {
+	   VarSetCapacity(Hay, HaystackBytes), pHaystack2 := &Hay
+	   DllCall(MemCpyLower, "Ptr",pHaystack, "Ptr",pHaystack2, "Int", HaystackBytes, "CDecl")
+	   VarSetCapacity(Ndl, NeedleBytes),   pNeedle2   := &Ndl
+	   DllCall(MemCpyLower, "Ptr",pNeedle,   "Ptr",pNeedle2,   "Int", NeedleBytes,   "CDecl")
+  }
+
+  FoundPtr := DllCall(InBinMcode, "Ptr",CaseSensitive ? pHaystack : pHaystack2,  "Int", HaystackBytes
+								, "Ptr",CaseSensitive ? pNeedle   : pNeedle2,  "Short", NeedleBytes
+								, "Int",StartingPos, "Int",Occurence, "CDecl Ptr")
+
+  ErrorLevel := ( FoundPtr="" ? "Memory access violation" : FoundPtr=0 ? "Needle not found." : "" )
+Return ( FoundPtr ? ( CaseSensitive ? FoundPtr : pHaystack + FoundPtr - pHaystack2 ) : FoundPtr )
+}
+
+MapFile(File, ByRef Bytes:=0) {     ; MapFile V0.33 by SKAN on D459/D45A @ tiny.cc/mapfile
+Local
+Static db := {}
+  If ! ( h := File.__handle )
+	   Return (0, "Invalid File object.")
+
+  If ( IsByRef(Bytes) )
+  If ( DB.HasKey(h) )
+	   Return (db[h].FileView, ErrorLevel := "")
+
+  If ( !IsByRef(Bytes) )
+  {
+	   If ( DB.HasKey(h) )
+		  , DllCall("UnmapViewOfFile", "Ptr",db[h].FileView)
+		  , DllCall("CloseHandle", "Ptr",db[h].MapFile)
+		  , db.Delete(h)
+	   Return (0, ErrorLevel := "")
+  }
+
+  VarSetCapacity(ioStatus, 12, 0)
+  DllCall("ntdll.dll\NtQueryInformationFile", "Ptr",File.__handle, "Ptr",&ioStatus
+		, "UIntP",ACCESS_MASK:=0, "Int",4, "Int",FileAccessInformation:=8)
+
+  READ_ACCESS := ACCESS_MASK & 1,   WRITE_ACCESS := (ACCESS_MASK >> 1) & 1
+  If ! ( READ_ACCESS )
+		 Return (0, ErrorLevel := "File object doesn't have read access.")
+
+  If ! ( Bytes := File.Length )
+		 Return (0, ErrorLevel := "MapFile cannot map a zero byte file.")
+  
+  PAGE_READWRITE := 0x4,   PAGE_READONLY := 0x2
+  hMapFile := DllCall("CreateFileMapping", "Ptr",h, "Ptr",0
+					, "Int",WRITE_ACCESS ? PAGE_READWRITE : PAGE_READONLY
+					, "Int",0, "Int",0, "Ptr",0, "Ptr")
+  If ! ( hMapFile )
+		 Return (Bytes:=0, ErrorLevel := "MapFile failed.`nLastError: " . A_LastError)
+
+  FILE_MAP_ALL_ACCESS := 0x000F001F,   FILE_MAP_READ := 0x00000004
+  pFileView := DllCall("MapViewOfFile", "Ptr",hMapFile
+					 , "Int",WRITE_ACCESS ? FILE_MAP_ALL_ACCESS : FILE_MAP_READ
+					 , "Int",0, "Int",0, "Ptr",0, "Ptr")
+  If ! ( pFileView )
+  {
+		 Err := A_LastError
+		 DllCall("CloseHandle", "Ptr",hMapFile)
+		 Return (Bytes:=0, ErrorLevel := "MapFile failed.`nLastError: " . Err)
+  }
+  
+Return ( (db[h]:={"MapFile":hMapFile, "FileView":pFileView}).FileView,  ErrorLevel := "" )
 }
 
 equal2darray(array1,array2)
@@ -10687,6 +10992,7 @@ externalfiles:
 if useextfile=1
 {
 	Gui,MainGUI:Show,NA,AJOM's Dota 2 MOD Master ; remove that irritating items per second
+	GuiControl,Text,searchnofound,Merging Files
 	if !instr(FileExist(A_ScriptDir "\Generated MOD\"),"D")
 	{
 		FileCreateDir, %A_ScriptDir%\Generated MOD
@@ -11083,6 +11389,20 @@ return
 */
 
 /*
+TODO:
+- Remove Multiple Style, but Merge Multiple Style and Single Source List
+- Dynamic Single Source Detection using this algorithm
+	- search for "player_loadout_slots" keyword and get its contents
+	- iterate the content's list of item slots and pick them all
+	- filter known Multiple Source and Pet
+	- Add the remaining list to Single Source
+- All Single Source list will be treated as multiple style
+- Single Source Injection Algorithm
+	- Pick the Picked Single Source Item Slot Content
+	- Search for an Existing "prefab" "<thisslot>" with a "baseitem" "1"
+		- If not found, then add a "baseitem" "1" parameter on its content
+		- If found, Replace the Default item slot content into this chosen item slot content
+
 
 add teleport effect
 add blink effect
