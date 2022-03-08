@@ -5,12 +5,27 @@
 <div align="center">
 <b>ABOUT</b></div>
 
-*Dota 2 MOD Master is a "**code analyzing tool"** which targets present "ID" and copies its contents, thus replacing the other target "ID's" contents simultaneously.
-Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough,this tool is best and can sacrifice less effort on your time.*
+**Dota 2 MOD Master** is an ***All-in-One tool*** that:
+1. Always Uses fresh files that came from DOTA2's genuine *pak01_dir.vpk*, thanks to **HLLib**.
+2. Can *automatically Detect all Heroes* using **activelist.txt**.
+3. Mix Multiple Cosmetic Items in one Database.
+4. Automatically Replaces the **Default ID's Content** into the **Chosen Cosmetic Item ID's Content** inside the **items_game.txt**.
+5. Automatically Replaces the **Default Hero Portrait** into the **Chosen Cosmetic Item Hero Portrait** inside the **portraits.txt**.
+6. Automatically extract cosmetic files like Model(.vmdl_c), Material(.vmat_c), Particle(.vpcf_c), Sound Events(.vsndevts_c), etc...
+7. Can Optionally **MERGE** Multiple **External MOD Files**(that didn't came from this tool) plus **this tool's MOD Files** using the* **External Files** System*.
+8. Generate an Annex **pak01_dir.vpk** archive that *safely overrides* DOTA2's genuine **pak01_dir.vpk** using [Shutnik's VPKCreator Method](https://dota2modss.blogspot.com/2016/05/how-to-install-mods-dota-2-reborn-with.html "Shutnik's VPKCreator Method").
+9. Patch ***gameinfo.gi*** that **fully bypass Valve Anti Cheat's CRC32**. Thanks to our **smart filesize normalizer** combined with [rr's File CRC32 Manipulator](https://github.com/rr-/CRC-manipulator "rr's File CRC32 Manipulator").
+10. Open Source - You can read the source code of DOTA2 MOD Master in-case its users want to:
+>- confirm if this tool is conducting any malicious activities.
+>- create their own version of DOTA2 MOD Master Application as its own basis.
+>- technically study how this tool works.
+11. MOD DOTA2 without the need of Internet Connection. DOTA2 MOD Master will only access the internet when you permitted it to automatically update itself, or to automatically download built-in Handy Injection Database Files. Nothing else.
+> Why is it risky to use Tools/Application that rely on internet connection?
+>- Consumes a lot of Internet Data - everytime you try to request generating your mod from those tool, you download files that are larger in size if you compute them as one(probably ranging from 50MB to 1GB depending on how much cosmetic items you selected from that tool to generate).
+>- Might be spying your computer and send your sensitive data anonymously encrypted without you knowing - it's a common suspicion that even you all can think off. I mean what's the point of using the internet to retrieve cosmetic item files, IF you can extract fresh cosmetics items from pak01_dir.vpk right?
+>> Only trust tools that are Open Source. This way anybody can confirm wether this tool were conducting malicious activities or not...
 
-One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool is that:
-- Imagine every released "patch" of DOTA2, they add new codes inside "items_game.txt" so that they can register its "use". Also,you might not notice, they change some existed "ID's Contents" into something new, without you ever knowing.
-- Generates a "Modified Clone" of "items_game.txt" from the "Library" Folder where all the desired code are injected.
+Since doing all of those at the same time is hard enough in a way its almost humanly impossible(according to my experience),this tool is best and would just sacrifice less effort of your time. So Seat back and relax while DOTA2 MOD Master do all the Modding for you!
 
 ------------
 
@@ -79,7 +94,7 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 
 *This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING, but **there will always be Limitations** that this Tool(Until now) Cannot Fix.*
 
-###### Current Issues that exist(7.03 patch):
+###### Current Issues that exist(7.31 patch):
 
 - This Tool needs to ReRun and ReInject all Item Sets every New Update/Patch with newly arrived items. It is because "items_game.txt" which is the script inside the MOD needs to be Reupdated/Repatched, the injector's work is to ReUpdate the Script to be compatible with the newly arrived items listed at the new "items_game.txt".
 	- IF THIS INSTRUCTION IS NOT FOLLOWED, YOU WILL ENCOUNTER WHEN LAUNCHING DOTA2 "ERROR PARSING SCRIPT" WHICH WILL IMMEDIATELY CRASH YOUR DOTA2 AND WILL REMAIN UNPLAYABLE UNTIL YOU EITHER "REMOVE THE MOD FROM YOUR DOTA2" OR "RELAUNCH THE TOOL AND REINJECT ALL ITEM SETS". Take Responsibility on the Risks!!!
@@ -98,10 +113,20 @@ One of the best reasons why I (Aldrin John Olaer Manalansan) created this tool i
 <div align="center">
 <b>CHANGELOG</b></div>
 
-v2.9.7
--Improved Material File Extractor.
--Improved Camera Distance Detection.
--Added a Feature at Handy Injection Section >>> Used Items SubSection >>> Options: "Extract Particle Effects?"
+v2.10.0
+- No more VAC notification when modifying gameinfo.gi .
+- We will now use npc_heroes.txt and npc_units.txt from DOTA2's genuine pak01_dir.vpk as our hero/unit references.
+- Fixed some bugs
+
+v2.9.9
+- Fixed "Memory Limit Reached" Bug.
+- Added Radiant Siege Engine Choice at Miscellaneous Section.
+- Added Dire Siege Engine Choice at Miscellaneous Section.
+
+v2.9.8
+- Improved Material File Extractor.
+- Improved Camera Distance Detection.
+- Added a Feature at Handy Injection Section >>> Used Items SubSection >>> Options: "Extract Particle Effects?"
 	- Using this feature, you can now set wether you want to extract the particle effects of a certain cosmetic item
 	- Example: To disable Rubick's Magus Cyper Arcana's affecting other hero's ability effects, Set "Extract Particle Effects?" = "No".
 
@@ -327,9 +352,11 @@ v0.0.1
 <div align="center">
 <b>CREDITS</b></div>
 
-- All Loyal Supporters of this Tool, my Love is eternity!
+- [This Tool's Developer: Aldrin John Olaer Manalansan](https://www.youtube.com/channel/UCTrGOdPyvkaopIbpFjPqc8A "This Tool's Developer: Aldrin John Olaer Manalansan")
 - [AutoHotkey Community](https://www.autohotkey.com/boards/ "AutoHotkey Community")
 - [xPaw's Valve's Source 2 resource file format Decompiler](https://github.com/SteamDatabase/ValveResourceFormat "xPaw's Valve's Source 2 resource file format Decompiler")
 - [Nem's HLLib](http://nemesis.thewavelength.net/index.php?p=35 "Nem's HLLib")
 - [Unzip by Info-Zip](http://gnuwin32.sourceforge.net/packages/unzip.htm "Unzip by Info-Zip")
 - [VPKCreator by Steam](https://dota2modss.blogspot.com/2016/05/how-to-install-mods-dota-2-reborn-with.html "VPKCreator by Steam")
+- [rr's File CRC32 Manipulator](https://github.com/rr-/CRC-manipulator "rr's File CRC32 Manipulator")
+- All Loyal Supporters of this Tool, my Love is eternity!

@@ -32,6 +32,7 @@ if not (A_IsAdmin or RegExMatch(DllCall("GetCommandLine", "str"), " /restart(?!\
 }
 ;
 
+#MaxMem 4095 ; items_game.txt is nearly exceeding 64mb, so we need to maximize our variable capacities into the maximum
 ;;optimize speed of script
 #NoEnv
 ;#MaxHotkeysPerInterval 99000000
@@ -60,8 +61,9 @@ CoordMode,ToolTip,Screen
 ;SetFormat,FloatFast,%A_FormatFloat%
 ;;
 
-version=2.9.7
+version=2.10.0
 
+IniRead,disableautoupdate,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,disableautoupdate
 if disableautoupdate<>1
 	Gosub,versionchecker
 
@@ -71,7 +73,8 @@ Menu, Tray, NoStandard
 global databasemessage="~ ~ ~ ~ MAIN DATABASE Version 2 : Don't Edit anything here to avoid DATABASE CORRUPTION!!! ~ ~ ~ ~`n`n"
 global defaultshoutout="(Always Relaunch this Tool and Reinject all item sets everytime DOTA2 has an Update with Newly Arrived Items!)"
 
-variablehllib:=A_ScriptDir "\Plugins\hllib246\bin\x" (A_Is64bitOS?"64":"86") "\HLExtract.exe"
+variablehllib:=A_ScriptDir "\Plugins\HLLib\bin\x" (A_Is64bitOS?"64":"86") "\HLExtract.exe"
+variableCRCM:=A_ScriptDir "\Plugins\CRC Manipulator\crcmanip-cli.exe"
 
 RegRead,SteamPath,HKEY_CURRENT_USER,Software\Valve\Steam,SteamPath
 StringReplace,SteamPath,SteamPath,/,\,1
@@ -113,7 +116,7 @@ FileCopyDir,%A_ScriptDir%\Plugins\Sound,%A_Temp%\AJOM Innovations\DOTA2 MOD Mast
 ;generate library files
 generatelibraryfiles:
 ToolTip,DOTA2 MOD Master:`nExtracting Library Files,0,0
-param=root\scripts\items\items_game.txt,root\scripts\npc\items.txt,root\scripts\npc\activelist.txt,root\scripts\npc\portraits.txt
+param=root\scripts\items\items_game.txt,root\scripts\npc\items.txt,root\scripts\npc\activelist.txt,root\scripts\npc\portraits.txt,root\scripts\npc\npc_units.txt,root\scripts\npc\npc_heroes.txt
 pidlist:=[]
 global GlobalArray:=[]
 loop,parse,param,`,
@@ -161,10 +164,6 @@ loop,parse,param,`,
 		else sleep 500
 	}
 }
-fileread,tempo,%dota2dir%\game\dota\scripts\npc\npc_heroes.txt
-GlobalArray["npc_heroes.txt"]:=tempo
-fileread,tempo,%dota2dir%\game\dota\scripts\npc\npc_units.txt
-GlobalArray["npc_units.txt"]:=tempo
 ;
 
 If !FileExist(A_ScriptDir "\Library\items_game.txt")
@@ -187,7 +186,7 @@ else if (GlobalArray["activelist.txt"]="")
 	GlobalArray["activelist.txt"]:=tempo
 }
 
-param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautoupdate,disableautohidbupdate,cmdmaxinstances
+param=ucr,mapinvdirview,mapdatadirview,maphdatadirview,mapmdirview,autovpk,pet,usemisc,mapgiloc,mappetstyle,maplowprocessor,usedversion,mapdota2dir,soundon,useextportraitfile,useextfile,useextitemgamefile,fastmisc,showtooltips,singlesourcechoice,multiplestyleschoice,disableautohidbupdate,cmdmaxinstances
 Loop,parse,param,`,
 {
 	IniRead,%A_LoopField%,%A_ScriptDir%\Settings.aldrin_dota2mod,Edits,%A_LoopField%
@@ -549,11 +548,11 @@ Gui, MainGUI:Tab,7
 cameradistance:=CameraDistance("Check")
 if cameradistance
 {
-	Gui, MainGUI:Add, Text, x1 y60 cred,
-	(
-	NOTICE:
-	There is a possibility that valve will ban your account when you use the features found on this section. USE AT YOUR OWN RISK!
-	)
+	Gui, MainGUI:Add, Text, vtext60 x1 y60 w549 h120 cred,
+(
+NOTICE:
+There is a possibility that valve will ban your account when you use the features found on this section. USE AT YOUR OWN RISK!
+)
 	Gui, MainGUI:Add, Edit, x1 y30 w100 Number gnumberlimiter vdummynl
 	Gui, MainGUI:Add, UpDown, x1 y30 w100 0x80 vcameradistance Range1200-9999,%cameradistance%
 	WM_MOUSEMOVE("cameradistance","Sets the elevation height of the camera, higher values allows you to see more areas in your screen.`n`nDefault Value: 1200`nRecommended 	values: 1200-2500")
@@ -892,8 +891,10 @@ tmpr:=[["courierchoice","Courier"]
 	  ,["wardchoice","Ward"]
 	  ,["hudchoice","HUD Skin"]
 	  ,["radcreepchoice","Radiant Creep"]
-	  ,["direcreepchoice","Dire Creeps"]
+	  ,["radsiegechoice","Radiant Siege Engine"]
 	  ,["radtowerchoice","Radiant Towers"]
+	  ,["direcreepchoice","Dire Creeps"]
+	  ,["diresiegechoice","Dire Siege Engine"]
 	  ,["diretowerchoice","Dire Towers"]
 	  ,["terrainchoice","Terrain"]]
 tmpr1:=[]
@@ -1474,7 +1475,7 @@ else if giloc=
 Gui, MainGUI:+Disabled 
 GuiControl,Text,searchnofound,Patching gameinfo.gi
 Gui, MainGUI:Submit, NoHide
-gosub,gipatcher
+gipatcher()
 GuiControl,MainGUI:Text,searchnofound,%defaultshoutout%
 GuiControl,MainGUI:Show,searchnofound
 Gui, MainGUI:-Disabled 
@@ -1711,7 +1712,7 @@ else ifexist,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.tx
 FileAppend,%portstring%,%A_ScriptDir%\Plugins\VPKCreator\pak01_dir\scripts\npc\portraits.txt
 
 GuiControl,Text,searchnofound,Shutnik Method: patching gameinfo.gi
-gosub,gipatcher
+gipatcher()
 if InStr(giloc,"/dota/")>0
 	stringgetpos,length,giloc,/dota/
 else stringgetpos,length,giloc,\dota\
@@ -1856,6 +1857,8 @@ param:=[["terrainchoice"		,"terrain"]
 	   ,["direcreepchoice"		,"direcreeps"]
 	   ,["radtowerchoice"		,"radianttowers"]
 	   ,["diretowerchoice"		,"diretowers"]
+	   ,["radsiegechoice"		,"radiantsiegecreeps"]
+	   ,["diresiegechoice"		,"diresiegecreeps"]
 	   ,["versuscreenchoice"	,"versus_screen"]
 	   ,["emoticonchoice"		,"emoticon_tool"]
 	   ,["streakeffectchoice"	,"streak_effect"]]
@@ -1985,10 +1988,13 @@ for intsaver, in param
 					or ((param[intsaver,2]="direcreeps") and (tmpr!="Cavernite Dire Creeps"))
 					or (param[intsaver,2]="radianttowers")
 					or ((param[intsaver,2]="diretowers") and (tmpr!="Guardians of the Lost Path Dire Towers"))
+					or (param[intsaver,2]="radiantsiegecreeps")
+					or (param[intsaver,2]="diresiegecreeps")
 					{
 						LV_GetText(numcheck,A_Index,4)
 						LV_GetText(stylechecker,A_Index,5)
 						contentport=%filecontent%
+						EPE := "Yes" ; Force extract particle effects of Global Items
 						gosub,extractmodel
 					}
 					StringReplace,filecontent,filecontent,%replacefrom%,%replaceto%
@@ -2394,6 +2400,13 @@ numcheck
 stylechecker
 */
 extractmodel:
+if (EPE == "No")
+{
+	tmpr := npcherodetector(herousercheck)
+	HeroModelPath:=searchstringdetector(tmpr,"""Model""")
+	HeroModelPath:=StrReplace(SubStr(HeroModelPath,1,InStr(HeroModelPath,"/",True,0)-1),"/","\")
+	HeroParticlePath:=StrReplace(searchstringdetector(tmpr,"""particle_folder"""),"/","\")
+}
 npchero:=GlobalArray["npc_heroes.txt"]
 npcunit:=GlobalArray["npc_units.txt"]
 stylestring:=stylechecker
@@ -2453,7 +2466,7 @@ loop,%modelcount%
 			StringGetPos, newpos, subjectcontent,\,R1
 			StringTrimLeft,defaultname,subjectcontent,% newpos+1
 			StringTrimRight,defaultloc,subjectcontent,% modelvarlength-newpos
-			if (defaultloc<>"") and (extractfile<>"")
+			if (defaultloc<>"") and (extractfile<>"") and ((EPE == "Yes") or (defaultloc=HeroModelPath))
 			{
 				tmp="item_rarity"%A_Tab%%A_Tab%"arcana"
 				if (InStr(filecontent,tmp)>0) and (FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\" defaultloc "\" defaultname))
@@ -2484,7 +2497,7 @@ loop,%modelcount%
 			herouser:=itemuserdetector(filecontent)
 			if (herouser="npc_dota_hero_tiny")
 			{
-				subjectcontent:=npcherodetector(herouser,dota2dir "\game\dota\scripts\npc\npc_heroes.txt")
+				subjectcontent:=npcherodetector(herouser)
 				
 				growvalue:=substr(check,0)
 				if (growvalue<=0) ; if zero or below this should have no value
@@ -2517,8 +2530,7 @@ loop,%modelcount%
 			StringTrimLeft,defaultname,subjectcontent,% newpos+1
 			StringTrimRight,defaultloc,subjectcontent,% modelvarlength-newpos
 		}
-		
-		if (defaultloc<>"") and (extractfile<>"")
+		if (defaultloc<>"") and (extractfile<>"") and ((EPE == "Yes") or (defaultloc=HeroModelPath))
 		{
 			tmp="item_rarity"%A_Tab%%A_Tab%"arcana"
 			if (InStr(filecontent,tmp)>0) and (FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\" defaultloc "\" defaultname))
@@ -2540,12 +2552,12 @@ loop,%modelcount%
 }
 	;
 	;extract particle effects
-
 modelcount=0
 tmp=`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%"asset"
 tmp:=StrReplace(itemname,tmp,tmp,modelcount)
 loop,%modelcount%
 {
+		; asset modifier detector
 	StringGetPos, ipos1, itemname,`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%"asset",L%A_Index%
 	StringGetPos, ipos2, itemname,`r`n%A_Tab%%A_Tab%%A_Tab%%A_Tab%},,%ipos1%
 	rightpos:=modeltmplength-ipos1
@@ -2555,6 +2567,7 @@ loop,%modelcount%
 	StringGetPos, newpos1, modifierstring,",L3,%newpos%
 	StringGetPos, newpos, modifierstring,",L2,%newpos1%
 	StringMid,check,modifierstring,% newpos1+2, % newpos-newpos1-1
+		;
 	if (SubStr(check,-4,5)=".vpcf") and (((numcheck>0) and (InStr(modifierstring,save)>0)) or (numcheck=0) or ((numcheck>0) and (InStr(modifierstring,save1)<1)))
 	{
 		check=%check%_c
@@ -2588,7 +2601,7 @@ loop,%modelcount%
 				VarSetCapacity(defaultloc,0),VarSetCapacity(extractfile,0)
 			}
 		}
-		if (defaultloc<>"") and (extractfile<>"")
+		if (defaultloc<>"") and (extractfile<>"") and ((EPE == "Yes") or (defaultloc=HeroParticlePath))
 		{
 			tmp="item_rarity"%A_Tab%%A_Tab%"arcana"
 			if ((InStr(filecontent,tmp)>0) and (FileExist(A_ScriptDir "\Plugins\VPKCreator\pak01_dir\" defaultloc "\" defaultname)) and (InStr(rptlimit,herousercheck)>0)) or (rptpermit=1)
@@ -2740,126 +2753,73 @@ if !lowprocessor
 DetectHiddenWindows,Off
 return
 
-gipatcher:
-fileread,vpktmp,%giloc%
-StringLen,filelength,vpktmp
-clone=%vpktmp%
-finder=Aldrin_Mods
-if InStr(vpktmp,finder)
+gipatcher()
 {
-	VarSetCapacity(check1,0),VarSetCapacity(check2,0),VarSetCapacity(check3,0)
-	loop
+	GuiControlGet,giloc,MainGUI:,giloc
+	FileRead,filedata,%giloc%
+		; get searchpaths block
+	originalfilelength := StrLen(filedata)
+	gamepos := 0
+	while gamepos := RegExMatch(filedata,"\bGame(\s)+dota\b",,gamepos+1)
 	{
-		StringGetPos, ipos, vpktmp,%finder%,L%A_Index%
-		if ipos<0
-			Break
-		
-		rightpos:=filelength-ipos
-		StringGetPos, ipos1, vpktmp,`r`n,L2,%ipos%
-		StringGetPos, ipos2, vpktmp,`r`n,R1,%rightpos%
-		startpos:=ipos2
-		ipos3:=ipos1-ipos2
-		StringMid,tmp,vpktmp,%startpos%,%ipos3%
-		param=Game_Language,Game_LowViolence,Mod
-		loop,parse,param,`,
+		pos1 := InStr(filedata,"{",True,gamepos-originalfilelength-1)+1
+		SearchPaths := SubStr(filedata,pos1,InStr(filedata,"}",True,gamepos+1)-pos1)
+		if modpos := RegExMatch(SearchPaths,"\bMod(\s)+dota\b")
+			break
+	}
+
+		; ~~~~~~~~~~~~~~~~~~~~~
+	if gamepos and modpos
+	{
+		if !RegExMatch(SearchPaths,"\bGame(\s)+Aldrin_Mods\b") and !RegExMatch(SearchPaths,"\bMod(\s)+Aldrin_Mods\b")
 		{
-			tmp1=%A_Tab%%A_Tab%%A_Tab%%A_LoopField%
-			if InStr(tmp,tmp1)
+			OriginalCRC32 := FileCRC32(giloc) ; RegExReplace(StdoutToVar_CreateProcess("""" A_ScriptDir "\Plugins\CRCManipulator\crcmanip-cli.exe"" c """ giloc """"),"\s")
+				; Insert our Mod Folder Paths
+			gamepos := RegExMatch(SearchPaths,"\bGame(\s)+dota\b")
+			SearchPathsLength := StrLen(SearchPaths)
+			pos1 := InStr(SearchPaths,"`r`n",True,gamepos-SearchPathsLength-1)+2
+			path := SubStr(SearchPaths,pos1,InStr(SearchPaths,"`r`n",True,gamepos+1)-pos1)
+			paths := StrReplace(path,"dota","Aldrin_Mods",,1) . "`r`n" . path
+			filedata := StrReplace(filedata,path,paths,,1)
+			pos1 := InStr(SearchPaths,"`r`n",True,modpos-SearchPathsLength-1)+2
+			path := SubStr(SearchPaths,pos1,InStr(SearchPaths,"`r`n",True,modpos+1)-pos1)
+			paths := StrReplace(path,"dota","Aldrin_Mods",,1) . "`r`n" . path
+			filedata := StrReplace(filedata,path,paths,,1)
+				; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+				; make the file size exactly the same as the original one just by deleting comment characters
+			ExcessCharactersCount:=StrLen(filedata)-originalfilelength+4 ; additional 4 bytes(dummy crc bytes)
+			while (ExcessCharactersCount > 0)
 			{
-				check%A_Index%=1
+				if !(pos := InStr(filedata,"//",True,1,A_Index+1))
+					break
+				giComment:=SubStr(filedata,pos,InStr(filedata,"`r`n",True,pos)-pos)
+				ExcessCharactersCount -= StrLen(giComment)
+				if (ExcessCharactersCount >= 0)
+					filedata := StrReplace(filedata,giComment,,,1)
+				else filedata := StrReplace(filedata,giComment,SubStr(giComment,1,-ExcessCharactersCount),,1)
 			}
-		}
-		if ErrorLevel=1 ; hunt this errorlevel
-		{
-			Break
+				; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			commentoffset := InStr(filedata,"//",True) + 1 ; starts from zero... 2 length word
+			moddedgiloc := A_Temp "\AJOM Innovations\DOTA2 MOD Master\moddedgameinfo.gi"
+			FileDelete,%moddedgiloc%
+			FileAppend,%filedata%,%moddedgiloc%
+			runwait,"%A_ScriptDir%\Plugins\CRCManipulator\crcmanip-cli.exe" patch "%moddedgiloc%" "%giloc%" %OriginalCRC32% -p %commentoffset% -a CRC32,,Hide UseErrorLevel
 		}
 	}
-	param=`r`n%A_Tab%%A_Tab%%A_Tab%Game_Language%A_Tab%%A_Tab%dota_*LANGUAGE*`r`n|`r`n%A_Tab%%A_Tab%%A_Tab%Game_LowViolence%A_Tab%dota_lv`r`n|`r`n%A_Tab%%A_Tab%%A_Tab%Mod%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%dota`r`n
-	param1=`r`n%A_Tab%%A_Tab%%A_Tab%Game%A_Tab%%A_Tab%%A_Tab%%A_Tab%%finder%`r`n%A_Tab%%A_Tab%%A_Tab%Game_Language%A_Tab%%A_Tab%dota_*LANGUAGE*`r`n|`r`n%A_Tab%%A_Tab%%A_Tab%Game%A_Tab%%A_Tab%%A_Tab%%A_Tab%%finder%`r`n%A_Tab%%A_Tab%%A_Tab%Game_LowViolence%A_Tab%dota_lv`r`n|`r`n%A_Tab%%A_Tab%%A_Tab%Mod%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%%finder%`r`n%A_Tab%%A_Tab%%A_Tab%Mod%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%dota`r`n
-	loop,parse,param,|
-	{
-		saver=%A_LoopField%
-		intsaver=%A_Index%
-		loop,parse,param1,|
-		{
-			if intsaver=%A_Index%
-			{
-				if check%A_Index%<>1
-				{
-					StringReplace,vpktmp,vpktmp,%saver%,%A_LoopField%,1
-					Break
-				}
-			}
-		}
-	}
+	else msgbox,16,Error!!!,
+(
+Corrupted/Dirty gameinfo.gi detected! Failed to detect SearchPaths, try doing this possible fix:
+1) At your Steam Application, go to the Library Tab
+2) Right Click DOTA 2 and then click Properties
+3) Go to Local Files tab and then Click Verify Integrity Cache
+4) Wait for it to finish
+5) After finishing the integrity verification, go to DOTA2 MOD Master > Advanced tab
+6) Click Patch gameinfo.gi
+7) Done
+
+If the problem still persists, please report this to the developer.
+)
 }
-else
-{
-	param=`r`n%A_Tab%%A_Tab%%A_Tab%Game_Language%A_Tab%%A_Tab%dota_*LANGUAGE*`r`n|`r`n%A_Tab%%A_Tab%%A_Tab%Game_LowViolence%A_Tab%dota_lv`r`n|`r`n%A_Tab%%A_Tab%%A_Tab%Mod%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%dota`r`n
-	param1=`r`n%A_Tab%%A_Tab%%A_Tab%Game%A_Tab%%A_Tab%%A_Tab%%A_Tab%%finder%`r`n%A_Tab%%A_Tab%%A_Tab%Game_Language%A_Tab%%A_Tab%dota_*LANGUAGE*`r`n|`r`n%A_Tab%%A_Tab%%A_Tab%Game%A_Tab%%A_Tab%%A_Tab%%A_Tab%%finder%`r`n%A_Tab%%A_Tab%%A_Tab%Game_LowViolence%A_Tab%dota_lv`r`n|`r`n%A_Tab%%A_Tab%%A_Tab%Mod%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%%finder%`r`n%A_Tab%%A_Tab%%A_Tab%Mod%A_Tab%%A_Tab%%A_Tab%%A_Tab%%A_Tab%dota`r`n
-	loop,parse,param,|
-	{
-		saver=%A_LoopField%
-		intsaver=%A_Index%
-		index=1
-		loop
-		{
-			StringGetPos, ipos, vpktmp,%saver%
-			if ipos<1
-			{
-				Break
-			}
-			StringLen,filelength,vpktmp
-			rightpos:=filelength-ipos
-			if intsaver=3
-			{
-				tmp2=%A_Tab%%A_Tab%%A_Tab%Mod%A_Tab%
-				tmp1=%A_Tab%%A_Tab%%A_Tab%Mod%A_Tab%%A_Tab%%A_Tab%%A_Tab%%finder%
-			}
-			else
-			{
-				tmp2=%A_Tab%%A_Tab%%A_Tab%Game%A_Tab%
-				tmp1=%A_Tab%%A_Tab%%A_Tab%Game%A_Tab%%A_Tab%%A_Tab%%A_Tab%%finder%
-			}
-			StringGetPos, ipos1, vpktmp,%tmp2%,R%index%,%rightpos%
-			if ipos1<1
-			{
-				Break
-			}
-			rightpos:=filelength-ipos1
-			StringGetPos, ipos2, vpktmp,`r`n,R1,%rightpos%
-			startpos:=ipos2+1
-			ipos3:=ipos-ipos2
-			StringMid,tmp,vpktmp,%startpos%,%ipos3%
-			if (InStr(tmp,tmp1)<1) and (InStr(tmp,tmp2)>0)
-			{
-				StringReplace,vpktmp,vpktmp,%tmp%,,1
-			}
-			else
-			{
-				index:=index+1
-			}
-			if ErrorLevel=1 ; hunt this errorlevel
-			{
-				Break
-			}
-		}
-		loop,parse,param1,|
-		{
-			if intsaver=%A_Index%
-			{
-				StringReplace,vpktmp,vpktmp,%saver%,%A_LoopField%,1
-				Break
-			}
-		}
-	}
-}
-if clone<>%vpktmp%
-{
-	FileDelete,%giloc%
-	FileAppend,%vpktmp%,%giloc%
-}
-return
 
 usemiscon:
 Gui, MainGUI:Submit, NoHide
@@ -3249,6 +3209,8 @@ param:=[["courierchoice","courier"]
 	   ,["direcreepchoice","direcreeps"]
 	   ,["radtowerchoice","radianttowers"]
 	   ,["diretowerchoice","diretowers"]
+	   ,["radsiegechoice","radiantsiegecreeps"]
+	   ,["diresiegechoice","diresiegecreeps"]
 	   ,["terrainchoice","terrain"]]
 for intsaver, in param
 {
@@ -3972,7 +3934,7 @@ reloadmisc(invfile) {
 				Gui, MainGUI:ListView,% misclv
 			}
 			GuiControl,-g,% misclv
-			if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+			if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="terrainchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 			{
 				;IniRead,miscstyle%A_Index%,%invfile%,Miscellaneous,miscstyle%A_Index%
 				miscstyle:=VarRead("miscstyle" A_Index)
@@ -4003,7 +3965,7 @@ reloadmisc(invfile) {
 							maperrorshow .= "Section: Miscellaneous:`nListview: " A_DefaultListView "`nID: " miscid "Registered Name: " miscidname "`nProblem: ID has a different name!`nSolution: changing the registered name into " tmp "`nStatus: Solved! No need for Further User Action`n`n"
 						}
 					}
-					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="terrainchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 					{
 						LV_GetText(checker,A_Index,4)
 						if miscstyle<=%checker%
@@ -4019,7 +3981,7 @@ reloadmisc(invfile) {
 			{
 				GuiControl,% "+g" misclv,% misclv
 			}
-			else if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+			else if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="terrainchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 			{
 				GuiControl,+gmiscstyle,% misclv
 			}
@@ -4084,7 +4046,7 @@ reloadmisc(invfile) {
 				Gui, MainGUI:ListView,% misclv
 			}
 			GuiControl,-g,% misclv
-			if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+			if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="terrainchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 			{
 				miscstyle:=VarRead("miscstyle" A_Index)
 				;IniRead,miscstyle,%invfile%,Miscellaneous,miscstyle%A_Index%
@@ -4120,7 +4082,7 @@ reloadmisc(invfile) {
 							;IniWrite,%tmp%,%invfile%,Miscellaneous,miscidname%intsaver%
 						}
 					}
-					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="terrainchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 					{
 						LV_GetText(checker,A_Index,4)
 						if miscstyle<=%checker%
@@ -4136,7 +4098,7 @@ reloadmisc(invfile) {
 			{
 				GuiControl,% "+g" misclv,% misclv
 			}
-			else if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+			else if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="terrainchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 			{
 				GuiControl,+gmiscstyle,% misclv
 			}
@@ -4195,7 +4157,7 @@ reloadmisc(invfile) {
 				Gui, MainGUI:ListView,% misclv
 			}
 			GuiControl,-g,% misclv
-			if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+			if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="terrainchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 			{
 				IniRead,miscstyle,%invfile%,Miscellaneous,miscstyle%intsaver%
 			}
@@ -4227,7 +4189,7 @@ reloadmisc(invfile) {
 							IniWrite,%tmp%,%invfile%,Miscellaneous,miscidname%intsaver%
 						}
 					}
-					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+					if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="terrainchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 					{
 						LV_GetText(checker,A_Index,4)
 						if miscstyle<=%checker%
@@ -4243,7 +4205,7 @@ reloadmisc(invfile) {
 			{
 				GuiControl,% "+g" misclv,% misclv
 			}
-			else if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="terrainchoice")
+			else if (misclv="courierchoice") or (misclv="wardchoice") or (misclv="hudchoice") or (misclv="terrainchoice") or (misclv="radcreepchoice") or (misclv="direcreepchoice") or (misclv="radtowerchoice") or (misclv="diretowerchoice") or (misclv="radsiegechoice") or (misclv="diresiegechoice")
 			{
 				GuiControl,+gmiscstyle,% misclv
 			}
@@ -4490,7 +4452,7 @@ gosub,leakdestroyer
 return
 
 heroportrait:
-porthero:=npcherodetector(porthero,dota2dir "\game\dota\scripts\npc\npc_heroes.txt")
+porthero:=npcherodetector(porthero)
 StringGetPos, portpos, porthero,`r`n%A_Tab%%A_Tab%"Model"
 StringGetPos, portpos1, porthero,",L3,%portpos%
 StringGetPos, portpos, porthero,",L2,%portpos1%
@@ -4662,6 +4624,7 @@ Loop % LV_GetCount()
 	filecontent:=itemdetector(tmpstring) ;filecontent:=itemdetector(tmpstring,filestring)
 	LV_GetText(numcheck,A_Index,6)
 	LV_GetText(stylechecker,A_Index,7)
+	LV_GetText(EPE,A_Index,8) ; Extract Particle Effects?
 	contentport=%filecontent%
 	gosub,extractmodel
 	porthero=%herousercheck%
@@ -5647,6 +5610,7 @@ Loop % LV_GetCount()
 		LV_GetText(stylechecker,A_Index,6)
 		itemname:=searchstringdetector(filecontent,"""used_by_heroes""") ; detects the hero who uses the item
 		contentport=%filecontent%
+		EPE := "Yes" ; Force extract particle effects of Global Items
 		gosub,extractmodel
 		porthero=%itemname%
 		if stylechecker>0
@@ -7282,38 +7246,17 @@ itemdetector(tmpstring,newfilestring:="") {
 	return,filecontent
 }
 
-npcherodetector(porthero,npcheroestxtdir,newnpchero:="") {
+npcherodetector(porthero) {
 ;npcherodetector will inspect npc_heroes.txt and extract the data of a certain hero
 ;porthero			-	the starting offset string. it commonly needs npc_dota_hero_*****
-;npcheroestxtdir	-	location of npc_heroes.txt
-;newnpchero			-	incase you want to replace the variable inside npc heroes
-	
-	Static npchero
-	if newnpchero<> ;if the caller wants to change the value of the static variable "npchero"
-	{
-		npchero:=newnpchero
-	}
-	
-	if npchero= ; the function cannot operate properly if there is no reference items_game.txt, this will check if it is blank
-	{
-		ifexist,%npcheroestxtdir%
-		{
-			fileread,npchero,%npcheroestxtdir% ; redefine items_game.txt reference
-		}
-		if npchero=
-		{
-			return ; terminate function if still no value
-		}
-	}
 	;; npchero:=GlobalArray["npc_heroes.txt"]
 	;; StringGetPos, portpos, npchero,`r`n%A_Tab%"%porthero% ;"
 	;; StringGetPos, portpos1, npchero,`r`n%A_Tab%},,%portpos%
 	;; StringMid,porthero,npchero,% portpos+1, % portpos1-portpos-1
 	
-	portpos := InStr(npchero,"`r`n	""" porthero) ; detects the leftmost barrier
-	portpos1 := InStr(npchero,"`r`n	}",,portpos) ; detects the rightmost barrier
-	porthero := SubStr(npchero,portpos+2,portpos1-portpos+2)
-	
+	portpos := InStr(GlobalArray["npc_heroes.txt"],"`r`n	""" porthero) ; detects the leftmost barrier
+	portpos1 := InStr(GlobalArray["npc_heroes.txt"],"`r`n	}",,portpos) ; detects the rightmost barrier
+	porthero := SubStr(GlobalArray["npc_heroes.txt"],portpos+2,portpos1-portpos+2)
 	return porthero
 }
 
@@ -7540,16 +7483,32 @@ Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext35,
 (
 Version %version%
 
-AJOM's Dota 2 MOD Master is a "code analyzing tool" which targets present "ID" and copies its contents, thus replacing the other target "ID's" contents simultaneously. Since manual "copy/paste" method on items_game.txt(accourding to my experience) is hard enough, this tool is best and can sacrifice less effort on your time.
+Dota 2 MOD Master is an All-in-One tool that:
+1. Always Uses fresh files that came from DOTA2's genuine pak01_dir.vpk, thanks to HLLib.
+2. Can automatically Detect all Heroes using activelist.txt.
+3. Mix Multiple Cosmetic Items in one Database.
+4. Automatically Replaces the Default ID's Content into the Chosen Cosmetic Item ID's Content inside the items_game.txt.
+5. Automatically Replaces the Default Hero Portrait into the Chosen Cosmetic Item Hero Portrait inside the portraits.txt.
+6. Automatically extract cosmetic files like Model(.vmdl_c), Material(.vmat_c), Particle(.vpcf_c), Sound Events(.vsndevts_c), etc...
+7. Can Optionally MERGE Multiple External MOD Files(that didn't came from this tool) plus this tool's MOD Files using the External Files System.
+8. Generate an Annex pak01_dir.vpk archive that safely overrides DOTA2's genuine pak01_dir.vpk using Shutnik's VPKCreator Method.
+9. Patch gameinfo.gi that fully bypass Valve Anti Cheat's CRC32. Thanks to our SMART FILESIZE NORMALIZER combined with rr's File CRC32 Manipulator.
+10. Open Source - You can read the source code of DOTA2 MOD Master in-case its users want to:
+	* confirm if this tool is conducting any malicious activities.
+	* create their own version of DOTA2 MOD Master Application as its own basis.
+	* technically study how this tool works.
+11. MOD DOTA2 without the need of Internet Connection. DOTA2 MOD Master will only access the internet when you permitted it to automatically update itself, or to automatically download built-in Handy Injection Database Files. Nothing else.
+Why is it risky to use Tools/Application that rely on internet connection?
+* Consumes a lot of Internet Data - everytime you try to request generating your mod from those tool, you download files that are larger in size if you compute them as one(probably ranging from 50MB to 1GB depending on how much cosmetic items you selected from that tool to generate).
+* Might be spying your computer and send your sensitive data anonymously encrypted without you knowing - it's a common suspicion that even you all can think off. I mean what's the point of using the internet to retrieve cosmetic item files, IF you can extract fresh cosmetics items from pak01_dir.vpk right?
+Only trust tools that are Open Source. This way anybody can confirm wether this tool were conducting malicious activities or not...
 
-One of the best reasons why I(Aldrin John Olaer Manalansan) created this tool is that:
-->Imagine every released "patch" of DOTA2, they add new codes inside "items_game.txt" so that they can register its "use". Also,you might not notice, they change some existed "ID's Contents" into something new, without you ever knowing.
-->Generates a "Modified Clone" of "items_game.txt" from the "Library" Folder where all the desired code are injected.
+Since doing all of those at the same time is hard enough in a way its almost humanly impossible(according to my experience),this tool is best and would just sacrifice less effort of your time. So Seat back and relax while DOTA2 MOD Master do all the Modding for you!
 )
 Gui, aboutgui:Tab,2
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext44,
 (
-This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING, but there will always be Limitations that this Injector(Until now) Cannot Fix.Current Issues that exist(7.25 patch):
+This Tool gives a bright help for MODDING DOTA2 and is very handy compared to manual MODDING, but there will always be Limitations that this Injector(Until now) Cannot Fix.Current Issues that exist(7.31 patch):
 
 *This Tool needs to ReRun and ReInject all Item Sets every New Update/Patch with newly arrived items. It is because "items_game.txt" which is the script inside the MOD needs to be Reupdated/Repatched, the injector's work is to ReUpdate the Script to be compatible with the newly arrived items listed at the new "items_game.txt". IF THIS INSTRUCTION IS NOT FOLLOWED, YOU WILL ENCOUNTER WHEN LAUNCHING DOTA2 "ERROR PARSING SCRIPT" WHICH WILL IMMEDIATELY CRASH YOUR DOTA2 AND WILL REMAIN UNPLAYABLE UNTIL YOU EITHER "REMOVE THE MOD FROM YOUR DOTA2" OR "RELAUNCH THE TOOL AND REINJECT ALL ITEM SETS". Take Responsibility on the Risks!!!
 
@@ -7569,7 +7528,17 @@ This problem is common on "Modding by Scripting Method" but the MOD perfectly wo
 Gui, aboutgui:Tab,3
 Gui,aboutgui:Add,Edit,x0 y20 h400 w500 ReadOnly vtext36,
 (
-v2.9.7
+v2.10.0
+* No more VAC notification when modifying gameinfo.gi .
+* We will now use npc_heroes.txt and npc_units.txt from DOTA2's genuine pak01_dir.vpk as our hero/unit references.
+* Fixed some bugs
+
+v2.9.9
+*Fixed "Memory Limit Reached" Bug.
+*Added Radiant Siege Engine Choice at Miscellaneous Section.
+*Added Dire Siege Engine Choice at Miscellaneous Section.
+
+v2.9.8
 *Improved Material File Extractor.
 *Improved Camera Distance Detection.
 *Added a Feature at Handy Injection Section >>> Used Items SubSection >>> Options: "Extract Particle Effects?"
@@ -7639,11 +7608,14 @@ Gui,aboutgui:Add, Link,vtext33,*Create your Own Database: <a href="https://www.y
 Gui,aboutgui:Add, Link,vtext34,*Edit a Database: <a href="https://www.youtube.com/watch?v=wF2DnfrgWkg">https://www.youtube.com/watch?v=wF2DnfrgWkg</a>
 Gui,aboutgui:Add, Link,vtext42,*ERROR! Items_game.txt is missing!: <a href="https://www.youtube.com/watch?v=l4w2fT_lY10&t=3s">https://www.youtube.com/watch?v=l4w2fT_lY10&t=3s</a>
 Gui, aboutgui:Tab,6
+Gui,aboutgui:Add, Link,vtext62,*<a href="https://www.youtube.com/channel/UCTrGOdPyvkaopIbpFjPqc8A">This Tool's Developer: Aldrin John Olaer Manalansan</a>
 Gui,aboutgui:Add, Link,vtext53,*<a href="https://www.autohotkey.com/boards/">AutoHotkey Community</a>
 Gui,aboutgui:Add, Link,vtext54,*<a href="https://github.com/SteamDatabase/ValveResourceFormat">xPaw's Valve's Source 2 resource file format Decompiler</a>
 Gui,aboutgui:Add, Link,vtext55,*<a href="http://nemesis.thewavelength.net/index.php?p=35">Nem's HLLib</a>
 Gui,aboutgui:Add, Link,vtext56,*<a href="http://gnuwin32.sourceforge.net/packages/unzip.htm">Unzip by Info-Zip</a>
 Gui,aboutgui:Add, Link,vtext57,*<a href="https://dota2modss.blogspot.com/2016/05/how-to-install-mods-dota-2-reborn-with.html">VPKCreator by Steam</a>
+Gui,aboutgui:Add, Link,vtext61,*<a href="https://github.com/rr-/CRC-manipulator">rr's File CRC32 Manipulator</a>
+Gui,aboutgui:Add, Text,vtext63,*All Loyal Supporters of this Tool, my Love is eternity!
 Gui, aboutgui:Tab
 Gui, aboutgui:Add, Button, vtext43 x230 y420, OK
 Gui,aboutgui:Show,h450 w500,About AJOM's Dota 2 MOD Master
@@ -10617,52 +10589,58 @@ CameraDistance(StrNewCameraDistance)
 		LeftScanPos := RightScanPos := FoundPtr-pHaystack
 		LeftScanPos -= 4 ; we scan 4 bytes string so this is the initial at the left hand side
 		RightScanPos += 14 ; 14 = strlen("r_propsmaxdist")
-		Loop 64 ; if we exceeded this byte offset, we will stop the patching operation for safety measurement purposes
+		Loop % File.Length+pHaystack-FoundPtr ; 64 ; if we exceeded this byte offset, we will stop the patching operation for safety measurement purposes
 		{
 			LeftScanPos--
-			File.Pos := LeftScanPos
-			CurrentDistance := File.Read(4)
-			if (StrLen(CurrentDistance) = 4)
+			if (LeftScanPos >= 0)
 			{
-				if CurrentDistance is digit
+				File.Pos := LeftScanPos
+				CurrentDistance := File.Read(4)
+				if (StrLen(CurrentDistance) = 4)
 				{
-					BoundaryASCII := File.ReadUChar()
-					if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
-
+					if CurrentDistance is digit
 					{
-						File.Pos -= 6
 						BoundaryASCII := File.ReadUChar()
 						if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
+	
 						{
-							if !(StrNewCameraDistance = "Check")
-								File.Write(StrNewCameraDistance)
-							pHaystack := MapFile(File)                     ; Clear file mapping
-							File.Close()                                   ; Close file
-							return CurrentDistance ; Success
+							File.Pos -= 6
+							BoundaryASCII := File.ReadUChar()
+							if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
+							{
+								if !(StrNewCameraDistance = "Check")
+									File.Write(StrNewCameraDistance)
+								pHaystack := MapFile(File)                     ; Clear file mapping
+								File.Close()                                   ; Close file
+								return CurrentDistance ; Success
+							}
 						}
 					}
 				}
 			}
 
 			RightScanPos++
-			File.Pos := RightScanPos
-			CurrentDistance := File.Read(4)
-			if (StrLen(CurrentDistance) = 4)
+			if (RightScanPos <= File.Length)
 			{
-				if CurrentDistance is digit
+				File.Pos := RightScanPos
+				CurrentDistance := File.Read(4)
+				if (StrLen(CurrentDistance) = 4)
 				{
-					BoundaryASCII := File.ReadUChar()
-					if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
+					if CurrentDistance is digit
 					{
-						File.Pos -= 6
 						BoundaryASCII := File.ReadUChar()
 						if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
 						{
-							if !(StrNewCameraDistance = "Check")
-								File.Write(StrNewCameraDistance)
-							pHaystack := MapFile(File)                     ; Clear file mapping
-							File.Close()                                   ; Close file
-							return CurrentDistance ; Success
+							File.Pos -= 6
+							BoundaryASCII := File.ReadUChar()
+							if (BoundaryASCII < 48) or (BoundaryASCII > 57) ; not a digit
+							{
+								if !(StrNewCameraDistance = "Check")
+									File.Write(StrNewCameraDistance)
+								pHaystack := MapFile(File)                     ; Clear file mapping
+								File.Close()                                   ; Close file
+								return CurrentDistance ; Success
+							}
 						}
 					}
 				}
@@ -10873,11 +10851,69 @@ ObjFullyClone(obj)
 			nobj[k] := ObjFullyClone(v)
 	return nobj
 }
+
+/*
+StdoutToVar_CreateProcess(sCmd, sEncoding:="CP0", sDir:="", ByRef nExitCode:=0) {
+    DllCall( "CreatePipe",           PtrP,hStdOutRd, PtrP,hStdOutWr, Ptr,0, UInt,0 )
+    DllCall( "SetHandleInformation", Ptr,hStdOutWr, UInt,1, UInt,1                 )
+
+            VarSetCapacity( pi, (A_PtrSize == 4) ? 16 : 24,  0 )
+    siSz := VarSetCapacity( si, (A_PtrSize == 4) ? 68 : 104, 0 )
+    NumPut( siSz,      si,  0,                          "UInt" )
+    NumPut( 0x100,     si,  (A_PtrSize == 4) ? 44 : 60, "UInt" )
+    NumPut( hStdOutWr, si,  (A_PtrSize == 4) ? 60 : 88, "Ptr"  )
+    NumPut( hStdOutWr, si,  (A_PtrSize == 4) ? 64 : 96, "Ptr"  )
+
+    If ( !DllCall( "CreateProcess", Ptr,0, Ptr,&sCmd, Ptr,0, Ptr,0, Int,True, UInt,0x08000000
+                                  , Ptr,0, Ptr,sDir?&sDir:0, Ptr,&si, Ptr,&pi ) )
+        Return ""
+      , DllCall( "CloseHandle", Ptr,hStdOutWr )
+      , DllCall( "CloseHandle", Ptr,hStdOutRd )
+
+    DllCall( "CloseHandle", Ptr,hStdOutWr ) ; The write pipe must be closed before reading the stdout.
+    While ( 1 )
+    { ; Before reading, we check if the pipe has been written to, so we avoid freezings.
+        If ( !DllCall( "PeekNamedPipe", Ptr,hStdOutRd, Ptr,0, UInt,0, Ptr,0, UIntP,nTot, Ptr,0 ) )
+            Break
+        If ( !nTot )
+        { ; If the pipe buffer is empty, sleep and continue checking.
+            Sleep, 100
+            Continue
+        } ; Pipe buffer is not empty, so we can read it.
+        VarSetCapacity(sTemp, nTot+1)
+        DllCall( "ReadFile", Ptr,hStdOutRd, Ptr,&sTemp, UInt,nTot, PtrP,nSize, Ptr,0 )
+        sOutput .= StrGet(&sTemp, nSize, sEncoding)
+    }
+    
+    ; * SKAN has managed the exit code through SetLastError.
+    DllCall( "GetExitCodeProcess", Ptr,NumGet(pi,0), UIntP,nExitCode )
+    DllCall( "CloseHandle",        Ptr,NumGet(pi,0)                  )
+    DllCall( "CloseHandle",        Ptr,NumGet(pi,A_PtrSize)          )
+    DllCall( "CloseHandle",        Ptr,hStdOutRd                     )
+    Return sOutput
+}
+*/
+
+FileCRC32( sFile="",cSz=4 ) { ; by SKAN www.autohotkey.com/community/viewtopic.php?t=64211
+ cSz := (cSz<0||cSz>8) ? 2**22 : 2**(18+cSz), VarSetCapacity( Buffer,cSz,0 ) ; 10-Oct-2009
+ hFil := DllCall( "CreateFile", Str,sFile,UInt,0x80000000, Int,3,Int,0,Int,3,Int,0,Int,0 )
+ IfLess,hFil,1, Return,hFil
+ hMod := DllCall( "LoadLibrary", Str,"ntdll.dll" ), CRC32 := 0
+ DllCall( "GetFileSizeEx", UInt,hFil, UInt,&Buffer ),    fSz := NumGet( Buffer,0,"Int64" )
+ Loop % ( fSz//cSz + !!Mod( fSz,cSz ) )
+   DllCall( "ReadFile", UInt,hFil, UInt,&Buffer, UInt,cSz, UIntP,Bytes, UInt,0 )
+ , CRC32 := DllCall( "NTDLL\RtlComputeCrc32", UInt,CRC32, UInt,&Buffer, UInt,Bytes, UInt )
+ DllCall( "CloseHandle", UInt,hFil )
+ SetFormat, Integer, % SubStr( ( A_FI := A_FormatInteger ) "H", 0 )
+ CRC32 := SubStr( CRC32 + 0x1000000000, -7 ), DllCall( "CharUpper", Str,CRC32 )
+ SetFormat, Integer, %A_FI%
+Return CRC32, DllCall( "FreeLibrary", UInt,hMod )
+}
 ;;~~~~~~~~~~~~~~~~~~~~~~~End of Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 aboutguiguisize:
 Gui,aboutgui:Default
-AutoXYWH("w",["text39","text40","text41","text42","text33","text34","text50","text53","text54","text55","text56","text57","text60"]) ; resize all links
+AutoXYWH("w",["text39","text40","text41","text42","text33","text34","text50","text53","text54","text55","text56","text57","text61","text62","text63"]) ; resize all links
 AutoXYWH("x0.5 y","text43") ; resize buttons
 AutoXYWH("wh",["text35","text36","text37","text38","tababout","text44"]) ; resize texts
 ;if sO_ci_siwfwimbuqparam=
@@ -10913,7 +10949,7 @@ if !IsObject(xv1d2_wv1d2_param)
 	xv1d2_wv1d2_param:=["injectto"]
 	
 if !IsObject(xv1d2_wv1d2_h_param)
-	xv1d2_wv1d2_h_param:=["showitems","announcerview","reportshow","terrainchoice","weatherchoice","multikillchoice","streakeffectchoice","emblemchoice","musicchoice","cursorchoice","loadingscreenchoice","courierchoice","wardchoice","hudchoice","radcreepchoice","direcreepchoice","radtowerchoice","diretowerchoice","versuscreenchoice","emoticonchoice","allitemlist","teleporteffectchoice","blinkeffectchoice","killeffectchoice","deatheffectchoice","headeffectchoice","mapeffectchoice","couriereffectchoice"]
+	xv1d2_wv1d2_h_param:=["showitems","announcerview","reportshow","terrainchoice","weatherchoice","multikillchoice","streakeffectchoice","emblemchoice","musicchoice","cursorchoice","loadingscreenchoice","courierchoice","wardchoice","hudchoice","radcreepchoice","direcreepchoice","radsiegechoice","diresiegechoice","radtowerchoice","diretowerchoice","versuscreenchoice","emoticonchoice","allitemlist","teleporteffectchoice","blinkeffectchoice","killeffectchoice","deatheffectchoice","headeffectchoice","mapeffectchoice","couriereffectchoice"]
 	
 if !IsObject(wv1d2_h_param)
 	wv1d2_h_param:=["herochoice","tauntview","errorshow","singlesourcechoicegui","multiplestyleschoicegui","itembuildlist"]
@@ -10926,7 +10962,7 @@ if !IsObject(x_h_param)
 	x_h_param:=["text46"]
 if !IsObject(w_h_param)
 {
-	w_h_param:=["invlv","searchshow","itemview","chview","OuterTab","extfilelist","slotstats"]
+	w_h_param:=["invlv","searchshow","itemview","chview","OuterTab","extfilelist","slotstats","text60"]
 	loop,parse,innertabparam,`,
 		w_h_param.Push(A_LoopField)
 }
@@ -11226,7 +11262,7 @@ GuiControl, MainGUI:-Redraw,slotstats
 GuiControl, MainGUI:-Redraw,statscalibrator
 Loop % herolist.Length() ; counts the number of elements inside the array
 {
-	npcherodata:=npcherodetector(herolist[A_Index],dota2dir "\game\dota\scripts\npc\npc_heroes.txt")
+	npcherodata:=npcherodetector(herolist[A_Index])
 	npcitemslotsdetector(npcherodata,itemslotscount) ; itemslotscount returns the number of item slots of a hero
 	if A_DefaultListView<>slotstats
 	{
@@ -11292,7 +11328,7 @@ if (InStr(ErrorLevel, "C", true)) or (InStr(ErrorLevel, "c", true))
 		}
 		LV_GetText(heroname,A_Index,1)
 		heroname=npc_dota_hero_%heroname%
-		npcherodata:=npcherodetector(heroname,dota2dir "\game\dota\scripts\npc\npc_heroes.txt") ; extracts the data of a specific hero
+		npcherodata:=npcherodetector(heroname) ; extracts the data of a specific hero
 		refreshnpcitemslotsdetector(npcherodata,itemslotscount) ; itemslotscount returns the number of item slots of a hero
 		
 		if A_DefaultListView<>slotstats
